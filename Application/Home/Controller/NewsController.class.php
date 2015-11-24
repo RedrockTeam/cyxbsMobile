@@ -149,7 +149,6 @@ class NewsController extends Controller {
             $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);            
             $this->_Jwzx[$i]['content'] = $ready_site;
             $this->_Jwzx[$i]['annex'] = $need_annex[1];
-            //var_dump($this->_Jwzx);exit;
         }
         foreach ($need_title[1] as $key => $value) {
             $this->_Jwzx[$key]['title'] = $value;
