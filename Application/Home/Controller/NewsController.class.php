@@ -139,7 +139,7 @@ class NewsController extends Controller {
             //     //$http->curlDownload("http://jwzx.cqupt.edu.cn/fileAttach.php?id=10825",'./Public/jwzxnews/1');
             // }
             $now_pattern_href = '/href=\'fileAttach.php\?id=/';
-            $ready_site = preg_replace($now_pattern_href,"href='".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
+            $ready_site = preg_replace($now_pattern_href,"href='http://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
             $now_pattern_href = '/href=\'(.*?)\'/';
             $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
             $content_pattern = "/([\s\S]*?)<hr size=1>/";
@@ -149,7 +149,6 @@ class NewsController extends Controller {
             $this->_Jwzx[$i]['content'] = $ready_site;
             $this->_Jwzx[$i]['annex'] = $need_annex[1];
         }
-        var_dump($this->_Jwzx);
         foreach ($need_title[1] as $key => $value) {
             $this->_Jwzx[$key]['title'] = $value;
         }
