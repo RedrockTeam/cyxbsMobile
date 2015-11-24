@@ -128,8 +128,10 @@ class NewsController extends Controller {
             $ready_site = $this->curl_init($now_site);
             $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
             $ready_site = $this->_patternGoal('/<!-- 下面是body部分 -->([\s\S]*?)<!-- body over -->/',$ready_site);
-            //$now_pattern = "/<span style=(.*?)\">([\s\S]*?)<span/";
-            //echo   implode('',$a[2]); 
+            $now_pattern_head = '/mso-font-kerning:0pt">([\s\S]*?)(<\/span>|<span|<a name|<b>|<o:p>)/';
+            $head = $this->_patternGoal($now_pattern_head,$ready_site[1][0]);
+            $need_head = trim(implode('',$head[1]));
+            $this->_Jwzx[$i]['head'] = $need_head; 
             $ready_site=implode('',$ready_site[0]);
             // $now_pattern_href = '/href=\'fileAttach.php\?id=([\s\S]*?)\'/';
             // $needArt icle = $this->_patternGoal($now_pattern_href,$ready_site);
@@ -149,7 +151,6 @@ class NewsController extends Controller {
             $this->_Jwzx[$i]['content'] = $ready_site;
             $this->_Jwzx[$i]['annex'] = $need_annex[1];
         }
-        exit;
         foreach ($need_title[1] as $key => $value) {
             $this->_Jwzx[$key]['title'] = $value;
         }
