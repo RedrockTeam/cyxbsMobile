@@ -42,7 +42,7 @@ class NewsController extends Controller {
     public function newsUpdate(){//设置需要网站，刷新入口
         $this->clear();
         S('jwzx',null);
-        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=2");
+        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=1");
         $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=1");
         $num = 60;
         $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=".$num,$num);
@@ -143,13 +143,13 @@ class NewsController extends Controller {
             $ready_site = preg_replace($now_pattern_href,"href='".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
             $now_pattern_href = '/href=\'(.*?)\/searchfolder\?goalID=(.*?)\'/';
             $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
-            $content_pattern = "/([\s\S]*?)<o:p><\/o:p><\/span><\/b><\/p>/";
+            $content_pattern = "/([\s\S]*?)<hr size=1>/";
             $ready_site = $this->_patternGoal($content_pattern,$ready_site);
             $now_pattern_src = "/src=\"/";
-            $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);
-            
+            $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);            
             $this->_Jwzx[$i]['content'] = $ready_site;
             $this->_Jwzx[$i]['annex'] = $need_annex[1];
+            //var_dump($this->_Jwzx);exit;
         }
         foreach ($need_title[1] as $key => $value) {
             $this->_Jwzx[$key]['title'] = $value;
@@ -158,7 +158,6 @@ class NewsController extends Controller {
         foreach ($need_time[1] as $key => $value) {
             $this->_Jwzx[$key]['date'] = $value;
         }
-        exit;
         S('jwzx',$this->_Jwzx);
         //$this->setSql('news',$this->_Jwzx);
     }
