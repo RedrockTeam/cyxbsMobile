@@ -40,7 +40,6 @@ class NewsController extends Controller {
      *num为搜索新闻数
      */
     public function newsUpdate(){//设置需要网站，刷新入口
-        $this->clear();
         S('jwzx',null);
         $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=1");
         $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=1");
