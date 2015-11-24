@@ -61,8 +61,11 @@ class NewsController extends Controller {
         $html = file_get_contents($url);  
         $last = $http_response_header[7]; 
         $last = explode('.', $last);
-        $setPosition = "./Public/jwzxnews/".$id.'.'.$last[1];
+        $site = $_SERVER["SERVER_NAME"];
+        $setPosition ="./Public/jwzxnews/".$id.'.'.$last[1];
         $http->curlDownload($url,$setPosition);
+        $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
+        $setPosition =$site.'/'.$folder_name[1]."/Public/jwzxnews/".$id.'.'.$last[1];
         echo $setPosition;
     }
     /*
@@ -117,27 +120,35 @@ class NewsController extends Controller {
         $need_title = $this->_patternGoal($pattern_title,$output);
         $need_time = $this->_patternGoal($pattern_time,$output);
         $need_href= $this->_patternGoal($pattern_href,$output);
+
         $goal_num = count($need_href[1]);
         for($i = 0; $i < $goal_num; $i++){
             $now_site = 'http://jwzx.cqupt.edu.cn/'.$need_href[1][$i];
             $ready_site = $this->curl_init($now_site);
             $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
             $ready_site = $this->_patternGoal('/<!-- 下面是body部分 -->([\s\S]*?)<!-- body over -->/',$ready_site);
-            //$now_pattern = "/<span style=(.*?)\">(.*?)<span/";
+            //$now_pattern = "/<span style=(.*?)\">([\s\S]*?)<span/";
             //echo   implode('',$a[2]); 
             $ready_site=implode('',$ready_site[0]);
             // $now_pattern_href = '/href=\'fileAttach.php\?id=([\s\S]*?)\'/';
-            // $needArticle = $this->_patternGoal($now_pattern_href,$ready_site);
+            // $needArt icle = $this->_patternGoal($now_pattern_href,$ready_site);
             // for($i = 0;$i<count($needArticle[1]);$i++){
             //     $url = 'http://jwzx.cqupt.edu.cn/fileAttach.php?id=10825';  
             //     //$http->curlDownload("http://jwzx.cqupt.edu.cn/fileAttach.php?id=10825",'./Public/jwzxnews/1');
             // }
             $now_pattern_href = '/href=\'fileAttach.php\?id=/';
-            $ready_site = preg_replace($now_pattern_href,"href='",$ready_site);
+            $ready_site = preg_replace($now_pattern_href,"href='".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
+            $now_pattern_href = '/href=\'(.*?)\/searchfolder\?goalID=(.*?)\'/';
+            $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
+            $content_pattern = "/([\s\S]*?)<o:p><\/o:p><\/span><\/b><\/p>/";
+            $ready_site = $this->_patternGoal($content_pattern,$ready_site);
             $now_pattern_src = "/src=\"/";
-            $ready_site = preg_replace($now_pattern_src,"href='http://jwzx.cqupt.edu.cn/",$ready_site);
+            $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);
+            
             $this->_Jwzx[$i]['content'] = $ready_site;
+            $this->_Jwzx[$i]['annex'] = $need_annex[1];
         }
+        exit;
         foreach ($need_title[1] as $key => $value) {
             $this->_Jwzx[$key]['title'] = $value;
         }
@@ -145,6 +156,7 @@ class NewsController extends Controller {
         foreach ($need_time[1] as $key => $value) {
             $this->_Jwzx[$key]['date'] = $value;
         }
+        exit;
         S('jwzx',$this->_Jwzx);
         //$this->setSql('news',$this->_Jwzx);
     }
