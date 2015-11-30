@@ -11,10 +11,10 @@ use Org\Net\Http;
  */
 class NewsController extends Controller {
     private $site = '';
-    private $_Jwzx;
-    private $_Cyxw;
-    private $_Xsjz;
-    private $_Xwgg;
+    private $_Jwzx = array();
+    private $_Cyxw = array();
+    private $_Xsjz = array();
+    private $_Xwgg = array();
     public function index(){
         $this->curl_init();
         $this->newsUpdate();
@@ -25,13 +25,9 @@ class NewsController extends Controller {
      'xwgg'=>'校务公告','404'=>'缓存为空'
      */
     public function __call($name,$agrs){//缓存调用位置
-        if(S($name) == null){
-            $this->newsUpdate();
-            echo json_encode('404');
-        }else{
-            $info = json_encode(S($name));
-            var_dump($info);
-        }
+        $page = empty(I('post.page'))?15:I('post.page');
+        $size = empty(I('post.size'))?15:I('post.size');
+        
     }
     /*
      *newsUpdate
@@ -40,12 +36,10 @@ class NewsController extends Controller {
      *num为搜索新闻数
      */
     public function newsUpdate(){//设置需要网站，刷新入口
-        S('jwzx',null);
-        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=1");
-        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=1");
-        $num = 60;
-        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=".$num,$num);
-        $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=".$num,$num);
+        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=");
+        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=");
+        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=");
+        $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=");
     }
     /*
      *searchFolder
@@ -111,65 +105,54 @@ class NewsController extends Controller {
      *S('jwzx')为内容缓存
      */
     private function _curl_set_jwzx($url){
-        $pattern_title = '/target=_blank onmouseover="javascript:window.status=\'(.*?)\';return true" onmouseout="window.status=\'欢迎来到教务在线!\';"/';
-        $pattern_time = '/<\/a><\/td><td align=center>(.*?)<\/td>/';
-        $pattern_href = '/<a href=\'(.*?)\' target=_blank/';
-        $output = $this->curl_init($url);
-        $output = mb_convert_encoding($output,"utf-8","gb2312");
+        for($e=1;$e<16;$e++){
+            $need_url = $url.$e;
+            $pattern_href = '/a href=\'showfilecontent.php\?id=(.*?)\'/';
+            $output = $this->curl_init($need_url);
+            $output = mb_convert_encoding($output,"utf-8","gb2312");
 
-        //$need_title = $this->_patternGoal($pattern_title,$output);
-        //$need_time = $this->_patternGoal($pattern_time,$output);
-        $need_href= $this->_patternGoal($pattern_href,$output);
-        $goal_num = count($need_href[1]);
-        for($i = 0; $i < $goal_num; $i++){
-            $now_site = 'http://jwzx.cqupt.edu.cn/'.$need_href[1][$i];
-            $ready_site = $this->curl_init($now_site);
-            $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
-            $ready_site = $this->_patternGoal('/<!-- 下面是body部分 -->([\s\S]*?)<!-- body over -->/',$ready_site);
-            $now_pattern_head = '/mso-font-kerning:0pt">([\s\S]*?)(<\/span>|<span|<a name|<b>|<o:p>)/';
-            $head = $this->_patternGoal($now_pattern_head,$ready_site[1][0]);
-            $need_head = trim(implode('',$head[1]));
-            $this->_Jwzx[$i]['head'] = $need_head; 
-            $ready_site=implode('',$ready_site[0]); 
-            
-            $now_pattern_head_time = "/<CENTER><h4 style=\"font-size:13pt\">(.*?)<\/h4><\/CENTER><hr size=\"1\"><CENTER>发布时间:(.*?)                   发布人:/"; 
-            $title_time = $this->_patternGoal($now_pattern_head_time,$ready_site);  
-            $this->_Jwzx[$i]['title'] = $title_time[1][0];
-            $this->_Jwzx[$i]['date'] = trim($title_time[2][0]);        
-            // $now_pattern_href = '/href=\'fileAttach.php\?id=([\s\S]*?)\'/';
-            // $needArt icle = $this->_patternGoal($now_pattern_href,$ready_site);
-            // for($i = 0;$i<count($needArticle[1]);$i++){
-            //     $url = 'http://jwzx.cqupt.edu.cn/fileAttach.php?id=10825';  
-            //     //$http->curlDownload("http://jwzx.cqupt.edu.cn/fileAttach.php?id=10825",'./Public/jwzxnews/1');
-            // }
-            $now_pattern_href = '/href=\'fileAttach.php\?id=/';
-            $ready_site = preg_replace($now_pattern_href,"href='http://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
-            
-            $now_pattern_href = '/href=\'(.*?)\'/';
-            $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
-
-            $now_pattern_hrefname = "/blank>(.*?)<\/a>/";
-            $hrefname = $this->_patternGoal($now_pattern_hrefname,$ready_site);
-            $this->_Jwzx[$i]['annex_name'] = $hrefname[1];
-
-            $content_pattern = "/([\s\S]*?)<hr size=1>/";
-            $ready_site = $this->_patternGoal($content_pattern,$ready_site);
-
-
-            $now_pattern_src = "/src=\"/";
-            $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);            
-            $this->_Jwzx[$i]['content'] = $ready_site[0];
-            $this->_Jwzx[$i]['annex'] = $need_annex[1];
+            $need_href = $this->_patternGoal($pattern_href,$output);
+            $goal_num = count($need_href[1]);
+            for($i = 0; $i < $goal_num; $i++){
+                $now_site = 'http://jwzx.cqupt.edu.cn/showfilecontent.php?id='.$need_href[1][$i];
+                $now_news['articleid'] =$need_href[1][$i];
+                $ready_site = $this->curl_init($now_site);
+                $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
+                $ready_site = $this->_patternGoal('/<!-- 下面是body部分 -->([\s\S]*?)<!-- body over -->/',$ready_site);
+                $now_pattern_head = '/mso-font-kerning:0pt">([\s\S]*?)(<\/span>|<span|<a name|<b>|<o:p>)/';
+                $head = $this->_patternGoal($now_pattern_head,$ready_site[1][0]);
+                $need_head = trim(implode('',$head[1]));
+                $now_news['head'] = substr($need_head,0,200); 
+                $ready_site=implode('',$ready_site[0]); 
+                /*作者、时间、阅读量*/
+                $now_pattern_head_time = "/<CENTER><h4 style=\"font-size:13pt\">(.*?)<\/h4><\/CENTER><hr size=\"1\"><CENTER>发布时间:(.*?)                   发布人:(.*?)阅读人数:(.*?)</"; 
+                $title_time = $this->_patternGoal($now_pattern_head_time,$ready_site);  
+                $now_news['title'] = $title_time[1][0];
+                $now_news['date'] = trim($title_time[2][0]);    
+                $now_news['read'] = trim($title_time[4][0]);    
+                $now_pattern_href = '/href=\'fileAttach.php\?id=/';
+                $ready_site = preg_replace($now_pattern_href,"href='http://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
+                $now_pattern_href = '/href=\'(.*?)\'/';
+                /*附件地址及名称*/
+                $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
+                $now_pattern_hrefname = "/blank>(.*?)<\/a>/";
+                $hrefname = $this->_patternGoal($now_pattern_hrefname,$ready_site);
+                $now_news['name'] = implode("|",$hrefname[1]);
+                $content_pattern = "/<\/CENTER><BR><BR>([\s\S]*?)<hr size=1>/";
+                $ready_site = $this->_patternGoal($content_pattern,$ready_site);
+                /*匹配contents*/
+                $now_pattern_src = "/src=\"/";
+                $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);            
+                $now_pattern_style = "/style=\"([\s\S]*?)\"/";
+                $ready_site = preg_replace($now_pattern_style,"style=''",$ready_site[0]);
+                $now_news['content'] = $ready_site;
+                $now_news['address'] =implode("|",$need_annex[1]);
+                array_push($this->_Jwzx,$now_news);
+            }
+            //var_dump($this->_Jwzx);exit;
         }
-        // foreach ($need_title[1] as $key => $value) {
-        //     $this->_Jwzx[$key]['title'] = $value;
-        // }
-
-        // foreach ($need_time[1] as $key => $value) {
-        //     $this->_Jwzx[$key]['date'] = trim($value);
-        // }
-        S('jwzx',$this->_Jwzx);
-        //$this->setSql('news',$this->_Jwzx);
+        array_shift($this->_Jwzx);
+        $this->setSql('jwzx',$this->_Jwzx);
     }
     /*
      *_curl_set_cyxw
@@ -182,33 +165,35 @@ class NewsController extends Controller {
      *S('cyxw')为内容缓存
      */
     private function _curl_set_cyxy($url){
-        $output = $this->curl_init($url);
-        $output = mb_convert_encoding($output,"utf-8","gb2312");
-        //var_dump($output);
-        $pattern  = '/<a href="(.*?)" title="(.*?)">/';
-        $ready_href = $this->_patternGoal($pattern,$output);
-        //var_dump($ready[2]);
-        $goal_num = count($ready_href[1]);
-        //var_dump($ready_href[1]);
-        for($i = 0;$i<$goal_num;$i++){
-            $now_site = "http://xwzx.cqupt.edu.cn/xwzx/".$ready_href[1][$i];
-            $ready_site = $this->curl_init($now_site);
-            $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
-            //var_dump($ready_site);
-            $title_pattern = '/<td align="center" style="padding-top:10px; height:30px; font-size:16px; font-family:\'黑体\'; line-height:30px;">(.*?)<\/td>/';
-            $need_title = $this->_patternGoal($title_pattern,$ready_site);
-            $date_pattern = '/<td align="center" style="line-height:30px;">日期：(.*?)&nbsp;/';
-            $need_date = $this->_patternGoal($date_pattern,$ready_site); 
-            $content_pattern = '/<td style="line-height:25px; text-indent:24px; padding:10px;" id="news_content">([\s\S]*?)<tr>
-        <td align="center" style="background:#000000; width:600px; height:1px;"><\/td>
-      <\/tr>/';
-            $need_content = $this->_patternGoal($content_pattern,$ready_site);
-            $need_content = preg_replace('/src="/','src="http://xwzx.cqupt.edu.cn', $need_content[1]);
-            $this->_Cyxw[$i]['title'] = $need_title[1];
-            $this->_Cyxw[$i]['date'] = $need_date[1];
-            $this->_Cyxw[$i]['content'] = $need_content;
+        import('ORG.Util.phpQuery');
+        for($e=1;$e<7;$e++){
+            $output = $this->curl_init($url.$e);
+            $output = mb_convert_encoding($output,"utf-8","gb2312");
+            $pattern  = '/<a href="news.php\?id=(.*?)" title="(.*?)">/';
+            $ready_href = $this->_patternGoal($pattern,$output);
+            $goal_num = count($ready_href[1]);
+            for($i = 0;$i<$goal_num;$i++){
+                $now_site = "http://xwzx.cqupt.edu.cn/xwzx/news.php?id=".$ready_href[1][$i];
+                $ready_site = $this->curl_init($now_site);
+                $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
+                $title_pattern = "/ line-height:30px;\">(.*?)<\/td>/";
+                $need_title = $this->_patternGoal($title_pattern,$ready_site);
+                $time_pattern = "/style=\"line-height:30px;\">日期：(.*?)&nbsp;&nbsp;&nbsp;&nbsp;供稿单位：(.*?)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;点击率：(.*?)次<\/td>/";
+                $need_date_read = $this->_patternGoal($time_pattern,$ready_site);
+                $content_pattern = '/news_content\">([\s\S]*?)<\/tr/';
+                $need_content = $this->_patternGoal($content_pattern,$ready_site);
+                $need_content = preg_replace('/src="/','src="http://xwzx.cqupt.edu.cn', $need_content[1]);
+                // $goal = \phpQuery::newDocumentFile($now_site);
+                // $now_news_cyxw['head'] = substr(pq("#news_content")->text(),0,200);
+                $now_news_cyxw['articleid'] = $ready_href[1][$i];
+                $now_news_cyxw['title'] = $need_title[1][0];
+                $now_news_cyxw['date'] = $need_date_read[1][0];
+                $now_news_cyxw['read'] = $need_date_read[3][0];
+                $now_news_cyxw['content'] = $need_content[0];
+                array_push($this->_Cyxw,$now_news_cyxw);
+            }
         }
-        S('cyxw',$this->_Cyxw);
+        $this->setSql('cyxw',$this->_Cyxw);exit;
     }
 
     private function _curl_set_xsjz($url,$num){
@@ -223,7 +208,6 @@ class NewsController extends Controller {
             $this->_Xsjz[$i]['date'] = $need_title[4];
             $this->_Xsjz[$i]['content'] = $ready_site;
         }
-        S('xsjz',$this->_Xsjz);
     }
 
     private function _curl_set_xwgg($url,$num){
@@ -238,7 +222,6 @@ class NewsController extends Controller {
             $this->_Xwgg[$i]['date'] = $need_title[4];
             $this->_Xwgg[$i]['content'] = $ready_site;
         }
-        S('xwgg',$this->_Xwgg);
     }
     /*
      *setSql
@@ -248,10 +231,9 @@ class NewsController extends Controller {
      */
     private function setSql($goalsql,$content){//刷新数据库
         $news = M($goalsql);
-        $sql = "truncate table cyxbsmobile_news";
+        $sql = "truncate table cyxbsmobile_".$goalsql;
         $new=M();
         $new->execute($sql);
-        //$news->where("1=1")->delete(); 
         $news->addall($content);
     }
 
@@ -264,4 +246,3 @@ class NewsController extends Controller {
         $this->display('Empty/index');
     }
 }
-
