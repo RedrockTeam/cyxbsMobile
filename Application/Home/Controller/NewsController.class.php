@@ -16,7 +16,6 @@ class NewsController extends Controller {
     private $_Xsjz = array();
     private $_Xwgg = array();
     public function index(){
-        $this->curl_init();
         $this->newsUpdate();
     }
     /*
@@ -149,7 +148,6 @@ class NewsController extends Controller {
                 $now_news['address'] =implode("|",$need_annex[1]);
                 array_push($this->_Jwzx,$now_news);
             }
-            //var_dump($this->_Jwzx);exit;
         }
         array_shift($this->_Jwzx);
         $this->setSql('jwzx',$this->_Jwzx);
@@ -185,6 +183,10 @@ class NewsController extends Controller {
                 $need_content = preg_replace('/src="/','src="http://xwzx.cqupt.edu.cn', $need_content[1]);
                 // $goal = \phpQuery::newDocumentFile($now_site);
                 // $now_news_cyxw['head'] = substr(pq("#news_content")->text(),0,200);
+                $head_pattern = "/>([\s\S]*?)</";
+                $need_head = $this->_patternGoal($head_pattern,$need_content[0]);
+                $need_head = trim(implode('',$need_head[1]));
+                $now_news_cyxw['head'] = $need_head;
                 $now_news_cyxw['articleid'] = $ready_href[1][$i];
                 $now_news_cyxw['title'] = $need_title[1][0];
                 $now_news_cyxw['date'] = $need_date_read[1][0];
