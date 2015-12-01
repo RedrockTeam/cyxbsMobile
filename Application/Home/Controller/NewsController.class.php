@@ -16,13 +16,31 @@ class NewsController extends Controller {
     private $_Xsjz = array();
     private $_Xwgg = array();
     public function index(){
-        $this->newsUpdate();
+        $this->newsUpdateFirst();
+        $this->newsUpdateSecond();
     }
     /*
      *魔术方法，调用缓存新闻内容
      *'jwzx'=>'教务在线','cyxw'=>'重邮新闻','xsjz'=>'学术讲座',
      'xwgg'=>'校务公告','404'=>'缓存为空'
      */
+        /*
+     *newsUpdate
+     *更新新闻缓存
+     *调用clear方法清除下载文件
+     *num为搜索新闻数
+     */
+    public function newsUpdateFirst(){//设置需要网站，刷新入口
+        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=");
+        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=");
+    }
+
+    public function newsUpdateSecond(){
+        $num =150;
+        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
+        $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
+    }
+
     public function __call($name,$agrs){//缓存调用位置
         $page = empty(I('post.page'))?15:I('post.page');
         $size = empty(I('post.size'))?15:I('post.size');
@@ -108,19 +126,6 @@ class NewsController extends Controller {
                 'data'  => array(),
             );
         }
-    }
-    /*
-     *newsUpdate
-     *更新新闻缓存
-     *调用clear方法清除下载文件
-     *num为搜索新闻数
-     */
-    public function newsUpdate(){//设置需要网站，刷新入口
-        //$this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=");
-        //$this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=");
-        $num =150;
-        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
-        $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
     }
     /*
      *searchFolder
