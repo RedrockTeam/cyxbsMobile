@@ -274,12 +274,6 @@ class NewsController extends Controller {
                 $head_pattern = "/>([\s\S]*?)</";
                 $need_head = $this->_patternGoal($head_pattern,$need_content[0]);
                 $need_head = trim(implode('',$need_head[1]));
-                // $now_news_cyxw['head'] = substr(trim(implode('',$need_head)),0,200);
-                // $now_news_cyxw['articleid'] = $ready_href[1][$i];
-                // $now_news_cyxw['title'] = $need_title[1][0];
-                // $now_news_cyxw['date'] = $need_date_read[1][0];
-                // $now_news_cyxw['read'] = $need_date_read[3][0];
-                // $now_news_cyxw['content'] = $need_content[0];
                 $now_news_cyxw = array(
                     'head' => substr(trim(implode('',$need_head)),0,200),
                     'articleid' => $ready_href[1][$i],
