@@ -31,7 +31,6 @@ class NewsController extends Controller {
 
     public function searchTitle(){
         $type = I('post.type');
-        $type = 'jwzx';
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $page = empty(I('post.page'))?0:I('post.page');
             $size = empty(I('post.size'))?15:I('post.size');
@@ -57,11 +56,9 @@ class NewsController extends Controller {
 
     public function searchContent(){
         $type = I('post.type');
-        $type = 'jwzx';
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $goal_sql = M($type);
             $articleid = empty(I('post.articleid'))?0:I('post.articleid');
-            $articleid = 'af10350f8e6502eab03766153c0e2aebc5215d49';
             $goal_content = $goal_sql->where("articleid = '$articleid'")->field('title,content,name,address')->find();
             if(!is_null($goal_content)){
                 if($type == 'jwzx' || $type = 'xwgg'){
@@ -85,7 +82,15 @@ class NewsController extends Controller {
                         ),
                     );
                 }else{
-
+                     $info = array(
+                        'state' => 200,
+                        'info'  =>'success',
+                        'id'    => $articleid,
+                        'data'  => array(
+                            'title'   => $goal_content['title'],
+                            'content' => $goal_content['content'],
+                        ),
+                    );
                 }
             }else{
                 $info = array(
@@ -114,7 +119,7 @@ class NewsController extends Controller {
         //$this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=");
         //$this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=");
         $num =150;
-        //$this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
+        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
         $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
     }
     /*
@@ -181,53 +186,53 @@ class NewsController extends Controller {
      *S('jwzx')为内容缓存
      */
     private function _curl_set_jwzx($url){
-        // for($e=1;$e<16;$e++){
-        //     $need_url = $url.$e;
-        //     $pattern_href = '/a href=\'showfilecontent.php\?id=(.*?)\'/';
-        //     $output = $this->curl_init($need_url);
-        //     $output = mb_convert_encoding($output,"utf-8","gb2312");
+        for($e=1;$e<16;$e++){
+            $need_url = $url.$e;
+            $pattern_href = '/a href=\'showfilecontent.php\?id=(.*?)\'/';
+            $output = $this->curl_init($need_url);
+            $output = mb_convert_encoding($output,"utf-8","gb2312");
 
-        //     $need_href = $this->_patternGoal($pattern_href,$output);
-        //     $goal_num = count($need_href[1]);
-        //     for($i = 0; $i < $goal_num; $i++){
-        //         $now_site = 'http://jwzx.cqupt.edu.cn/showfilecontent.php?id='.$need_href[1][$i];
-        //         $now_news['articleid'] =$need_href[1][$i];
-        //         $ready_site = $this->curl_init($now_site);
-        //         $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
-        //         $ready_site = $this->_patternGoal('/<!-- 下面是body部分 -->([\s\S]*?)<!-- body over -->/',$ready_site);
-        //         $now_pattern_head = '/mso-font-kerning:0pt">([\s\S]*?)(<\/span>|<span|<a name|<b>|<o:p>)/';
-        //         $head = $this->_patternGoal($now_pattern_head,$ready_site[1][0]);
-        //         $need_head = trim(implode('',$head[1]));
-        //         $now_news['head'] = substr($need_head,0,200); 
-        //         $ready_site=implode('',$ready_site[0]); 
-        //         /*作者、时间、阅读量*/
-        //         $now_pattern_head_time = "/<CENTER><h4 style=\"font-size:13pt\">(.*?)<\/h4><\/CENTER><hr size=\"1\"><CENTER>发布时间:(.*?)                   发布人:(.*?)阅读人数:(.*?)</"; 
-        //         $title_time = $this->_patternGoal($now_pattern_head_time,$ready_site);  
-        //         $now_news['title'] = $title_time[1][0];
-        //         $now_news['date'] = trim($title_time[2][0]);    
-        //         $now_news['read'] = trim($title_time[4][0]);    
-        //         $now_pattern_href = '/href=\'fileAttach.php\?id=/';
-        //         $ready_site = preg_replace($now_pattern_href,"href='http://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
-        //         $now_pattern_href = '/href=\'(.*?)\'/';
-        //         /*附件地址及名称*/
-        //         $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
-        //         $now_pattern_hrefname = "/blank>(.*?)<\/a>/";
-        //         $hrefname = $this->_patternGoal($now_pattern_hrefname,$ready_site);
-        //         $now_news['name'] = implode("|",$hrefname[1]);
-        //         $content_pattern = "/<\/CENTER><BR><BR>([\s\S]*?)<hr size=1>/";
-        //         $ready_site = $this->_patternGoal($content_pattern,$ready_site);
-        //         /*匹配contents*/
-        //         $now_pattern_src = "/src=\"/";
-        //         $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);            
-        //         $now_pattern_style = "/style=\"([\s\S]*?)\"/";
-        //         $ready_site = preg_replace($now_pattern_style,"style=''",$ready_site[0]);
-        //         $now_news['content'] = $ready_site;
-        //         $now_news['address'] =implode("|",$need_annex[1]);
-        //         array_push($this->_Jwzx,$now_news);
-        //     }
-        // }
-        // array_shift($this->_Jwzx);
-        // $this->setSql('jwzx',$this->_Jwzx);
+            $need_href = $this->_patternGoal($pattern_href,$output);
+            $goal_num = count($need_href[1]);
+            for($i = 0; $i < $goal_num; $i++){
+                $now_site = 'http://jwzx.cqupt.edu.cn/showfilecontent.php?id='.$need_href[1][$i];
+                $now_news['articleid'] =$need_href[1][$i];
+                $ready_site = $this->curl_init($now_site);
+                $ready_site = mb_convert_encoding($ready_site,"utf-8","gb2312");
+                $ready_site = $this->_patternGoal('/<!-- 下面是body部分 -->([\s\S]*?)<!-- body over -->/',$ready_site);
+                $now_pattern_head = '/mso-font-kerning:0pt">([\s\S]*?)(<\/span>|<span|<a name|<b>|<o:p>)/';
+                $head = $this->_patternGoal($now_pattern_head,$ready_site[1][0]);
+                $need_head = trim(implode('',$head[1]));
+                $now_news['head'] = substr($need_head,0,200); 
+                $ready_site=implode('',$ready_site[0]); 
+                /*作者、时间、阅读量*/
+                $now_pattern_head_time = "/<CENTER><h4 style=\"font-size:13pt\">(.*?)<\/h4><\/CENTER><hr size=\"1\"><CENTER>发布时间:(.*?)                   发布人:(.*?)阅读人数:(.*?)</"; 
+                $title_time = $this->_patternGoal($now_pattern_head_time,$ready_site);  
+                $now_news['title'] = $title_time[1][0];
+                $now_news['date'] = trim($title_time[2][0]);    
+                $now_news['read'] = trim($title_time[4][0]);    
+                $now_pattern_href = '/href=\'fileAttach.php\?id=/';
+                $ready_site = preg_replace($now_pattern_href,"href='http://".$_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"]."/searchfolder?goalID=",$ready_site);
+                $now_pattern_href = '/href=\'(.*?)\'/';
+                /*附件地址及名称*/
+                $need_annex = $this->_patternGoal($now_pattern_href,$ready_site);
+                $now_pattern_hrefname = "/blank>(.*?)<\/a>/";
+                $hrefname = $this->_patternGoal($now_pattern_hrefname,$ready_site);
+                $now_news['name'] = implode("|",$hrefname[1]);
+                $content_pattern = "/<\/CENTER><BR><BR>([\s\S]*?)<hr size=1>/";
+                $ready_site = $this->_patternGoal($content_pattern,$ready_site);
+                /*匹配contents*/
+                $now_pattern_src = "/src=\"/";
+                $ready_site = preg_replace($now_pattern_src,"src='http://jwzx.cqupt.edu.cn/",$ready_site[1]);            
+                $now_pattern_style = "/style=\"([\s\S]*?)\"/";
+                $ready_site = preg_replace($now_pattern_style,"style=''",$ready_site[0]);
+                $now_news['content'] = $ready_site;
+                $now_news['address'] =implode("|",$need_annex[1]);
+                array_push($this->_Jwzx,$now_news);
+            }
+        }
+        array_shift($this->_Jwzx);
+        $this->setSql('jwzx',$this->_Jwzx);
     }
     /*
      *_curl_set_cyxw
@@ -296,12 +301,7 @@ class NewsController extends Controller {
             $ready_site = $ready_site[2][0];
             $head_pattern = "/>([\s\S]*?)</";
             $need_head = $this->_patternGoal($head_pattern,$ready_site);
-            // $news['head'] = substr(trim(implode('',$need_head[1])),0,200);
-            // $news['articleid'] = $output[$i]['id'];
-            // $news['title'] = $need_title[1][0];
-            // $news['date'] = $need_title[4][0];
-            // $news['unit'] = $need_title[2][0];
-            // $news['content'] = $ready_site;
+
             $news = array(
                 'head'      => substr(trim(implode('',$need_head[1])),0,200),
                 'articleid' => $output[$i]['id'],
@@ -314,7 +314,6 @@ class NewsController extends Controller {
             array_push($this->_Xsjz,$news);
         }
         $this->setSql('xxjz',$this->_Xsjz);
-        exit;
     }
 
     private function _curl_set_xwgg($url){
@@ -341,19 +340,20 @@ class NewsController extends Controller {
             $ready_site = preg_replace('/style=\"(.*?)\"/',"",$ready_site);
             //echo $ready_site;exit;
             $head_pattern = $this->_patternGoal('/>(.*?)</',$ready_site);
-            $need_annex_name = substr(trim(implode('',$head_pattern[1])),0,200);
+            $need_head = substr(trim(implode('',$head_pattern[1])),0,200);
             $news = array(
                 'address'   => $need_annex_address,
                 'name'      => $need_annex_name,
+                'head'      => $need_head,
                 'articleid' => $output[$i]['id'],
                 'title'     => $need_title[1][0],
                 'unit'      => $need_title[2][0],
                 'date'      => $need_title[4][0],
                 'content'   => $ready_site,
                 );
-            array_push($this->_Xwgg,$news);;
+            array_push($this->_Xwgg,$news);
         }
-        $this->setSql('xwgg',$$this->_Xwgg);
+        $this->setSql('xwgg',$this->_Xwgg);
     }
     /*
      *setSql
