@@ -69,7 +69,7 @@ class NewsController extends Controller {
                 'data'  => array(),
             );
         }
-        var_dump($info);
+        echo json_encode($info);
     }
 
     public function searchContent(){
@@ -126,6 +126,7 @@ class NewsController extends Controller {
                 'data'  => array(),
             );
         }
+        echo json_encode($info);
     }
     /*
      *searchFolder
