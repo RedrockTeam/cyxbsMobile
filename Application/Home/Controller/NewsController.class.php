@@ -4,7 +4,7 @@ use Think\Controller;
 use Org\Net\Http;
 /*
  *written by 丛广林
- *date:2015/11/
+ *date:2015/11-12/
  *qq:304546210
  *phone:18883990798
  *news_api:教务在线jwzx，重邮新闻cyxw，学术讲座xsjz，校务公告xwgg
@@ -19,20 +19,10 @@ class NewsController extends Controller {
         $this->newsUpdateFirst();
         $this->newsUpdateSecond();
     }
-    /*
-     *魔术方法，调用缓存新闻内容
-     *'jwzx'=>'教务在线','cyxw'=>'重邮新闻','xsjz'=>'学术讲座',
-     'xwgg'=>'校务公告','404'=>'缓存为空'
-     */
-        /*
-     *newsUpdate
-     *更新新闻缓存
-     *调用clear方法清除下载文件
-     *num为搜索新闻数
-     */
+    
     public function newsUpdateFirst(){//设置需要网站，刷新入口
-        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=");
-        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=");
+        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",10);
+        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",7);
     }
 
     public function newsUpdateSecond(){
@@ -41,6 +31,14 @@ class NewsController extends Controller {
         $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
     }
 
+    public function newsUpdate(){
+        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",2);
+        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",2);
+        $num = 15;
+        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
+        $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
+    }
+    
     public function __call($name,$agrs){//缓存调用位置
         $page = empty(I('post.page'))?15:I('post.page');
         $size = empty(I('post.size'))?15:I('post.size');
@@ -49,18 +47,30 @@ class NewsController extends Controller {
 
     public function searchTitle(){
         $type = I('post.type');
+        $type = 'jwzx';
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $page = empty(I('post.page'))?0:I('post.page');
             $size = empty(I('post.size'))?15:I('post.size');
             $goal_sql = M($type);
-            $start = $page*15+1;
-            $data = $goal_sql->field('id,articleid,title,head,date,read')->limit($start,$start+15)->select();
-            $info = array(
-                'state' => 200,
-                'info'  =>'success',
-                'page'  => $page,
-                'data'  => $data,
-            );
+            $start = $page*15;
+            $data = $goal_sql->field('id,articleid,title,head,date,read')->order('id DESC')->limit($start,$start+15)->select();
+            $data = $goal_sql->where('id =12222')->find();
+            if($data){
+                $info = array(
+                    'state' => 200,
+                    'info'  =>'success',
+                    'page'  => $page,
+                    'data'  => $data,
+                );
+            }else{
+                $info = array(
+                    'state' => 403,
+                    'info'  => 'failed',
+                    'page'  => 0,
+                    'data'  => array(),
+                );
+            }
+            var_dump($data);exit;
         }else{
             $info = array(
                 'state' => 404,
@@ -189,17 +199,33 @@ class NewsController extends Controller {
      *output 为目标页内容
      *need目标匹配内容
      *for内为文章内容匹配
-     *S('jwzx')为内容缓存
      */
-    private function _curl_set_jwzx($url){
-        for($e=1;$e<16;$e++){
-            $need_url = $url.$e;
-            $pattern_href = '/a href=\'showfilecontent.php\?id=(.*?)\'/';
-            $output = $this->curl_init($need_url);
-            $output = mb_convert_encoding($output,"utf-8","gb2312");
-
-            $need_href = $this->_patternGoal($pattern_href,$output);
-            $goal_num = count($need_href[1]);
+    private function _curl_set_jwzx($url,$num){
+        $jwzx = M('jwzx');
+        for($e=1;$e<$num;$e++){
+            if($num<4){
+                $need_url = $url.$e;
+                $pattern_href = '/a href=\'showfilecontent.php\?id=(.*?)\'/';
+                $output = $this->curl_init($need_url);
+                $output = mb_convert_encoding($output,"utf-8","gb2312");
+                $need_href = $this->_patternGoal($pattern_href,$output);
+                $goal_num = count($need_href[1]);
+                for($f=0;$f<$goal_num;$f++){
+                    $condition['articleid'] = $need_href[1][$f];
+                    $goal = $jwzx->where($condition)->find();
+                    if(!is_null($goal)){
+                        $goal_num = $f;
+                        break;
+                    }
+                }
+            }else{
+                $need_url = $url.$e;
+                $pattern_href = '/a href=\'showfilecontent.php\?id=(.*?)\'/';
+                $output = $this->curl_init($need_url);
+                $output = mb_convert_encoding($output,"utf-8","gb2312");
+                $need_href = $this->_patternGoal($pattern_href,$output);
+                $goal_num = count($need_href[1]);
+            }
             for($i = 0; $i < $goal_num; $i++){
                 $now_site = 'http://jwzx.cqupt.edu.cn/showfilecontent.php?id='.$need_href[1][$i];
                 $now_news['articleid'] =$need_href[1][$i];
@@ -237,7 +263,7 @@ class NewsController extends Controller {
                 array_push($this->_Jwzx,$now_news);
             }
         }
-        array_shift($this->_Jwzx);
+        $this->_Jwzx = array_reverse($this->_Jwzx);
         $this->setSql('jwzx',$this->_Jwzx);
     }
     /*
@@ -248,16 +274,32 @@ class NewsController extends Controller {
      *output 为目标页内容
      *need目标匹配内容
      *for内为文章内容匹配
-     *S('cyxw')为内容缓存
      */
-    private function _curl_set_cyxy($url){
+    private function _curl_set_cyxy($url,$num){
         // import('ORG.Util.phpQuery');
-        for($e=1;$e<7;$e++){
-            $output = $this->curl_init($url.$e);
-            $output = mb_convert_encoding($output,"utf-8","gb2312");
-            $pattern  = '/<a href="news.php\?id=(.*?)" title="(.*?)">/';
-            $ready_href = $this->_patternGoal($pattern,$output);
-            $goal_num = count($ready_href[1]);
+        $cyxw = M('cyxw');
+        for($e=1;$e<$num;$e++){
+            if($num<4){
+                $output = $this->curl_init($url.$e);
+                $output = mb_convert_encoding($output,"utf-8","gb2312");
+                $pattern  = '/<a href="news.php\?id=(.*?)" title="(.*?)">/';
+                $ready_href = $this->_patternGoal($pattern,$output);
+                $goal_num = count($ready_href[1]);
+                for($f=0;$f<$goal_num;$f++){
+                    $condition['articleid'] = $ready_href[1][$f];
+                    $goal = $cyxw->where($condition)->find();
+                    if(!is_null($goal)){
+                        $goal_num = $f;
+                        break;
+                    }
+                }
+            }else{
+                $output = $this->curl_init($url.$e);
+                $output = mb_convert_encoding($output,"utf-8","gb2312");
+                $pattern  = '/<a href="news.php\?id=(.*?)" title="(.*?)">/';
+                $ready_href = $this->_patternGoal($pattern,$output);
+                $goal_num = count($ready_href[1]);
+            }
             for($i = 0;$i<$goal_num;$i++){
                 $now_site = "http://xwzx.cqupt.edu.cn/xwzx/news.php?id=".$ready_href[1][$i];
                 $ready_site = $this->curl_init($now_site);
@@ -285,13 +327,30 @@ class NewsController extends Controller {
                 array_push($this->_Cyxw,$now_news_cyxw);
             }
         }
+        $this->_Cyxw = array_reverse($this->_Cyxw);
         $this->setSql('cyxw',$this->_Cyxw);
     }
 
     private function _curl_set_xsjz($url,$num){
-        $output = $this->curl_init($url);
-        $output = json_decode($output,true);
-        $output = $output["rows"];
+        $xxjz = M('xxjz');
+        if($num<16){
+            $output = $this->curl_init($url);
+            $output = json_decode($output,true);
+            $output = $output["rows"];
+            $goal_num = count($output);
+            for($f=0;$f<$goal_num;$f++){
+                $condition['articleid'] = $output[$f]['id'];
+                $goal = $xxjz->where($condition)->find();
+                if(!is_null($goal)){
+                    $num = $f;
+                    break;
+                }
+            }
+        }else{
+            $output = $this->curl_init($url);
+            $output = json_decode($output,true);
+            $output = $output["rows"];
+        }
         for($i = 0;$i<$num;$i++){
             $ready_site =$this->curl_init("http://202.202.32.35/getPublicNotic.do?id=".$output[$i]['id']);
             $title_pattern = '/<h1 align=\'center\' style=\'font-size:19px;color: darkgreen\'>(.*?)<\/h1><h4 align=\'center\' style=\'font-weight:normal\'>发布部门:(.*?)&nbsp;&nbsp;发布人:(.*?)&nbsp;&nbsp;发布时间:(.*?)<\/h4>/';
@@ -301,7 +360,6 @@ class NewsController extends Controller {
             $ready_site = $ready_site[2][0];
             $head_pattern = "/>([\s\S]*?)</";
             $need_head = $this->_patternGoal($head_pattern,$ready_site);
-
             $news = array(
                 'head'      => substr(trim(implode('',$need_head[1])),0,200),
                 'articleid' => $output[$i]['id'],
@@ -313,21 +371,34 @@ class NewsController extends Controller {
             );
             array_push($this->_Xsjz,$news);
         }
+        $this->_Xsjz = array_reverse($this->_Xsjz);
         $this->setSql('xxjz',$this->_Xsjz);
     }
 
-    private function _curl_set_xwgg($url){
-        function change($name){
-                return "202.202.32.35".$name;
+    private function _curl_set_xwgg($url,$num){
+        $xwgg = M('xwgg');
+        if($num<16){
+            $output = $this->curl_init($url);
+            $output = json_decode($output,true);
+            $output = $output["rows"];
+            $goal_num = count($output);
+            for($f=0;$f<$goal_num;$f++){
+                $condition['articleid'] = $output[$f]['id'];
+                $goal = $xwgg->where($condition)->find();
+                if(!is_null($goal)){
+                    $num = $f;
+                    break;
+                }
+            }
+        }else{
+            $output = $this->curl_init($url);
+            $output = json_decode($output,true);
+            $output = $output["rows"];
         }
-        $output = $this->curl_init($url);
-        $output = json_decode($output,true);
-        $output = $output["rows"];
-        for($i = 0;$i<150;$i++){
+        for($i = 0;$i<$num;$i++){
             $ready_site =$this->curl_init("http://202.202.32.35/getPublicNotic.do?id=".$output[$i]['id']);
             $title_pattern = '/<h1 align=\'center\' style=\'font-size:19px;color: darkgreen\'>(.*?)<\/h1><h4 align=\'center\' style=\'font-weight:normal\'>发布部门:(.*?)&nbsp;&nbsp;发布人:(.*?)&nbsp;&nbsp;发布时间:(.*?)<\/h4>/';
             $need_title = $this->_patternGoal($title_pattern,$ready_site);
-            //preg_replace('href=\"',"href=\"202.202.32.35", $ready_site);
             $annex_pattern = '/href=\"(.*?)\" title=\"(.*?)\"/';
             $need_annex = $this->_patternGoal($annex_pattern,$ready_site);
             foreach ($need_annex[1] as $key => $value) {
@@ -338,7 +409,6 @@ class NewsController extends Controller {
             $need_content = $this->_patternGoal($content_pattern,$ready_site);
             $ready_site = $need_content[2][0];
             $ready_site = preg_replace('/style=\"(.*?)\"/',"",$ready_site);
-            //echo $ready_site;exit;
             $head_pattern = $this->_patternGoal('/>(.*?)</',$ready_site);
             $need_head = substr(trim(implode('',$head_pattern[1])),0,200);
             $news = array(
@@ -353,7 +423,12 @@ class NewsController extends Controller {
                 );
             array_push($this->_Xwgg,$news);
         }
+        $this->_Xwgg = array_reverse($this->_Xwgg);
         $this->setSql('xwgg',$this->_Xwgg);
+    }
+
+    private function _checkArticle(){
+
     }
     /*
      *setSql
@@ -363,9 +438,9 @@ class NewsController extends Controller {
      */
     private function setSql($goalsql,$content){//刷新数据库
         $news = M($goalsql);
-        $sql = "truncate table cyxbsmobile_".$goalsql;
-        $new=M();
-        $new->execute($sql);
+        // $sql = "truncate table cyxbsmobile_".$goalsql;
+        // $new=M();
+        // $new->execute($sql);
         $news->addall($content);
     }
 
