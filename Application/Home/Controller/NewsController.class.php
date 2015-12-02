@@ -437,9 +437,9 @@ class NewsController extends Controller {
      */
     private function setSql($goalsql,$content){//刷新数据库
         $news = M($goalsql);
-        $sql = "truncate table cyxbsmobile_".$goalsql;
-        $new=M();
-        $new->execute($sql);
+        // $sql = "truncate table cyxbsmobile_".$goalsql;
+        // $new=M();
+        // $new->execute($sql);
         $num = count($content);
         foreach($content as $key => $value){
             $news->add($value);
