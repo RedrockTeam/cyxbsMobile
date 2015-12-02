@@ -4,8 +4,7 @@ use Think\Controller;
 class SearchPeopleController extends Controller {
 
     public function index(){
-        $studentNum = I('get.stunum');
-        $studentNum = '201421416';
+        $studentNum = I('stunum');
         $goal_people = $this->_curl_init("http://jwzx.cqupt.edu.cn/pubBjStu.php?searchKey=$studentNum");
         $goal_people = mb_convert_encoding($goal_people,'utf-8','gb2312');
         $info_pattern = "/<td>&nbsp;(.*?)<\/td>/";
