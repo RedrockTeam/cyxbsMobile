@@ -49,7 +49,7 @@ class NewsController extends Controller {
     // }
 
     public function searchTitle(){
-        $type = I('post.type');
+        $type = I('type');
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $page = I('post.page');
             $size = I('post.size');
