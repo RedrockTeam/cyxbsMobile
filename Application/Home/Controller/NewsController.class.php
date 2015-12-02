@@ -20,16 +20,16 @@ class NewsController extends Controller {
         $this->newsUpdateSecond();
     }
     
-    public function newsUpdateFirst(){//设置需要网站，刷新入口
-        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",7);
-        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",6);
-    }
+    // public function newsUpdateFirst(){//设置需要网站，刷新入口
+    //     $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",7);
+    //     $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",6);
+    // }
 
-    public function newsUpdateSecond(){
-        $num =150;
-        $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
-        $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
-    }
+    // public function newsUpdateSecond(){
+    //     $num =150;
+    //     $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
+    //     $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
+    // }
 
     public function newsUpdate(){
         $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",2);
