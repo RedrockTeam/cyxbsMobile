@@ -21,8 +21,8 @@ class NewsController extends Controller {
     }
     
     public function newsUpdateFirst(){//设置需要网站，刷新入口
-        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",10);
-        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",7);
+        $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",7);
+        $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",6);
     }
 
     public function newsUpdateSecond(){
@@ -52,8 +52,8 @@ class NewsController extends Controller {
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $page = I('post.page');
             $size = I('post.size');
-            $page = empty($page)?0:$page;
-            $size = empty($size)?15:$size;
+            $page = empty($page) ? 0 : $page;
+            $size = empty($size) ? 15 : $size;
             $goal_sql = M($type);
             $start = $page*15;
             $data = $goal_sql->field('id,articleid,title,head,date,read')->order('id DESC')->limit($start,$start+15)->select();
@@ -437,10 +437,14 @@ class NewsController extends Controller {
      */
     private function setSql($goalsql,$content){//刷新数据库
         $news = M($goalsql);
-        // $sql = "truncate table cyxbsmobile_".$goalsql;
-        // $new=M();
-        // $new->execute($sql);
-        $news->addall($content);
+        $sql = "truncate table cyxbsmobile_".$goalsql;
+        $new=M();
+        $new->execute($sql);
+        $num = count($content);
+        foreach($content as $key => $value){
+            $news->add($value);
+        }
+        //$news->addall($content);
     }
 
     private function _patternGoal($pattern,$string){//匹配函数
