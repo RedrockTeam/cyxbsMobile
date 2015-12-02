@@ -58,7 +58,6 @@ class NewsController extends Controller {
             $goal_sql = M($type);
             $start = $page*15;
             $data = $goal_sql->field('id,articleid,title,head,date,read')->order('id DESC')->limit($start,$start+15)->select();
-            $data = $goal_sql->where('id =12222')->find();
             if($data){
                 $info = array(
                     'state' => 200,
