@@ -40,13 +40,13 @@ class NewsController extends Controller {
         $this->_curl_set_xwgg("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=notic&page=1&rows=$num",$num);
     }
     
-    public function __call($name,$agrs){//缓存调用位置
-        $page = I('post.page');
-        $sieze = I('post.size');
-        $page = empty($page)?15:$page;
-        $size = empty($size)?15:$size;
-        $goal_sql = M($name);
-    }
+    // public function __call($name,$agrs){//缓存调用位置
+    //     $page = I('post.page');
+    //     $sieze = I('post.size');
+    //     $page = empty($page)?15:$page;
+    //     $size = empty($size)?15:$size;
+    //     $goal_sql = M($name);
+    // }
 
     public function searchTitle(){
         $type = I('post.type');
