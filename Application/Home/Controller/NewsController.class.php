@@ -40,17 +40,20 @@ class NewsController extends Controller {
     }
     
     public function __call($name,$agrs){//缓存调用位置
-        $page = empty(I('post.page'))?15:I('post.page');
-        $size = empty(I('post.size'))?15:I('post.size');
+        $page = I('post.page');
+        $sieze = I('post.size');
+        $page = empty($page)?15:$page;
+        $size = empty($size)?15:$size;
         $goal_sql = M($name);
     }
 
     public function searchTitle(){
         $type = I('post.type');
-        $type = 'jwzx';
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
-            $page = empty(I('post.page'))?0:I('post.page');
-            $size = empty(I('post.size'))?15:I('post.size');
+            $page = I('post.page');
+            $size = I('post.size');
+            $page = empty($page)?0:$page;
+            $size = empty($size)?15:$size;
             $goal_sql = M($type);
             $start = $page*15;
             $data = $goal_sql->field('id,articleid,title,head,date,read')->order('id DESC')->limit($start,$start+15)->select();
@@ -70,7 +73,6 @@ class NewsController extends Controller {
                     'data'  => array(),
                 );
             }
-            var_dump($data);exit;
         }else{
             $info = array(
                 'state' => 404,
@@ -86,7 +88,8 @@ class NewsController extends Controller {
         $type = I('post.type');
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $goal_sql = M($type);
-            $articleid = empty(I('post.articleid'))?0:I('post.articleid');
+            $articleid = I('post.articleid');
+            $articleid = empty($articleid)?0:$articleid;
             $goal_content = $goal_sql->where("articleid = '$articleid'")->field('title,content,name,address')->find();
             if(!is_null($goal_content)){
                 if($type == 'jwzx' || $type = 'xwgg'){
@@ -157,7 +160,7 @@ class NewsController extends Controller {
         $http->curlDownload($url,$setPosition);
         $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
         $setPosition ="http://".$site.'/'.$folder_name[1]."/Public/jwzxnews/".$id.'.'.$last[1];
-        echo $setPosition;
+        echo json_encode($setPosition);
     }
     /*
      *clear
@@ -425,10 +428,6 @@ class NewsController extends Controller {
         }
         $this->_Xwgg = array_reverse($this->_Xwgg);
         $this->setSql('xwgg',$this->_Xwgg);
-    }
-
-    private function _checkArticle(){
-
     }
     /*
      *setSql
