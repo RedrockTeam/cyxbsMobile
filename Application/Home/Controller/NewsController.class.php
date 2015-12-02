@@ -15,10 +15,10 @@ class NewsController extends Controller {
     private $_Cyxw = array();
     private $_Xsjz = array();
     private $_Xwgg = array();
-    public function index(){
-        $this->newsUpdateFirst();
-        $this->newsUpdateSecond();
-    }
+    // public function index(){
+    //     $this->newsUpdateFirst();
+    //     $this->newsUpdateSecond();
+    // }
     
     // public function newsUpdateFirst(){//设置需要网站，刷新入口
     //     $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",7);
