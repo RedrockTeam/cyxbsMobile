@@ -85,7 +85,7 @@ class NewsController extends Controller {
     }
 
     public function searchContent(){
-        $type = I('post.type');
+        $type = I('type');
         if($type == 'jwzx'|| $type == 'cyxw' || $type == 'xsjz' || $type == 'xwgg'){
             $goal_sql = M($type);
             $articleid = I('post.articleid');
