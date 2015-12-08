@@ -9,7 +9,10 @@ class SearchPeopleController extends Controller {
         $goal_people = mb_convert_encoding($goal_people,'utf-8','gb2312');
         $info_pattern = "/<td>&nbsp;(.*?)<\/td>/";
         $goal_people = $this->_patternGoal($info_pattern,$goal_people);
-        if($goal_people){
+        //var_dump($goal_people);
+        $people_num = implode('',$goal_people[1]);
+        $people_num = strlen($people_num);
+        if($people_num!=0&&strlen($studentNum)==10){
             $need_people = array(
                     'state' => 200,
                     'info'  => 'success',
