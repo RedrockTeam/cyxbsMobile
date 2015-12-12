@@ -16,7 +16,7 @@ class SearchPeopleController extends Controller {
             $need_people = array(
                     'state' => 200,
                     'info'  => 'success',
-                    'data'  =>array(
+                    'data'  => array(
                         'stunum'   => $goal_people[1][0],
                         'name'     => $goal_people[1][1],
                         'gender'   => $goal_people[1][2],
@@ -29,12 +29,12 @@ class SearchPeopleController extends Controller {
         }else{
             $need_people = array(
                 'state' => 404,
-                'info' => 'failed',
-                'data' => array(),
+                'info'  => 'failed',
+                'data'  => array(),
             );
 
         }
-        echo json_encode($need_people);
+        echo json_encode($need_people,JSON_FORCE_OBJECT);
         exit;
     }
 
