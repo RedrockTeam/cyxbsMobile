@@ -9,11 +9,14 @@ class SearchPeopleController extends Controller {
         $goal_people = mb_convert_encoding($goal_people,'utf-8','gb2312');
         $info_pattern = "/<td>&nbsp;(.*?)<\/td>/";
         $goal_people = $this->_patternGoal($info_pattern,$goal_people);
-        if($goal_people){
+        //var_dump($goal_people);
+        $people_num = implode('',$goal_people[1]);
+        $people_num = strlen($people_num);
+        if($people_num!=0&&strlen($studentNum)==10){
             $need_people = array(
                     'state' => 200,
                     'info'  => 'success',
-                    'data'  =>array(
+                    'data'  => array(
                         'stunum'   => $goal_people[1][0],
                         'name'     => $goal_people[1][1],
                         'gender'   => $goal_people[1][2],
@@ -26,12 +29,12 @@ class SearchPeopleController extends Controller {
         }else{
             $need_people = array(
                 'state' => 404,
-                'info' => 'failed',
-                'data' => array(),
+                'info'  => 'failed',
+                'data'  => array(),
             );
 
         }
-        echo json_encode($need_people);
+        echo json_encode($need_people,JSON_FORCE_OBJECT);
         exit;
     }
 
