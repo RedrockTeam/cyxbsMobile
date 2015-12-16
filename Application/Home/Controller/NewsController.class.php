@@ -25,7 +25,6 @@ class NewsController extends Controller {
         $this->_curl_set_jwzx("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=",7);
         $this->_curl_set_cyxy("http://xwzx.cqupt.edu.cn/xwzx/news_type.php?id=1&page=",6);
     }
-
     public function newsUpdateSecond(){
         $num =150;
         $this->_curl_set_xsjz("http://202.202.32.35/getPublicPage.do?ffmodel=notic&&nc_mode=news&page=1&rows=$num",$num);
@@ -144,14 +143,15 @@ class NewsController extends Controller {
         import("ORG.Net.Http");
         $id = I('get.goalID');
         $url = "http://jwzx.cqupt.edu.cn/fileAttach.php?id=".$id;
-        $url = "http://jwzx.cqupt.edu.cn/fileAttach.php?id=10756";
         $http = new Http();
         $html = file_get_contents($url);  
         $last = $http_response_header[7]; 
         $last = explode('.', $last);
         $site = $_SERVER["SERVER_NAME"];
         $setPosition ="./Public/jwzxnews/".$id.'.'.$last[1];
-        $http->curlDownload($url,$setPosition);
+        if(!file_exists($setPosition)){
+            $http->curlDownload($url,$setPosition);
+        }
         $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
         $setPosition ="http://".$site.'/'.$folder_name[1]."/Public/jwzxnews/".$id.'.'.$last[1];
         echo json_encode($setPosition);
