@@ -21,7 +21,8 @@ class IndexController extends Controller {
         // $this->_articleList("http://jwzx.cqupt.edu.cn/pubFileList.php?dirId=0001&currentPageNo=");
         // $this->collect();
         // exit;
-        $this->_empty();
+        //$this->_empty();
+        header('Location: http://hongyan.cqupt.edu.cn/app/');
     }
     
     // private function _articleList($url,){
