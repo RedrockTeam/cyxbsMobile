@@ -6,7 +6,6 @@
 // 	_phone.css("left",x/230);
 // 	__phone.css("left",190-x/200);
 // });
-
 //放大镜
 var $Screen = $(".screen");
 var more = $(".more1");
@@ -63,7 +62,7 @@ $(document).on('scroll', function(e){
 		info();
 	}
 
-	if(_top >= topMore + 0.1 * $moreFunc.height()){
+	if(_top >= topInfo + 0.2 * $info.height()){
 		moreFunc();
 	}
 });
