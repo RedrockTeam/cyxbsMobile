@@ -22,7 +22,8 @@ class IndexController extends Controller {
         // $this->collect();
         // exit;
         //$this->_empty();
-        header('Location: http://hongyan.cqupt.edu.cn/app/');
+        //header('Location: http://hongyan.cqupt.edu.cn/app/');
+        $this->display();
     }
     
     // private function _articleList($url,){
