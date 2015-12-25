@@ -1,11 +1,3 @@
-//顶部两手机特效
-// var _phone = $(".phone1");
-// var __phone = $(".phone2");
-// $("#top").mousemove(function (e) {
-// 	var x = e.pageX;
-// 	_phone.css("left",x/230);
-// 	__phone.css("left",190-x/200);
-// });
 //放大镜
 var $Screen = $(".screen");
 var more = $(".more1");
@@ -22,20 +14,6 @@ $Screen.mousemove(function (e) {
 	more.css("top",y-132.5);
 	In.css("left",165.5-x);
 	In.css("top",-96.5-y);
-});
-
-//微信
-var mask = $('.theme-popover-mask');
-var obj = $("#changepass");
-
-$(".wx").click(function(){
-    mask.fadeIn(500);
-    obj.slideDown(500);
-});
-
-$(".close").click(function(){
-    mask.fadeOut(500);
-    obj.slideUp(500);
 });
 
 //懒加载

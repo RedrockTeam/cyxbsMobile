@@ -153,16 +153,16 @@ body {
 			margin: 0 auto;
 			.phone1 {
 				position: absolute;
-				left: 16px;
-				top: 107px;
-				.Size(230,480);
+				.left(6);
+				.top(107);
+				.Size(260,482);
 				.background-image("../images/iphone1.png");
 			}
 			.phone2 {
 				position: absolute;
 				left: 190px;
 				top: 130px;
-				.Size(210,433);
+				.Size(230,435);
 				.background-image("../images/iphone2.png");
 			}
 			.word {
@@ -272,6 +272,7 @@ body {
 	#find {
 		.height(600);
 		overflow: hidden;
+		background-color: #f0f2f3;
 		.out {
 			position: relative;
 			display: none;
@@ -300,6 +301,9 @@ body {
 				.top(76);
 				.Size(265,265);
 				border: 2px solid #fff;
+				-moz-box-shadow: 0px 0px 5px 3px #d5d6d7;
+				-webkit-box-shadow: 0px 0px 5px 3px #d5d6d7;
+				box-shadow: 0px 0px 5px 3px #d5d6d7;
 				.radius(132.5);
 				overflow: hidden;
 			}
@@ -311,11 +315,11 @@ body {
 				.background-image("../images/magnify2.png")
 			}
 			.more2 {
-				.margin-top-rem(17);
-				.Size(270,558);
+				.margin-top-rem(16);
+				.Size(296,564);
 				.background-image("../images/magnify.png");
 				float: right;
-				.margin-right-rem(64);
+				.margin-right-rem(18);
 			}
 			.screen {
 				position: absolute;
@@ -530,7 +534,7 @@ body {
 	#share{
 		.height(142);
 		.word{
-			.width(812);
+			.width(752);
 			height: 100%;
 			margin: 0 auto;
 			.padding-top-rem(44);
@@ -538,7 +542,7 @@ body {
 				.font-size(14);
 				color: #999;
 				float: left;
-				.margin-right-rem(37px);
+				.margin-right-rem(82px);
 				span{
 					font-family: iconfont;
 					.font-size(50);
@@ -556,12 +560,9 @@ body {
 				&.sina{
 					.width(252);
 				}
-				&.wx{
-					.width(154);
-					cursor: pointer;
-				}
 				&.qq{
 					.width(146);
+					.margin-right-rem(136);
 				}
 				&.e-mail{
 					.width(136);
@@ -571,50 +572,6 @@ body {
 					color: #666;
 				}
 			}
-		}
-	}
-	#changepass{
-		padding: 20px;
-		padding: 20/16rem;
-		z-index:9999;
-		position:fixed;
-		top:50%;
-		left:50%;
-		.Size(400,350);
-		.margin-top-rem(-200px);
-		.margin-left-rem(-200px);
-		border:solid .5px #ccc;
-		background-color:#FEFEFE;
-		display:none;
-		box-shadow: 0 0 2px #666;
-		.theme-poptit{
-			.close{
-				font-family: iconfont;
-				float: right;
-				.font-size(40);
-				color: #999;
-				cursor:pointer;
-				position: relative;
-				top:-10px;
-				top:-10/16rem;
-				left:10px;
-				left:10/16rem;
-				&:hover{
-					color:#666;
-				}
-			}
-		}
-		.img{
-			.background-image("../images/wx.jpg");
-			.Size(258,258);
-			margin: 0 auto;
-		}
-		p{
-			text-align: center;
-			.line-height(40);
-			.font-size(30);	
-			letter-spacing:4px;
-			letter-spacing:.25rem;
 		}
 	}
 	footer{
@@ -630,18 +587,6 @@ body {
 		a{
 			color: #fff;
 		}
-	}
-	.theme-popover-mask{
-		z-index: 9998;
-		position:fixed;
-		top:0;
-		left:0;
-		width:100%;
-		height:100%;
-		background:#000;
-		opacity:0.4;
-		filter:alpha(opacity=40);
-		display:none;
 	}
 	#up{
 		cursor:pointer;
@@ -660,10 +605,10 @@ body {
 		}
 	}
 
-@keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:16px;left:16/16rem;opacity:1;}}
-@-moz-keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:16px;left:16/16rem;opacity:1;}}
-@-webkit-keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:16px;left:16/16rem;opacity:1;}}
-@-o-keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:16px;left:16/16rem;opacity:1;}}
+@keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:6px;left:6/16rem;opacity:1;}}
+@-moz-keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:6px;left:6/16rem;opacity:1;}}
+@-webkit-keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:6px;left:6/16rem;opacity:1;}}
+@-o-keyframes phone{20%{opacity:1;}0%{left:-100px;left:-100/16rem;opacity:0;}100% {left:6px;left:6/16rem;opacity:1;}}
 
 @keyframes Phone{20%{left:110px;left:110/16rem;opacity:0;}0%{left:110;left:110/16rem;opacity: 0;}100% {left:190px;left:190/16rem;opacity:1;}}
 @-moz-keyframes Phone{20%{left:110px;left:110/16rem;opacity:0;}0%{left:110;left:110/16rem;opacity: 0;}100% {left:190px;left:190/16rem;opacity:1;}}
