@@ -41,6 +41,7 @@ class SearchPeopleController extends Controller {
     public function peopleList(){
         $studentNum = I('stu');
         $goal_mod = strlen($studentNum)%3;
+        $studentList = array();
         if(strlen($studentNum) == 0){
             $need_people = array(
                 'state' => 404,
@@ -85,7 +86,8 @@ class SearchPeopleController extends Controller {
                             'depart'   => $goal_people[1][$num+5],
                             'grade'    => $goal_people[1][$num+6]
                             );
-                    $studentList[] = $student_now;
+                    //$studentList[] = $student_now;
+                    array_push($studentList,$student_now);
                 }
                 $need_people = array(
                         'state' => 200,
@@ -94,7 +96,7 @@ class SearchPeopleController extends Controller {
                     );
             }
         }
-        echo json_encode($need_people,JSON_FORCE_OBJECT);
+        echo json_encode($need_people,true);
         exit;
     }
 
