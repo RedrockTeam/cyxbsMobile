@@ -96,6 +96,7 @@ class SearchPeopleController extends Controller {
                     );
             }
         }
+        // print_r($need_people));
         echo json_encode($need_people,true);
         exit;
     }
