@@ -8,7 +8,7 @@ class PhotoController extends Controller {
 
     }
 
-    public function searchPhoto(){
+    public function search(){
         $stunum = I('post.stunum');        
         $photo = M('photo');
         $condition = array(
