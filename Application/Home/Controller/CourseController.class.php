@@ -173,7 +173,10 @@ class CourseController extends Controller
             'stuNum' => $stu, 'week' => $week
         ))->response();
 
-        return json_decode($res, true)['data'];
+        /* 5.3.3 兼容写法 */
+        $json_to_arr = json_decode($res, true);
+
+        return $json_to_arr['data'];
     }
 
     /**
