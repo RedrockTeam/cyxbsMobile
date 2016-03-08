@@ -80,7 +80,7 @@ class CourseController extends Controller
         $this->curlController = apiCurlController::init();
     }
 
-    private function wukebiao()
+    public function wukebiao()
     {
         if ($this->isPost()) {
             // 解析POST参数
@@ -122,8 +122,7 @@ class CourseController extends Controller
             foreach ($stuGroup as $stu) {
                 // 获得过滤后的课表数据,并放入待对比的课表集合中
                 $tempTable = $this->getTable($stu, $week);
-
-                $_lesson = 0; $_day = 0;
+                $_lesson = -1; $_day = -1;
                 foreach ($tempTable as $class) {
                     $clz = $this->processClass($class);
                     // 先获取当前天数
@@ -140,7 +139,7 @@ class CourseController extends Controller
                         $clz['names'][] = $stu;
                         $tables[$day][$lesson] = $clz;
                     } else {
-                        $tables[++$_day][++$_lesson] = [];
+                        $tables[++$_day][++$_lesson] = array();
                     }
 
                 }
@@ -174,7 +173,10 @@ class CourseController extends Controller
             'stuNum' => $stu, 'week' => $week
         ))->response();
 
-        return json_decode($res, true)['data'];
+        /* 5.3.3 兼容写法 */
+        $json_to_arr = json_decode($res, true);
+
+        return $json_to_arr['data'];
     }
 
     /**
