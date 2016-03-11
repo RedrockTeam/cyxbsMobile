@@ -36,25 +36,37 @@ class PhotoController extends Controller {
         $condition = array(
                 "stunum" => I('post.stunum')
             );
+        if(I('post.stunum') == null){
+            $info = array(
+                    'state' => 404,
+                    'info'  => 'failed',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
         $checkExist = $photo->where($condition)->find();
         $upload = new \Think\Upload();
-        $upload->maxSize = 51200;
+        $upload->maxSize = 512000;
         $upload->exts = array('png', 'jpeg',"jpg" , 'PNG','JPEG','JPG');
         $upload->rootPath  =  "./Public/photo/";
         $upload->saveName = time().'_'.mt_rand();
         $upload->autoSub = false;
         $a = $upload->upload();
         if($upload->getError() != null){
+            var_dump($upload->getError());
             $info = array(
                 'state' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
         }else{
+            $site = $_SERVER["SERVER_NAME"];
+            $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
             $content = array(
                 "stunum"   => I('post.stunum'),
                 "date"     => date("Y-m-d H:i:s", time()),
-                "photosrc" => "./Public/photo/".$upload->saveName.".".$a['fold']['ext'],
+                "photosrc" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
                 'state'    => 1
             );
             if($checkExist != null){
