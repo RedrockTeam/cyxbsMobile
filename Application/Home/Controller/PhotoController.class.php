@@ -69,6 +69,7 @@ class PhotoController extends Controller {
                 "photosrc" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
                 'state'    => 1
             );
+            $goal;
             if($checkExist != null){
                 $goal = $photo->where($condition)->data($content)->save();
             }else{
@@ -80,7 +81,6 @@ class PhotoController extends Controller {
                     'info'  => 'success',
                 );
             }else{
-                var_dump($goal);
                 $info = array(
                     'state' => 404,
                     'info'  => 'failed',
