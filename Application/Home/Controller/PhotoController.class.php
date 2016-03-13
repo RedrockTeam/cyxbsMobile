@@ -80,6 +80,7 @@ class PhotoController extends Controller {
                     'info'  => 'success',
                 );
             }else{
+                var_dump($goal);
                 $info = array(
                     'state' => 404,
                     'info'  => 'failed',
