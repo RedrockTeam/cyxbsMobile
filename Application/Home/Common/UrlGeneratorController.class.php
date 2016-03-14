@@ -200,7 +200,7 @@ class UrlGeneratorController {
 
             $bytes = random_bytes($size);
 
-            $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
+            $string .= substr(str_replace(array('/', '+', '='), '', base64_encode($bytes)), 0, $size);
         }
 
         return $string;
