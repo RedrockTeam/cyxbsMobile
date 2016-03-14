@@ -54,7 +54,6 @@ class PhotoController extends Controller {
         $upload->autoSub = false;
         $a = $upload->upload();
         if($upload->getError() != null){
-            var_dump($upload->getError());
             $info = array(
                 'state' => 404,
                 'info'  => 'failed',
@@ -70,7 +69,6 @@ class PhotoController extends Controller {
                 'state'    => 1
             );
             if($checkExist != NULL){
-                var_dump($condition);
                 $goal = $photo->where($condition)->data($content)->save();
             }else{
                 $goal = $photo->where($condition)->add($content);
