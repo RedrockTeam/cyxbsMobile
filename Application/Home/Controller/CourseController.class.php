@@ -8,11 +8,12 @@
 
 namespace Home\Controller;
 
+use Home\Common\Api\ApiCurlController;
+use Home\Common\ExcelGeneratorController;
 use Home\Common\UrlGeneratorController;
-use Home\Common\apiCurlController;
+use Redis;
 use Think\Controller;
 use Think\Exception;
-use Redis;
 
 /**
  * Class CourseController
@@ -39,9 +40,20 @@ class CourseController extends Controller
     }
 
     /**
+     * 初始化api连接管理器
+     *
+     * @return void
+     * */
+    private function _curl_init()
+    {
+        $this->curlController = apiCurlController::init();
+    }
+
+    /**
      * 显示无课表网页信息
      * */
-    public function index() {
+    public function index()
+    {
 
         $table_id = $_GET['table'];
 
@@ -52,7 +64,8 @@ class CourseController extends Controller
             return exit($this->display('Empty/index'));
         }
 
-        C('TMPL_L_DELIM', '<{'); C('TMPL_R_DELIM', '}>');
+        C('TMPL_L_DELIM', '<{');
+        C('TMPL_R_DELIM', '}>');
 
         /*<{{*/
         $jsonData = unserialize(strip_tags(trim($this->getJSON($table_id))));
@@ -63,40 +76,25 @@ class CourseController extends Controller
     }
 
     /**
-     * 课表参数解析
+     * 计算出对应的table_id并获取到对应的JSON
      *
-     * @param $param
-     * @return array
+     * @param string $table_id
+     *
+     * @return string|void
      */
-    private function _parse($param)
+    function getJSON($table_id)
     {
-        /**
-         * @example "张三,李四,王麻子"
-         * @return ["张三", "李四", "王麻子"]
-         * */
-        if (strpos($param, ',') !== false)
-            return explode(',', $param);
-        /**
-         * @example ["王二", "李狗蛋", "张大山"]
-         * @return
-         * */
-        else if (is_array($param))
-            return $param;
 
-        /**
-         * 否则将单个参数返回
-         * */
-        return $param;
-    }
+        $generator = $this->_url_init();
+        $redis = $this->_redis_init();
 
-    /**
-     * 初始化api连接管理器
-     *
-     * @return void
-     * */
-    private function _curl_init()
-    {
-        $this->curlController = apiCurlController::init();
+        $idx = $generator->generator($table_id, $this->passKey);
+
+        $json_serialize = $redis->get('mky_tables:key:' . $idx);
+
+        if (false === $json_serialize) return exit($this->display('Empty/index'));
+
+        return $json_serialize;
     }
 
     /**
@@ -147,7 +145,8 @@ class CourseController extends Controller
 //            header('Content-Type:application/json; charset=utf-8');
 //            echo json_encode((object) $this->compareTable($stuNums, $week));
 
-            $generator = $this->_url_init(); $redis = $this->_redis_init();
+            $generator = $this->_url_init();
+            $redis = $this->_redis_init();
 
             $idx = $redis->incr('mky_tables:count');
 
@@ -161,24 +160,199 @@ class CourseController extends Controller
 
     }
 
+    /***/
+
     /**
-     * @param array $stuGroup 学号
+     * 对于非POST请求的访问直接拒绝
+     *
+     * @return null|bool
+     * */
+    function isPost()
+    {
+        if (!IS_POST) $this->ajaxReturn(array(
+            'success' => 'false',
+            'info' => 'Wrong dispatch method',
+        ));
+
+        return true;
+    }
+
+    public function download()
+    {
+        $excel = new ExcelGeneratorController();
+        $json = json_decode($GLOBALS['HTTP_RAW_POST_DATA']);
+
+        /** 读取默认模板文件,并作为修改的底稿 */
+        $excel->excel_generator = $excel->reader('Excel2007', 'ExcelTemplate/template_freetable.xlsx');
+
+        /** 设置Excel的基础属性 */
+        $excel->property(function (\PHPExcel_DocumentProperties $property) {
+            $property->setCreator('Redrock Team');
+            $property->setLastModifiedBy('Redrock Team');
+            $property->setTitle('FreeTable');
+            $property->setSubject('FreeTable');
+            $property->setDescription('该无课表由服务器根据以下几位同学的课表信息自动生成.');
+            $property->setKeywords('FreeTable');
+            $property->setCategory('');
+        });
+
+        // 设置当前工作簿
+        $excel->excel_generator->setActiveSheetIndex(0);
+
+        /** 设置表格的具体内容 */
+        $excel->sheet(function (\PHPExcel_Worksheet $sheet) use ($json) {
+
+            /** 替换标题中XXXX年份为当前年份 */
+            $sheet->setCellValue('A1', preg_replace('/XXXX/', date('Y', time()), $sheet->getCell('A1')->getValue()));
+
+            /** 设置发布日期 */
+            $sheet->setCellValue('A3', '=TODAY()');
+
+            $rec_it = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($json));
+            // 星期数映射至表格的列数
+            $week_to_cell = array('B', 'C', 'D', 'E', 'F', 'G', 'H'); $week_flag = 0;
+
+            $cell = ''; $names = ''; $max_height = 0; $max_weight = 0; $temp_height = 0;
+
+            foreach ($rec_it as $key => $item) {
+
+                if (is_int($item)) {
+
+                    /**
+                     * 如果发现 $cell 变量不为空,则实际上周数等已经
+                     * 转换为了表格对应的行列指标,此时就应该设置对应
+                     * 的表格内容,并重置相应状态.
+                     */
+                    if (!empty($cell) && !empty($names)) {
+
+                        $sheet->setCellValue($cell, rtrim($names));
+
+                        // 计算当前表格中最长最高的字符串
+                        $max_height = $max_height < $temp_height ? $temp_height : $max_height;
+
+                        $cell = $names = ''; $week_flag = 0;
+                    }
+
+                    /** 将0/1 这种数字转换为字符串 A1 */
+                    if (!$week_flag) {
+                        $cell .= $week_to_cell[$item]; $week_flag = 1;
+                    } else $cell .= ($item + 5);
+
+                    continue;
+
+                } else if (is_string($item)) {
+
+                    $str = preg_replace('/\n/', '', $item);
+                    // 计算当前字符串的最大长度
+                    $str_len = strlen($str); $max_weight = $max_weight < $str_len ? $str_len : $max_weight;
+
+                    $names .= $str . PHP_EOL;
+
+                    // 当前遍历姓名的次数
+                    $temp_height++;
+
+                }
+
+            }
+
+            $sheet->setTitle('FreeTable');
+
+            // 使当前课表单元表格的宽高度自适应
+            for($i = 0; $i < 7; $i++) {
+                $sheet->getColumnDimension($week_to_cell[$i])->setWidth($max_weight * 0.46);
+            }
+            for($i = 5; $i <= 10; $i++) {
+                $sheet->getRowDimension($i)->setRowHeight($max_height * 0.66);
+            }
+        });
+
+        $this->getXSLSHeader();
+
+        return $excel->writer($excel->excel_generator, 'Excel2007')->save('php://output');
+    }
+
+    function getXSLHeader()
+    {
+        // Redirect output to a client’s web browser (Excel5)
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="freetable.xls"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+    }
+
+    function getXSLSHeader()
+    {
+        // Redirect output to a client’s web browser (Excel2007)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="freetable.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+    }
+
+    /**
+     * 课表参数解析
+     *
+     * @param $param
+     *
+     * @return array
+     */
+    private function _parse($param)
+    {
+        /**
+         * @example "张三,李四,王麻子"
+         * @return  ["张三", "李四", "王麻子"]
+         * */
+        if (strpos($param, ',') !== false)
+            return explode(',', $param);
+        /**
+         * @example ["王二", "李狗蛋", "张大山"]
+         * @return
+         * */
+        else if (is_array($param))
+            return $param;
+
+        /**
+         * 否则将单个参数返回
+         * */
+        return $param;
+    }
+
+    /**
+     * @param array  $stuGroup 学号
      * @param string $week
+     *
      * @return mixed
      */
-    private function compareTable($stuGroup = array(), $week = '0') {
+    private function compareTable($stuGroup = array(), $week = '0')
+    {
         if (!is_array($stuGroup) && is_string($stuGroup)) {
             return $this->getTable($stuGroup, $week);
         } else if (is_array($stuGroup)) {
 
             // 待对比的课表集合
-            $tables = array(); $tempTable = null;
+            $tables = array();
+            $tempTable = null;
 
             // 遍历学号组成的集合
             foreach ($stuGroup as $stu) {
                 // 获得过滤后的课表数据,并放入待对比的课表集合中
                 $tempTable = $this->getTable($stu, $week);
-                $_lesson = -1; $_day = -1;
+                $_lesson = -1;
+                $_day = -1;
                 foreach ($tempTable as $class) {
                     $clz = $this->processClass($class);
                     // 先获取当前天数
@@ -188,7 +362,8 @@ class CourseController extends Controller
                     // 如果已经存在当前有课的同学
                     if (array_key_exists($day, $tables)) {
                         if (array_key_exists($lesson, $tables[$day])) {
-                            $_lesson = $lesson; $_day = $day;
+                            $_lesson = $lesson;
+                            $_day = $day;
                             $tables[$day][$lesson]['names'][] = $stu;
                             continue;
                         }
@@ -213,8 +388,9 @@ class CourseController extends Controller
     /**
      * 得到某学生的当前课表,可以选择周数
      *
-     * @param string $stu 学号
+     * @param string $stu  学号
      * @param string $week 周数
+     *
      * @return array
      * */
     function getTable($stu, $week = '0')
@@ -239,49 +415,17 @@ class CourseController extends Controller
      * 获取课表数据的特定内容
      *
      * @param $table 课表数据
+     *
      * @return array $clear 过滤后的课表数据
      */
-    function processClass($table) {
+    function processClass($table)
+    {
         $whitelist = array('hash_day', 'hash_lesson');
 
-        $clear = array_filter($table, function($k) use ($whitelist) {
+        $clear = array_filter($table, function ($k) use ($whitelist) {
             return in_array($k, $whitelist);
         }, ARRAY_FILTER_USE_KEY);
 
         return $clear;
-    }
-
-    /**
-     * 对于非POST请求的访问直接拒绝
-     *
-     * @return null|bool
-     * */
-    function isPost()
-    {
-        if (!IS_POST) $this->ajaxReturn(array(
-            'success' => 'false',
-            'info' => 'Wrong dispatch method',
-        ));
-
-        return true;
-    }
-
-    /**
-     * 计算出对应的table_id并获取到对应的JSON
-     *
-     * @param string $table_id
-     * @return string|void
-     */
-    function getJSON($table_id) {
-
-        $generator = $this->_url_init(); $redis = $this->_redis_init();
-
-        $idx = $generator->generator($table_id, $this->passKey);
-
-        $json_serialize = $redis->get('mky_tables:key:' . $idx);
-
-        if (false === $json_serialize) return exit($this->display('Empty/index'));
-
-        return $json_serialize;
     }
 }
