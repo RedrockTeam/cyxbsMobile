@@ -6,9 +6,9 @@
  * Time: 17:05
  */
 
-namespace Home\Common;
+namespace Home\Common\Api;
 
-class apiCurlController extends CurlController
+class ApiCurlController extends CurlController
 {
 
     /**

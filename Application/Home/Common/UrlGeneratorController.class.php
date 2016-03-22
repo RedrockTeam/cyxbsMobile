@@ -4,11 +4,13 @@ namespace Home\Common;
 
 require __DIR__ . '/random_compat/lib/random.php';
 
-class UrlGeneratorController {
+class UrlGeneratorController
+{
 
     protected $prefix = 6378;
 
-    public function generator($in, $passKey = '') {
+    public function generator($in, $passKey = '')
+    {
 
         if (is_numeric($in)) {
             // 生成随机后缀
@@ -103,27 +105,27 @@ class UrlGeneratorController {
      *
      * </code>
      *
-     * @author  Kevin van Zonneveld &lt;kevin@vanzonneveld.net>
-     * @author  Simon Franz
-     * @author  Deadfish
-     * @author  SK83RJOSH
+     * @author    Kevin van Zonneveld &lt;kevin@vanzonneveld.net>
+     * @author    Simon Franz
+     * @author    Deadfish
+     * @author    SK83RJOSH
      * @copyright 2008 Kevin van Zonneveld (http://kevin.vanzonneveld.net)
      * @license   http://www.opensource.org/licenses/bsd-license.php New BSD Licence
      * @version   SVN: Release: $Id: alphaID.inc.php 344 2009-06-10 17:43:59Z kevin $
-     * @link    http://kevin.vanzonneveld.net/
+     * @link      http://kevin.vanzonneveld.net/
      *
-     * @param mixed   $in   String or long input to translate
-     * @param boolean $to_num  Reverses translation when true
-     * @param mixed   $pad_up  Number or boolean padds the result up to a specified length
+     * @param mixed   $in       String or long input to translate
+     * @param boolean $to_num   Reverses translation when true
+     * @param mixed   $pad_up   Number or boolean padds the result up to a specified length
      * @param string  $pass_key Supplying a password makes it harder to calculate the original ID
      *
      * @return mixed string or long
      */
     protected function alphaID($in, $to_num = false, $pad_up = false, $pass_key = null)
     {
-        $out   =   '';
+        $out = '';
         $index = 'bcdfghjklmnpqrstvwxyz0123456789BCDFGHJKLMNPQRSTVWXYZ';
-        $base  = strlen($index);
+        $base = strlen($index);
 
         if ($pass_key !== null) {
             // Although this function's purpose is to just make the
@@ -136,11 +138,11 @@ class UrlGeneratorController {
                 $i[] = substr($index, $n, 1);
             }
 
-            $pass_hash = hash('sha256',$pass_key);
+            $pass_hash = hash('sha256', $pass_key);
             $pass_hash = (strlen($pass_hash) < strlen($index) ? hash('sha512', $pass_key) : $pass_hash);
 
             for ($n = 0; $n < strlen($index); $n++) {
-                $p[] =  substr($pass_hash, $n, 1);
+                $p[] = substr($pass_hash, $n, 1);
             }
 
             array_multisort($p, SORT_DESC, $i);
@@ -152,7 +154,7 @@ class UrlGeneratorController {
             $len = strlen($in) - 1;
 
             for ($t = $len; $t >= 0; $t--) {
-                $bcp = bcpow($base, $len - $t);
+                $bcp = \bcpow($base, $len - $t);
                 $out = $out + strpos($index, substr($in, $t, 1)) * $bcp;
             }
 
@@ -174,10 +176,10 @@ class UrlGeneratorController {
             }
 
             for ($t = ($in != 0 ? floor(log($in, $base)) : 0); $t >= 0; $t--) {
-                $bcp = bcpow($base, $t);
-                $a   = floor($in / $bcp) % $base;
+                $bcp = \bcpow($base, $t);
+                $a = floor($in / $bcp) % $base;
                 $out = $out . substr($index, $a, 1);
-                $in  = $in - ($a * $bcp);
+                $in = $in - ($a * $bcp);
             }
         }
 
@@ -187,12 +189,14 @@ class UrlGeneratorController {
     /**
      * Generate a more truly "random" alpha-numeric string.
      *
-     * @param  int  $length
+     * @param  int $length
+     *
      * @return string
      *
      * @throws \RuntimeException
      */
-    protected function str_random($length = 13) {
+    protected function str_random($length = 13)
+    {
         $string = '';
 
         while (($len = strlen($string)) < $length) {
@@ -200,7 +204,7 @@ class UrlGeneratorController {
 
             $bytes = random_bytes($size);
 
-            $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
+            $string .= substr(str_replace(array('/', '+', '='), '', base64_encode($bytes)), 0, $size);
         }
 
         return $string;

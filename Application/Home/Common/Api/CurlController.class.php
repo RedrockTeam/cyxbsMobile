@@ -6,7 +6,7 @@
  * Time: 11:07
  */
 
-namespace Home\Common;
+namespace Home\Common\Api;
 
 use Think\Controller;
 use Closure;
