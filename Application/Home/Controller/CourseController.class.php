@@ -164,7 +164,7 @@ class CourseController extends Controller
     {
         if ($this->isPost()) {
             $excel = new ExcelGeneratorController();
-            $json = $GLOBALS['HTTP_RAW_POST_DATA'];
+            $json = json_decode($GLOBALS['HTTP_RAW_POST_DATA']);
 
             /** 读取默认模板文件,并作为修改的底稿 */
             $excel->excel_generator = $excel->reader('Excel2007', 'ExcelTemplate/template_freetable.xlsx');
