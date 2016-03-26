@@ -11,7 +11,7 @@ namespace Home\Controller;
 use Home\Common\Api\ApiCurlController;
 use Home\Common\ExcelGeneratorController;
 use Home\Common\UrlGeneratorController;
-use Home\Common\Detection;
+use Home\Common\Detection\Mobile_Detect;
 use Redis;
 use Think\Controller;
 use Think\Exception;
