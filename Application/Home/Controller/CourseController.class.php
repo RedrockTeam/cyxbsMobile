@@ -143,7 +143,7 @@ class CourseController extends Controller
 
                 echo '/index.php/Home/get/' . $shortcode;
             } else {
-                return $this->download($post);
+                return $this->download(json_decode($post));
             }
 
         }
