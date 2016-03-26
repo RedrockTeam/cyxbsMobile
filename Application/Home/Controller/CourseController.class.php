@@ -11,7 +11,7 @@ namespace Home\Controller;
 use Home\Common\Api\ApiCurlController;
 use Home\Common\ExcelGeneratorController;
 use Home\Common\UrlGeneratorController;
-use Home\Common\Detection\Mobile_Detect;
+use Home\Common\MobileDetectController;
 use Redis;
 use Think\Controller;
 use Think\Exception;
@@ -130,7 +130,7 @@ class CourseController extends Controller
             // 解析POST参数
             $post = $GLOBALS['HTTP_RAW_POST_DATA'];
 
-            $detect = new Mobile_Detect;
+            $detect = new MobileDetectController;
 
             if ($detect->match('micromessenger') || $detect->isMobile()) {
                 $generator = $this->_url_init(); $redis = $this->_redis_init();
