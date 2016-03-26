@@ -128,7 +128,7 @@ class CourseController extends Controller
     {
         if ($this->isPost()) {
             // 解析POST参数
-            $post = $GLOBALS['HTTP_RAW_POST_DATA'];
+            $post = file_get_contents('php://input', 'r');
 
             $detect = new MobileDetectController;
 
