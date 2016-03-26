@@ -167,7 +167,7 @@ class CourseController extends Controller
         return true;
     }
 
-    public function download($json)
+    protected function download($json)
     {
         $excel = new ExcelGeneratorController();
 
