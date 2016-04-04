@@ -73,7 +73,7 @@ class ExcelGeneratorController
      * @param string $type
      * @param string $filepath
      *
-     * @return \PHPExcel_Reader_IReader
+     * @return \PHPExcel
      * @throws \PHPExcel_Reader_Exception
      */
     public function reader($type = 'Excel5', $filepath = '')
