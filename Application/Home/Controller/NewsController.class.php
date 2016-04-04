@@ -431,11 +431,21 @@ class NewsController extends Controller {
      */
     private function setSql($goalsql,$content){//刷新数据库
         $news = M($goalsql);
+        $hot = M('hotarticles');
+        $article_type = M('articletypes');
+        $articleType = $article_type->where("typename='$goalsql'")->field('id')->find();
+        $articleid = $news->max('id');
         // $sql = "truncate table cyxbsmobile_".$goalsql;
         // $new=M();
         // $new->execute($sql);
         $num = count($content);
         foreach($content as $key => $value){
+            $content = array(
+                    "article_id"         => ++$articleid,
+                    "article_type"       => $articleType['id'],
+                    "created_time"       => date("Y-m-d H:i:s", time()),
+                );
+            $hot->add($content);
             $news->add($value);
         }
         //$news->addall($content);

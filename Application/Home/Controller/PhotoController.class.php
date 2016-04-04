@@ -62,16 +62,21 @@ class PhotoController extends Controller {
         }else{
             $site = $_SERVER["SERVER_NAME"];
             $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
+            $thunmbnail_src =  "http://".$site.'/'.$folder_name[1].'/Public/photo/thumbnail/'.$upload->saveName.".".$a['fold']['ext'];
             $content = array(
                 "stunum"   => I('post.stunum'),
                 "date"     => date("Y-m-d H:i:s", time()),
                 "photosrc" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
-                'state'    => 1
+                "photo_thumbnail_src" => $thunmbnail_src,
+                'state'    => 1,
             );
+            $thumbnail = new \Think\Image();
+            $thumbnail->open('./Public/photo/'.$upload->saveName.".".$a['fold']['ext']);
+            $thumbnail->thumb(150, 150)->save($thunmbnail_src);
             if($checkExist != NULL){
                 $goal = $photo->where($condition)->data($content)->save();
             }else{
-                $goal = $photo->where($condition)->add($content);
+                $goal = $photo->add($content);
             }
             if($goal){
                 $info = array(
