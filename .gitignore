@@ -58,7 +58,7 @@ config.php
 Application/Data/
 Application/Runtime/
 Application/Common/Conf/db.php
-
+Public/photo/
 # Created by .ignore support plugin (hsz.mobi)
 
 
