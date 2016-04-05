@@ -7,10 +7,10 @@ use Think\Model\RelationModel;
 
 class ArticletypesModel extends RelationModel{
     protected $_link = array(        
-			'Hotarticles'=>array(    
+			'Articles'=>array(    
 			        'mapping_type'      => self::HAS_MANY,
-			        'class_name'        => 'Hotarticles',  
-			        'foreign_key'       => 'articletypes_id',              
+			        'class_name'        => 'Articles',  
+			        'foreign_key'       => 'user_id',              
 			    ),       
 			);
 
