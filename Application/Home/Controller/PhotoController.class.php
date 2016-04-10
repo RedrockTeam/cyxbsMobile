@@ -14,7 +14,7 @@ class PhotoController extends Controller {
         $condition = array(
                 "stunum" => I('post.stunum')
             );
-        $goal = $photo->where($condition)->field('stunum,date,photosrc')->find();
+        $goal = $photo->where($condition)->field('stunum,date,photosrc,photo_thumbnail_src')->find();
         if($goal){
              $info = array(
                     'state' => 200,

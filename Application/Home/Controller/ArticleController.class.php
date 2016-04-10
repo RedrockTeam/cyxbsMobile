@@ -9,8 +9,13 @@ class ArticleController extends Controller {
         $articles = $article->relation(true)->select();
     }
 
-    public function searchArticle(){
+    public function listArticle(){
         $type = I('post.type_id');
+        $page = I('post.page');
+        $size = I('post.size');
+        $page = empty($page) ? 0 : $page;
+        $size = empty($size) ? 15 : $size;
+        $start = $page*$size;
         if($type == null){
             $info = array(
                     'state' => 801,
@@ -22,15 +27,31 @@ class ArticleController extends Controller {
         }
         $articleType = D('articletypes');
         $article     = D('articles');
-        $condition_type = array(
-            'typename' => $type
+        $condition = array(
+            'type_id' => $type
         );
-        $type_id = $articleType->where($condition)->find();
-        $article_condition = array(
-            'id'      => I('post.id'),
-            'type_id' => $type_id
+        $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('id,photo_src,thumbnail_src,content,updated_time,created_time,like_num,remark_num')->select();
+
+        $praise  = M('articlepraises');
+        $praise_condition = array(
+            "articletypes_id" => $content['type_id'],
+            "article_id"      => $content['id'],
+            "stunum"          => I('post.stuNum')
         );
-        $content = $article->where($condition)->find();
+        $praise_exist = $praise->where($praise_condition)->find();
+        if($praise_exist){
+            $content['is_my_like'] = true;
+        }else{
+            $content['is_my_like'] = false;
+        }
+
+
+        $info = array(
+                'status' => '200',
+                "page"   => $page,
+                'data'   => $content
+        );
+        echo json_encode($info);
     }
 
     public function searchHotArticle(){
@@ -41,7 +62,7 @@ class ArticleController extends Controller {
         $size = I('post.size');
         $page = empty($page) ? 0 : $page;
         $size = empty($size) ? 15 : $size;
-        $start = $page*15;
+        $start = $page*$size;
         $info = array();
         $data = $hotArticle->order('like_num DESC')->limit($start,$start+15)->relation(true)->select();
         foreach ($data as $key => $value) {

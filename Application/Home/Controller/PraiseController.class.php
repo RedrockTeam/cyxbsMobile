@@ -4,9 +4,9 @@ use Think\Controller;
 
 class PraiseController extends BaseController {
     public function addone(){
-        $praise_id = I('post.id');
+        $praise_id = I('post.article_id');
         $articletypes_id = I('post.type_id');
-        if($praise_id == null){
+        if($praise_id == null || $articletypes_id == nul){
             $info = array(
                     'state' => 801,
                     'info'  => 'invalid parameter',
@@ -29,6 +29,13 @@ class PraiseController extends BaseController {
                 );
         }else{
             $hotarticle = M('hotarticles');
+            if($praise_id > 5){
+                $article = M('articles');
+                $condition = array(
+                    "id"  => $praise_id,
+                );
+                $article->where($condition)->setInc('like_num');
+            }
             $praise->add($condition);
             $condition_all = array(
                 "article_id" => $praise_id,
