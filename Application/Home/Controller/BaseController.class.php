@@ -16,7 +16,6 @@ class BaseController extends Controller {
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
-        $this->article_type = M()
         if(empty(I('post.stuNum'))||empty(I('post.idNum'))){
             $info = array(
                 "status" => 801,
@@ -33,7 +32,8 @@ class BaseController extends Controller {
             $needInfo = $this->curl_init($this->apiUrl,$condition);
             $needInfo = json_decode($needInfo,true);
             if($needInfo['status'] == 801){
-                echo json_encode($needInfo);exit;
+                echo json_encode($needInfo);
+                exit;
             }
         }
     }

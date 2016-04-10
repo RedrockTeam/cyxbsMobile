@@ -10,7 +10,7 @@ class ArticletypesModel extends RelationModel{
 			'Hotarticles'=>array(    
 			        'mapping_type'      => self::HAS_MANY,
 			        'class_name'        => 'Hotarticles',  
-			        'foreign_key'       => 'articletypes_id',              
+			        'foreign_key'       => 'articletype_id',              
 			    ),       
 			);
 

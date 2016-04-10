@@ -7,10 +7,33 @@ class ArticleController extends Controller {
     public function index(){
         $article = D("hotarticles");
         $articles = $article->relation(true)->select();
-        var_dump($articles);
     }
 
     public function searchArticle(){
+        $type = I('post.type_id');
+        if($type == null){
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
+        $articleType = D('articletypes');
+        $article     = D('articles');
+        $condition_type = array(
+            'typename' => $type
+        );
+        $type_id = $articleType->where($condition)->find();
+        $article_condition = array(
+            'id'      => I('post.id'),
+            'type_id' => $type_id
+        );
+        $content = $article->where($condition)->find();
+    }
+
+    public function searchHotArticle(){
         $hotArticle = D("hotarticles");
         $article = D("articles");
         $user = D('users');
@@ -20,52 +43,88 @@ class ArticleController extends Controller {
         $size = empty($size) ? 15 : $size;
         $start = $page*15;
         $info = array();
-        $data = $hotArticle->order('hot_num DESC')->limit($start,$start+15)->relation(true)->select();
+        $data = $hotArticle->order('like_num DESC')->limit($start,$start+15)->relation(true)->select();
         foreach ($data as $key => $value) {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
                 );
-            if($data[$key]['articletypes_id'] < 5){
+            if($data[$key]['articletype_id'] < 5){
                 $article = M($data[$key]['Articletypes']['typename']);
+                $praise  = M('articlepraises');
+                $praise_condition = array(
+                    "articletypes_id" => $data[$key]['articletypes_id'],
+                    "article_id"      => $data[$key]['article_id'],
+                    "stunum"          => I('post.stuNum')
+                );
+                $praise_exist = $praise->where($praise_condition)->find();
+                if($praise_exist){
+                    $exist = true;
+                }else{
+                    $exist = false;
+                }
                 $articles = $article->where($condiion_articles)->find();
                 $now_info = array(
                     'status' => 200,
                     'page'   => $page,
                     'data'   =>array(
                                 'type'      => $data[$key]['Articletypes']['typename'],
-                                'id'        => $data[$key]['articletypes_id'],
+                                'id'        => $data[$key]['articletype_id'],
                                 'user_id'   => '',
                                 'user_name' =>'',
                                 'user_head' =>'',
                                 'time'      => $articles['date'],
                                 'content'   => $articles,
-                                'img'       => '',
-
+                                'img'       => array(
+                                                'img_small_src' => $articles['thumbnail_src'],
+                                                'img_src' => $articles['photo_src'],
+                                            ),
+                                'like_num'  => $value['like_num'],
+                                'remark_num'=> $value['remark_num'],
+                                "is_my_Like"=> $exist,
                             ),
                 );
                 array_push($info,$now_info);
             }else{
                 $article = D('articles');
+                $praise  = M('articlepraises');
+                $articlePhoto  = M('articlephoto');
                 $articles = $article->where($condiion_articles)->relation(true)->find();
+                $praise_condition = array(
+                    "articletypes_id" => $data[$key]['articletypes_id'],
+                    "article_id"      => $data[$key]['article_id'],
+                    "stunum"          => I('post.stuNum')
+                );
+                $praise_exist = $praise->where($praise_condition)->find();
+                if($praise_exist){
+                    $exist = true;
+                }else{
+                    $exist = false;
+                }
+                $photo_content = $articlePhoto->where($photo_condition)->select();
                 $now_info = array(
                     'status' => 200,
                     'page'   => $page,
                     'data'   =>array(
                                 'type'      => $data[$key]['Articletypes']['typename'],
-                                'id'        => $data[$key]['articletypes_id'],
+                                'id'        => $data[$key]['articletype_id'],
                                 'user_id'   => $articles['Users']['stunum'],
                                 'user_name' => $articles['Users']['username'],
                                 'user_head' => '',
                                 'time'      => $articles['created_time'],
                                 'content'   => $articles['content'],
-                                'img'       => '',
-
+                                'img'       => array(
+                                                'img_small_src' => $articles['thumbnail_src'],
+                                                'img_src' => $articles['photo_src'],
+                                            ),
+                                'like_num'  => $value['like_num'],
+                                'remark_num'=> $value['remark_num'],
+                                "is_my_Like"=> $exist,
                             ),
                 );
                 array_push($info,$now_info);
             }
         }
-        var_dump($info);
+        echo json_encode($info);
     }
 
     public function praise(){
