@@ -86,16 +86,14 @@ class PhotoController extends Controller {
             $thumbnail = new \Think\Image();
             $thumbnail->open('./Public/photo/'.$upload->saveName.".".$a['fold']['ext']);
             $thumbnail->thumb(150, 150)->save('./Public/photo/thumbnail/'.$upload->saveName.".".$a['fold']['ext']);
-            if($checkExist != NULL){
-                $goal = $photo->where($condition)->data($content)->save();
-            }else{
-                $goal = $photo->add($content);
-            }
+            $photo = M('photo');
+            $goal = $photo->add($content);
 
             if($goal){
                 $info = array(
                     'state' => 200,
                     'info'  => 'success',
+                    'data'  => $content,
                 );
             }else{
                 $info = array(
@@ -104,11 +102,9 @@ class PhotoController extends Controller {
                     'data'  => array(),
                 );
             }
+            echo json_encode($info,true);
         }
-        $content = array(
-            'user_stunum' => I('post.stunum'),
-            'article_id'  => I('post.article_id'),
-        );
+
 
     }
 
