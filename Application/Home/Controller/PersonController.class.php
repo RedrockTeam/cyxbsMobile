@@ -2,7 +2,7 @@
 namespace Home\Controller;
 use Think\Controller;
 
-class PersonController extends Controller {
+class PersonController extends BaseController {
     public function search(){
         $user = M('users');
         $stunum_other = I('post.stunum_other');

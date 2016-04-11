@@ -2,11 +2,46 @@
 namespace Home\Controller;
 use Think\Controller;
 
-class ArticleController extends Controller {
+class ArticleController extends BaseController {
     protected    $newsList = array('jwzx','cyxw','xsjz','xwgg');
     public function index(){
         $article = D("hotarticles");
         $articles = $article->relation(true)->select();
+    }
+
+    public function addArticle(){
+        $data = I('post.');
+        if($data['user_id']==null||$data['title']==null||$data['type_id'] == null){
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                );
+            echo json_encode($info,true);
+            exit;
+        }
+        $article  = D('articles');
+        $article_field = $article->getDbFields();
+        foreach ($data as $key => $value) {
+            if(!in_array($key, $article_field)){
+                unset($data[$key]);
+            }
+        }
+        $article_check = $article->add($data);
+        if($article_check){
+            $info = array(
+                    'state' => 200,
+                    'info'  => 'success',
+                );
+            echo json_encode($info,true);
+            exit;
+        }else{
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                );
+            echo json_encode($info,true);
+            exit;
+        }
     }
 
     public function listArticle(){
@@ -65,6 +100,15 @@ class ArticleController extends Controller {
         $start = $page*$size;
         $info = array();
         $data = $hotArticle->order('like_num DESC')->limit($start,$start+15)->relation(true)->select();
+        if($data == null){
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
         foreach ($data as $key => $value) {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
