@@ -190,7 +190,7 @@ class ArticleController extends BaseController {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
                 );
-            if($data[$key]['Articletypes']['typename'] ==null){
+            if($data[$key]['Articletypes']['typename'] == null){
 
             }elseif($data[$key]['articletype_id'] < 5){
                 $article = M($data[$key]['Articletypes']['typename']);

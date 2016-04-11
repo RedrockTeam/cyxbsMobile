@@ -442,7 +442,7 @@ class NewsController extends Controller {
         foreach($content as $key => $value){
             $content = array(
                     "article_id"         => ++$articleid,
-                    "article_type"       => $articleType['id'],
+                    "articletype_id"       => $articleType['id'],
                     "created_time"       => date("Y-m-d H:i:s", time()),
                 );
             $hot->add($content);
