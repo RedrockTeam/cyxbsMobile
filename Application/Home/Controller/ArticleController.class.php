@@ -26,6 +26,8 @@ class ArticleController extends BaseController {
                 unset($data[$key]);
             }
         }
+        $data['created_time'] = date("Y-m-d H:i:s", time());
+        $data['updated_time'] = date("Y-m-d H:i:s", time());
         $article_check = $article->add($data);
         if($article_check){
             $info = array(
