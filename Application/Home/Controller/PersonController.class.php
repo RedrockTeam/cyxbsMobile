@@ -6,7 +6,11 @@ class PersonController extends Controller {
     public function search(){
         $user = M('users');
         $stunum_other = I('post.stunum_other');
-        $stunum = $stunum_other == null?I('post.stuNum'):$stunum_other;
+        if($stunum_other == null){
+            $stunum = I('post.stuNum');
+        }else{
+            $stunum = $stunum_other;
+        }
         if($stunum == null){
             $info = array(
                 "status" => 801,
@@ -53,7 +57,7 @@ class PersonController extends Controller {
     }
 
     public function setNickname(){
-        if(empty(I('post.username'))){
+        if(I('post.username')==null){
             $info = array(
                 "status" => 801,
                 "info"   => "invalid parameter"
