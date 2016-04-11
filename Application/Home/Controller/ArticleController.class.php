@@ -9,6 +9,81 @@ class ArticleController extends BaseController {
         $articles = $article->relation(true)->select();
     }
 
+    public function searchTrends(){
+        $stunum_other = I('post.stunum_other');
+        $type = I('post.type_id');
+        $page = I('post.page');
+        $size = I('post.size');
+        $page = empty($page) ? 0 : $page;
+        $size = empty($size) ? 15 : $size;
+        $start = $page*$size;
+        if($stunum_other == null){
+            $stunum = I('post.stuNum');
+        }else{
+            $stunum = $stunum_other;
+        }
+        if($stunum == null){
+            $info = array(
+                "status" => 801,
+                "info"   => "invalid parameter"
+            );
+            echo json_encode($info);exit;
+        }else{
+            $condition_user = array(
+                "stunum" => $stunum
+            );
+            $user = M('users');
+            $user = $user->where($condition_user)->find();
+            $article = D('articles');
+            $condition_article = array(
+                    'user_id' =>$user['id']
+                );
+            $content = $article->where($condition_article)->order('updated_time DESC')->limit($start,$start+15)->field('id,photo_src,thumbnail_src,content,type_id,updated_time,created_time,like_num,remark_num')->select();
+            $info = array(
+                'status' => '200',
+                "info"   => "success",
+                'data'   => $content
+            );
+            echo json_encode($info);
+        }
+    }
+
+    public function aboutMe(){
+        $stunum = I('post.stuNum');
+        $type = I('post.type_id');
+        $page = I('post.page');
+        $size = I('post.size');
+        $page = empty($page) ? 0 : $page;
+        $size = empty($size) ? 15 : $size;
+        $start = $page*$size;
+        $remark = D('articleremarks');
+        $user = M('users');
+        $article = D('articles');
+        $user_id = $user->where("stunum = '$stunum'")->find();
+        $user_id = $user_id['id'];
+        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content, cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
+                FROM cyxbsmobile_articleremarks JOIN cyxbsmobile_users 
+        ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id WHERE cyxbsmobile_users.id= '$user_id' and 
+            cyxbsmobile_articleremarks.article_id IN(
+                SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
+        ) UNION
+        SELECT 'praise' as type,'' as content,cyxbsmobile_articlepraises.created_time,cyxbsmobile_articlepraises.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
+        FROM cyxbsmobile_articlepraises JOIN cyxbsmobile_users 
+        ON cyxbsmobile_articlepraises.stunum = cyxbsmobile_users.stunum WHERE cyxbsmobile_users.id= '$user_id' and 
+            cyxbsmobile_articlepraises.article_id IN(
+                SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
+        )
+            ORDER BY created_time DESC
+        ";
+        $result = M('')->query($sql);
+        $info = array(
+                'status' => '200',
+                "info"   => "success",
+                'data'   => $result
+            );
+            echo json_encode($info);
+    }
+
     public function addArticle(){
         $data = I('post.');
         if($data['user_id']==null||$data['title']==null||$data['type_id'] == null){

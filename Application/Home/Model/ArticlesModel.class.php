@@ -12,7 +12,17 @@ class ArticlesModel extends RelationModel{
 			        'mapping_type'      => self::BELONGS_TO,
 			        'class_name'        => 'Users',  
 			        'foreign_key'       => 'user_id',              
-			    ),       
+			    ),  
+			'ArticleRemarks'=>array(    
+			        'mapping_type'      => self::HAS_MANY,
+			        'class_name'        => 'Articleremarks',  
+			        'foreign_key'       => 'article_id',              
+			    ),   
+			'ArticlePraises'=>array(    
+			        'mapping_type'      => self::HAS_MANY,
+			        'class_name'        => 'Articlepraises',  
+			        'foreign_key'       => 'article_id',              
+			    ),           
 			);
 
     public function addLog(){
