@@ -14,7 +14,7 @@ class PhotoController extends Controller {
         $condition = array(
                 "stunum" => I('post.stunum')
             );
-        $goal = $photo->where($condition)->field('stunum,date,photosrc')->find();
+        $goal = $photo->where($condition)->field('stunum,date,photosrc,thumbnail_src')->find();
         if($goal){
              $info = array(
                     'state' => 200,
@@ -144,7 +144,7 @@ class PhotoController extends Controller {
                 "stunum"   => I('post.stunum'),
                 "date"     => date("Y-m-d H:i:s", time()),
                 "photosrc" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
-                "photo_thumbnail_src" => $thunmbnail_src,
+                "thumbnail_src" => $thunmbnail_src,
                 'state'    => 1,
             );
             $thumbnail = new \Think\Image();
