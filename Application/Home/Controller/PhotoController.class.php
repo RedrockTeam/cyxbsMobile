@@ -80,13 +80,13 @@ class PhotoController extends Controller {
                 "stunum"   => I('post.stunum'),
                 "date"     => date("Y-m-d H:i:s", time()),
                 "photosrc" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
-                "photo_thumbnail_src" => $thunmbnail_src,
+                "thumbnail_src" => $thunmbnail_src,
                 'state'    => 1,
             );
             $thumbnail = new \Think\Image();
             $thumbnail->open('./Public/photo/'.$upload->saveName.".".$a['fold']['ext']);
             $thumbnail->thumb(150, 150)->save('./Public/photo/thumbnail/'.$upload->saveName.".".$a['fold']['ext']);
-            $photo = M('photo');
+            $photo = M('articlephoto');
             $goal = $photo->add($content);
 
             if($goal){
