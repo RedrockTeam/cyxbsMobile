@@ -16,7 +16,7 @@ class BaseController extends Controller {
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
-        if(empty(I('post.stuNum'))||empty(I('post.idNum'))){
+        if(I('post.stuNum')==null||I('post.idNum') == null){
             $info = array(
                 "status" => 801,
                 "info"   => "invalid parameter"
