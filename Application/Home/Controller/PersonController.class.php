@@ -21,7 +21,7 @@ class PersonController extends BaseController {
             $condition = array(
                 "stunum" => $stunum
             );
-            $data = $user->where($condition)->field('stunum,introduction,username,nickname,photo_thumbnail_src,photo_src,updated_time,phone,qq')->find();
+            $data = $user->where($condition)->field('stunum,introduction,username,nickname,gender,photo_thumbnail_src,photo_src,updated_time,phone,qq')->find();
             $info = array(
                 'status' => '200',
                 "info"   => "success",
@@ -48,7 +48,6 @@ class PersonController extends BaseController {
         if($checkExist != NULL){
             $goal = $user->where($user_condition)->data($all_info)->save();
         }else{
-            var_dump($all_info);
             $goal = $user->add($all_info);
         }  
         $info = array(
