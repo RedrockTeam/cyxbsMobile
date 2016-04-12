@@ -34,19 +34,20 @@ class PersonController extends BaseController {
 
     public function setInfo(){
         $all_info  = I('post.');
-        $all_info['stunnum'] = $all_info['stuNum'];
+        $all_info['stunum'] = $all_info['stuNum'];
         $all_info['idnum'] = $all_info['idNum'];
         unset($all_info['stuNum']);
         unset($all_info['idNum']);
         $all_info = array_filter($all_info);
         $user  = M('users');
         $user_condition = array(
-                "stunnum" => I('post.stuNum')
+                "stunum" => I('post.stuNum')
             );
         $checkExist = $user->where($user_condition)->find();
         if($checkExist != NULL){
             $goal = $user->where($user_condition)->data($all_info)->save();
         }else{
+            var_dump($all_info);
             $goal = $user->add($all_info);
         }  
         $info = array(
