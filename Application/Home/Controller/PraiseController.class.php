@@ -96,7 +96,6 @@ class PraiseController extends BaseController {
                 );
                 $article->where($condition)->setDec('like_num');
             }
-            $praise->add($condition);
             $condition_all = array(
                 "article_id" => $praise_id,
                 "articletypes_id" => I('post.type_id')
@@ -106,8 +105,9 @@ class PraiseController extends BaseController {
                     "id"  => $praise_id,
                 );
             $article->where($condition_article)->setDec('like_num');
+            $praise->where($condition)->delete();
             $hotarticle->where($condition_all)->setDec('hot_num');
-            $num = $praise->where($condition_all)->find();
+            $num = $praise->where($condition_all)->count();
             $info = array(
                     'state' => 200,
                     'like_num'  => $num,
