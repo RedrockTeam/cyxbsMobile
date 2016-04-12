@@ -22,6 +22,7 @@ class BaseController extends Controller {
                 "info"   => "invalid parameter"
             );
             echo json_encode($info,true);
+            exit;
         }else{
             $stunum = I('post.stunum');
             $idNum  = I('post.idNum');
