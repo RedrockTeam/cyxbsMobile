@@ -30,7 +30,7 @@ class PraiseController extends BaseController {
                 );
         }else{
             $hotarticle = M('hotarticles');
-            if($praise_id > 5){
+            if($praise_id > 4){
                 $article = M('articles');
                 $condition = array(
                     "id"  => $praise_id,
@@ -53,9 +53,7 @@ class PraiseController extends BaseController {
             $condition_article = array(
                     "id"  => $praise_id,
                 );
-            if($praise_id < 5){
-                $article->where($condition_article)->setInc('like_num');
-            }
+            $a = $hotarticle->where($condition_all)->find();
             $hotarticle->where($condition_all)->setInc('like_num');
             $num = $praise->where($condition_all)->count();
             $info = array(
@@ -107,12 +105,10 @@ class PraiseController extends BaseController {
             $condition_article = array(
                     "id"  => $praise_id,
                 );
-            if($praise_id < 5){
-                $a = $article->where($condition_article)->setDec('like_num');
-            }
-            $condition['articletype_id'] = I('post.type_id');
-            $condition['stunum'] = I('post.stuNum');
-            $c = $praise->where($condition)->delete(); 
+            $condition_praise['articletype_id'] = I('post.type_id');
+            $condition_praise['stunum'] = I('post.stuNum');
+            $condition_praise['article_id'] = $condition['id'];
+            $praise->where($condition_praise)->delete(); 
             $b = $hotarticle->where($condition_all)->setDec('like_num');
             $num = $praise->where($condition_all)->count();
             $info = array(
