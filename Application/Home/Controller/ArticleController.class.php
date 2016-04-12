@@ -145,6 +145,7 @@ class ArticleController extends BaseController {
         $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('id,photo_src,thumbnail_src,content,updated_time,created_time,like_num,remark_num')->select();
 
         $praise  = M('articlepraises');
+        $result = array();
         foreach($content as $key => $value){
             $praise_condition = array(
                 "articletypes_id" => $content['type_id'],
@@ -153,17 +154,18 @@ class ArticleController extends BaseController {
             );
             $praise_exist = $praise->where($praise_condition)->find();
             if($praise_exist){
-                $content['is_my_like'] = true;
+                $value['is_my_like'] = true;
             }else{
-                $content['is_my_like'] = false;
+                $value['is_my_like'] = false;
             }
+            array_push($result,$value);
         }
 
 
         $info = array(
                 'status' => '200',
                 "page"   => $page,
-                'data'   => $content
+                'data'   => $result
         );
         echo json_encode($info);
     }
