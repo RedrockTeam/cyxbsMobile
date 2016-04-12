@@ -61,18 +61,22 @@ class ArticleController extends BaseController {
         $article = D('articles');
         $user_id = $user->where("stunum = '$stunum'")->find();
         $user_id = $user_id['id'];
-        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content, cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
-                FROM cyxbsmobile_articleremarks JOIN cyxbsmobile_users 
-        ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id WHERE cyxbsmobile_users.id= '$user_id' and 
+        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content,cyxbsmobile_articles.content as article_content ,cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
+                FROM (cyxbsmobile_articleremarks JOIN cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id)JOIN cyxbsmobile_articles
+        ON  cyxbsmobile_articleremarks.article_id = cyxbsmobile_articles.id
+         WHERE 
+            cyxbsmobile_users.stunum != '$stunum' AND
             cyxbsmobile_articleremarks.article_id IN(
                 SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
         ) UNION
-        SELECT 'praise' as type,'' as content,cyxbsmobile_articlepraises.created_time,cyxbsmobile_articlepraises.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
-        FROM cyxbsmobile_articlepraises JOIN cyxbsmobile_users 
-        ON cyxbsmobile_articlepraises.stunum = cyxbsmobile_users.stunum WHERE cyxbsmobile_users.id= '$user_id' and 
+        SELECT 'praise' as type,'' as content,cyxbsmobile_articles.content as article_content,cyxbsmobile_articlepraises.created_time,cyxbsmobile_articlepraises.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
+        FROM (cyxbsmobile_articlepraises JOIN cyxbsmobile_users ON cyxbsmobile_articlepraises.stunum = cyxbsmobile_users.stunum )JOIN cyxbsmobile_articles
+        ON cyxbsmobile_articlepraises.article_id = cyxbsmobile_articles.id
+        WHERE 
+            cyxbsmobile_users.stunum != '$stunum' AND
             cyxbsmobile_articlepraises.article_id IN(
                 SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
-        )
+        ) 
             ORDER BY created_time DESC
         ";
         $result = M('')->query($sql);
@@ -86,7 +90,7 @@ class ArticleController extends BaseController {
 
     public function addArticle(){
         $data = I('post.');
-        if($data['user_id']==null||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5){
+        if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5){
             $info = array(
                     'state' => 801,
                     'info'  => 'invalid parameter',
@@ -94,6 +98,11 @@ class ArticleController extends BaseController {
             echo json_encode($info,true);
             exit;
         }
+        $user = M('users');
+        $user_condition = array(
+            "stunum" =>$data['stuNum']
+        );
+        $user_id = $user->where($user_condition)->find();
         $article  = D('articles');
         $article_field = $article->getDbFields();
         foreach ($data as $key => $value) {
@@ -101,6 +110,7 @@ class ArticleController extends BaseController {
                 unset($data[$key]);
             }
         }
+        $data['user_id'] = $user_id['id'];
         $data['created_time'] = date("Y-m-d H:i:s", time());
         $data['updated_time'] = date("Y-m-d H:i:s", time());
         $article_check = $article->add($data);
