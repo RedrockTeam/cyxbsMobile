@@ -153,7 +153,7 @@ class ArticleController extends BaseController {
         $result = array();
         foreach($content as $key => $value){
             $praise_condition = array(
-                "articletypes_id" => $content['type_id'],
+                "articletype_id" => $content['type_id'],
                 "article_id"      => $content['id'],
                 "stunum"          => I('post.stuNum')
             );
