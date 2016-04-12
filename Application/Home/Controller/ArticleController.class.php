@@ -104,6 +104,11 @@ class ArticleController extends BaseController {
         $data['created_time'] = date("Y-m-d H:i:s", time());
         $data['updated_time'] = date("Y-m-d H:i:s", time());
         $article_check = $article->add($data);
+        $hotarticles = M('hotarticles');
+        $content = $data;
+        $content['artticletype_id'] = $data['type_id'];
+        $content['article_id'] = $article_check;
+        $hotarticles->add($content);
         if($article_check){
             $info = array(
                     'state' => 200,
@@ -142,7 +147,7 @@ class ArticleController extends BaseController {
         $condition = array(
             'type_id' => $type
         );
-        $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('id,photo_src,thumbnail_src,content,updated_time,created_time,like_num,remark_num')->select();
+        $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('title,id,photo_src,thumbnail_src,content,updated_time,created_time,like_num,remark_num')->select();
 
         $praise  = M('articlepraises');
         $result = array();

@@ -21,7 +21,7 @@ class PersonController extends BaseController {
             $condition = array(
                 "stunum" => $stunum
             );
-            $data = $user->where($condition)->field('stunum,introduction,username,nickname,gender,photo_thumbnail_src,photo_src,updated_time,phone,qq')->find();
+            $data = $user->where($condition)->field('id,stunum,introduction,username,nickname,gender,photo_thumbnail_src,photo_src,updated_time,phone,qq')->find();
             $info = array(
                 'status' => '200',
                 "info"   => "success",

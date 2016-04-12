@@ -24,7 +24,7 @@ class BaseController extends Controller {
             echo json_encode($info,true);
             exit;
         }else{
-            $stunum = I('post.stunum');
+            $stunum = I('post.stuNum');
             $idNum  = I('post.idNum');
             $condition = array(
                 "stuNum" => $stunum,
@@ -32,7 +32,7 @@ class BaseController extends Controller {
             );
             $needInfo = $this->curl_init($this->apiUrl,$condition);
             $needInfo = json_decode($needInfo,true);
-            if($needInfo['status'] == 801){
+            if($needInfo['status'] != 200){
                 echo json_encode($needInfo);
                 exit;
             }

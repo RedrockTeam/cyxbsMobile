@@ -40,20 +40,20 @@ class PraiseController extends BaseController {
                 "article_id" => $praise_id,
                 "stunum"     => I('post.stuNum'),
                 "created_time" => date("Y-m-d H:i:s", time()),
-                "update_time"  => date("Y-m-d H:i:s", time()),
+                "updated_time"  => date("Y-m-d H:i:s", time()),
                 "articletype_id"    => $articletypes_id
             );
             $praise->add($content);
             $condition_all = array(
                 "article_id" => $praise_id,
-                "articletypes_id" => I('post.type_id')
+                "articletype_id" => I('post.type_id')
             );
             $article = M('articles');
             $condition_article = array(
                     "id"  => $praise_id,
                 );
             $article->where($condition_article)->setInc('like_num');
-            $hotarticle->where($condition_all)->setInc('hot_num');
+            $hotarticle->where($condition_all)->setInc('like_num');
             $num = $praise->where($condition_all)->count();
             $info = array(
                     'state' => 200,
@@ -92,26 +92,29 @@ class PraiseController extends BaseController {
             if($praise_id > 5){
                 $article = M('articles');
                 $condition = array(
-                    "id"  => $praise_id,
+                    "article_id"  => $praise_id,
                 );
                 $article->where($condition)->setDec('like_num');
             }
             $condition_all = array(
                 "article_id" => $praise_id,
-                "articletypes_id" => I('post.type_id')
+                "articletype_id" => I('post.type_id')
             );
             $article = M('articles');
             $condition_article = array(
                     "id"  => $praise_id,
                 );
-            $article->where($condition_article)->setDec('like_num');
-            $praise->where($condition)->delete();
-            $hotarticle->where($condition_all)->setDec('hot_num');
+            $a = $article->where($condition_article)->setDec('like_num');
+            $condition['articletype_id'] = I('post.type_id');
+            $condition['stunum'] = I('post.stuNum');
+            $c = $praise->where($condition)->delete(); 
+            $b = $hotarticle->where($condition_all)->setDec('like_num');
             $num = $praise->where($condition_all)->count();
             $info = array(
                     'state' => 200,
                     'like_num'  => $num,
                 );
+
         }
         echo json_encode($info,true);
     }
