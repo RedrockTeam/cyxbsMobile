@@ -35,7 +35,8 @@ class PersonController extends BaseController {
     public function setInfo(){
         $all_info  = I('post.');
         $all_info['stunum'] = $all_info['stuNum'];
-        $all_info['idnum'] = $all_info['idNum'];
+        $all_info['idnum'] = date("Y-m-d H:i:s", time());
+        $all_info['updated_time'] = date;
         unset($all_info['stuNum']);
         unset($all_info['idNum']);
         $all_info = array_filter($all_info);
