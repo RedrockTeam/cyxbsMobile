@@ -54,7 +54,7 @@ class PraiseController extends BaseController {
                 );
             $article->where($condition_article)->setInc('like_num');
             $hotarticle->where($condition_all)->setInc('hot_num');
-            $num = $praise->where($condition_all)->find();
+            $num = $praise->where($condition_all)->count();
             $info = array(
                     'state' => 200,
                     'like_num'  => $num,
