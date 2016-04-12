@@ -47,7 +47,7 @@ class PersonController extends BaseController {
         if($checkExist != NULL){
             $goal = $user->where($user_condition)->data($all_info)->save();
         }else{
-            $goal = $user->add($alli_info);
+            $goal = $user->add($all_info);
         }  
         $info = array(
             'status' => '200',
