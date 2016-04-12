@@ -95,7 +95,7 @@ class PraiseController extends BaseController {
             if($praise_id > 4){
                 $article = M('articles');
                 $condition = array(
-                    "article_id"  => $praise_id,
+                    "id"  => $praise_id,
                 );
                 $article->where($condition)->setDec('like_num');
             }

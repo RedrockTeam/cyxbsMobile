@@ -147,7 +147,7 @@ class ArticleController extends BaseController {
         $condition = array(
             'type_id' => $type
         );
-        $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('title,id,photo_src,thumbnail_src,content,updated_time,created_time,like_num,remark_num')->select();
+        $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')->select();
 
         $praise  = M('articlepraises');
         $result = array();
@@ -205,7 +205,7 @@ class ArticleController extends BaseController {
                 $article = M($data[$key]['Articletypes']['typename']);
                 $praise  = M('articlepraises');
                 $praise_condition = array(
-                    "articletypes_id" => $data[$key]['articletypes_id'],
+                    "articletype_id" => $data[$key]['articletype_id'],
                     "article_id"      => $data[$key]['article_id'],
                     "stunum"          => I('post.stuNum')
                 );
