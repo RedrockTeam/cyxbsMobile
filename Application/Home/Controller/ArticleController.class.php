@@ -106,7 +106,7 @@ class ArticleController extends BaseController {
         $article_check = $article->add($data);
         $hotarticles = M('hotarticles');
         $content = $data;
-        $content['artticletype_id'] = $data['type_id'];
+        $content['articletype_id'] = $data['type_id'];
         $content['article_id'] = $article_check;
         $hotarticles->add($content);
         if($article_check){
