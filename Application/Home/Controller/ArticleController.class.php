@@ -86,7 +86,7 @@ class ArticleController extends BaseController {
 
     public function addArticle(){
         $data = I('post.');
-        if($data['user_id']==null||$data['title']==null||$data['type_id'] == null){
+        if($data['user_id']==null||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5){
             $info = array(
                     'state' => 801,
                     'info'  => 'invalid parameter',
@@ -145,16 +145,18 @@ class ArticleController extends BaseController {
         $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('id,photo_src,thumbnail_src,content,updated_time,created_time,like_num,remark_num')->select();
 
         $praise  = M('articlepraises');
-        $praise_condition = array(
-            "articletypes_id" => $content['type_id'],
-            "article_id"      => $content['id'],
-            "stunum"          => I('post.stuNum')
-        );
-        $praise_exist = $praise->where($praise_condition)->find();
-        if($praise_exist){
-            $content['is_my_like'] = true;
-        }else{
-            $content['is_my_like'] = false;
+        foreach($content as $key => $value){
+            $praise_condition = array(
+                "articletypes_id" => $content['type_id'],
+                "article_id"      => $content['id'],
+                "stunum"          => I('post.stuNum')
+            );
+            $praise_exist = $praise->where($praise_condition)->find();
+            if($praise_exist){
+                $content['is_my_like'] = true;
+            }else{
+                $content['is_my_like'] = false;
+            }
         }
 
 

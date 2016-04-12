@@ -36,7 +36,14 @@ class PraiseController extends BaseController {
                 );
                 $article->where($condition)->setInc('like_num');
             }
-            $praise->add($condition);
+            $content = array(
+                "article_id" => $praise_id,
+                "stunum"     => I('post.stuNum'),
+                "created_time" => date("Y-m-d H:i:s", time()),
+                "update_time"  => date("Y-m-d H:i:s", time()),
+                "articletype_id"    => $articletypes_id
+            );
+            $praise->add($content);
             $condition_all = array(
                 "article_id" => $praise_id,
                 "articletypes_id" => I('post.type_id')

@@ -164,6 +164,7 @@ class PhotoController extends Controller {
                 $user_content = array(
                     "photo_src" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
                     "photo_thumbnail_src" => $thunmbnail_src,
+                    "update_time"  => date("Y-m-d H:i:s", time())
                 );
                 $goal_2 = $user->where($condition)->data($user_content)->save();
             }else{
@@ -171,6 +172,8 @@ class PhotoController extends Controller {
                     "stunum"   => I('post.stunum'),
                     "photo_src" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
                     "photo_thumbnail_src" => $thunmbnail_src,
+                    "created_time" => date("Y-m-d H:i:s", time()),
+                    "update_time"  => date("Y-m-d H:i:s", time()),
                 );
                 $goal_2 = $user->add($user_content);
             }
