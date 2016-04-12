@@ -50,6 +50,11 @@ class ArticleRemarkController extends BaseController {
             $condition = array(
                     "stunum"  => I('post.stuNum')
                 );
+            $article = M('articles');
+            $condition_article = array(
+                    "id"  => $article_id,
+                );
+            $article->where($condition_article)->setInc('remark_num');
             $user_id = $user->where($condition)->field('id')->find();
             $content = array(
                 "content"         => $content,

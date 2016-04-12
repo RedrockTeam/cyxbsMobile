@@ -48,6 +48,11 @@ class PraiseController extends BaseController {
                 "article_id" => $praise_id,
                 "articletypes_id" => I('post.type_id')
             );
+            $article = M('articles');
+            $condition_article = array(
+                    "id"  => $praise_id,
+                );
+            $article->where($condition_article)->setInc('like_num');
             $hotarticle->where($condition_all)->setInc('hot_num');
             $num = $praise->where($condition_all)->find();
             $info = array(
@@ -96,6 +101,11 @@ class PraiseController extends BaseController {
                 "article_id" => $praise_id,
                 "articletypes_id" => I('post.type_id')
             );
+            $article = M('articles');
+            $condition_article = array(
+                    "id"  => $praise_id,
+                );
+            $article->where($condition_article)->setDec('like_num');
             $hotarticle->where($condition_all)->setDec('hot_num');
             $num = $praise->where($condition_all)->find();
             $info = array(
