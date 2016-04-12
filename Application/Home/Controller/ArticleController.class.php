@@ -153,8 +153,8 @@ class ArticleController extends BaseController {
         $result = array();
         foreach($content as $key => $value){
             $praise_condition = array(
-                "articletype_id" => $content['type_id'],
-                "article_id"      => $content['id'],
+                "articletype_id" => $value['type_id'],
+                "article_id"      => $value['id'],
                 "stunum"          => I('post.stuNum')
             );
             $praise_exist = $praise->where($praise_condition)->find();
