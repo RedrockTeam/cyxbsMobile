@@ -36,7 +36,7 @@ class PersonController extends BaseController {
         $all_info  = I('post.');
         $all_info['stunum'] = $all_info['stuNum'];
         $all_info['idnum'] = $all_info['idNum'];
-        $all_info['updated_time'] = date;
+        $all_info['updated_time'] = date("Y-m-d H:i:s", time());
         unset($all_info['stuNum']);
         unset($all_info['idNum']);
         $all_info = array_filter($all_info);
@@ -44,6 +44,16 @@ class PersonController extends BaseController {
         $user_condition = array(
                 "stunum" => I('post.stuNum')
             );
+        $stunum = I('post.stuNum');
+        $idNum  = I('post.idNum');
+        $search_condition = array(
+            "stuNum" => $stunum,
+            "idNum"  => $idNum
+        );
+        $needInfo = $this->curl_init($this->apiUrl,$search_condition);
+        $needInfo = json_decode($needInfo,true);
+        $all_info['username'] = $needInfo['data']['name'];
+        $all_info['gender'] = $needInfo['data']['gender'];
         $checkExist = $user->where($user_condition)->find();
         if($checkExist != NULL){
             $goal = $user->where($user_condition)->data($all_info)->save();
