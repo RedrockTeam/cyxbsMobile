@@ -231,8 +231,9 @@ class ArticleController extends BaseController {
                     'status' => 200,
                     'page'   => $page,
                     'data'   =>array(
+                                'id'        => $data[$key]['id'],
                                 'type'      => $data[$key]['Articletypes']['typename'],
-                                'id'        => $data[$key]['articletype_id'],
+                                'article_id'        => $data[$key]['articletype_id'],
                                 'user_id'   => '',
                                 'user_name' =>'',
                                 'user_head' =>'',
