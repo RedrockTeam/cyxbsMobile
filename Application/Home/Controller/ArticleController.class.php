@@ -233,7 +233,7 @@ class ArticleController extends BaseController {
                     'data'   =>array(
                                 'id'        => $data[$key]['id'],
                                 'type'      => $data[$key]['Articletypes']['typename'],
-                                'article_id'        => $data[$key]['articletype_id'],
+                                'type_id'        => $data[$key]['articletype_id'],
                                 'user_id'   => '',
                                 'user_name' =>'',
                                 'user_head' =>'',
