@@ -53,7 +53,7 @@ class PersonController extends BaseController {
         $needInfo = $this->curl_init($this->apiUrl,$search_condition);
         $needInfo = json_decode($needInfo,true);
         $all_info['username'] = $needInfo['data']['name'];
-        $all_info['gender'] = $needInfo['data']['gender'];
+        $all_info['gender'] = trim($needInfo['data']['gender']);
         $checkExist = $user->where($user_condition)->find();
         if($checkExist != NULL){
             $goal = $user->where($user_condition)->data($all_info)->save();
