@@ -233,10 +233,11 @@ class ArticleController extends BaseController {
                     'data'   =>array(
                                 'id'        => $data[$key]['id'],
                                 'type'      => $data[$key]['Articletypes']['typename'],
-                                'type_id'        => $data[$key]['articletype_id'],
+                                'type_id'   => $data[$key]['articletype_id'],
+                                'article_id'   => $data[$key]['article_id'],
                                 'user_id'   => '',
-                                'user_name' =>'',
-                                'user_head' =>'',
+                                'user_name' => '',
+                                'user_head' => '',
                                 'time'      => $articles['date'],
                                 'content'   => $articles,
                                 'img'       => array(
