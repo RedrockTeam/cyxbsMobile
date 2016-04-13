@@ -61,7 +61,7 @@ class ArticleController extends BaseController {
         $article = D('articles');
         $user_id = $user->where("stunum = '$stunum'")->find();
         $user_id = $user_id['id'];
-        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content,cyxbsmobile_articles.content as article_content ,cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.username,cyxbsmobile_users.photo_src
+        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content,cyxbsmobile_articles.content as article_content ,cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
                 FROM (cyxbsmobile_articleremarks JOIN cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id)JOIN cyxbsmobile_articles
         ON  cyxbsmobile_articleremarks.article_id = cyxbsmobile_articles.id
          WHERE 
@@ -157,7 +157,8 @@ class ArticleController extends BaseController {
         $condition = array(
             'type_id' => $type
         );
-        $content = $article->where($condition)->order('updated_time DESC')->limit($start,$start+15)->field('title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')->select();
+        // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
+        $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src')->select();
 
         $praise  = M('articlepraises');
         $result = array();
