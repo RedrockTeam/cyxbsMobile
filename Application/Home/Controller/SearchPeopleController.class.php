@@ -63,7 +63,7 @@ class SearchPeopleController extends Controller {
         }else{
             $studentNum = iconv( "UTF-8", "gb2312//IGNORE" , $studentNum);
             $goal_people = $this->_curl_init("http://jwzx.cqupt.edu.cn/pubBjStu.php?searchKey=$studentNum");
-            $goal_people = mb_convert_encoding($goal_people,'utf-8','gb2312');
+            $goal_people = mb_convert_encoding($goal_people,'utf-8','gbk');
             $info_pattern = "/<td>&nbsp;(.*?)<\/td>/";
             $goal_people = $this->_patternGoal($info_pattern,$goal_people);
             $goal_emp = implode("", $goal_people[1]);
