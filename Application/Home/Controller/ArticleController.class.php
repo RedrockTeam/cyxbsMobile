@@ -196,7 +196,9 @@ class ArticleController extends BaseController {
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
         $info = array();
-        $data = $hotArticle->order('like_num DESC')->limit($start,$start+15)->relation(true)->select();
+        
+        $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
+        $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$start+15)->relation(true)->select();
         if($data == null){
             $info = array(
                     'state' => 801,
