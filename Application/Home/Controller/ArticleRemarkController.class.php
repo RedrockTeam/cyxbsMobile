@@ -55,6 +55,10 @@ class ArticleRemarkController extends BaseController {
                     "id"  => $article_id,
                 );
             $article->where($condition_article)->setInc('remark_num');
+            $article_update = array(
+                    "updated_time"=>date("Y-m-d H:i:s", time()),
+                );
+            $article->where($condition_article)->data($article_update)->save();
             $user_id = $user->where($condition)->field('id')->find();
             $content = array(
                 "content"         => $content,
