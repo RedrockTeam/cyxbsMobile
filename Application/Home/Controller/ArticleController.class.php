@@ -136,6 +136,56 @@ class ArticleController extends BaseController {
         }
     }
 
+    public function listNews(){
+        $type = I('post.type_id');
+        $page = I('post.page');
+        $size = I('post.size');
+        $page = empty($page) ? 0 : $page;
+        $size = empty($size) ? 15 : $size;
+        $start = $page*$size;
+        if($type == null){
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
+        $articleType = D('articletypes');
+        $article     = D('news');
+        $condition = array(
+            'type_id' => $type
+        );
+        // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
+        $content = $article->where($condition)->limit($start,$start+15)->order('id DESC')->select();
+
+        $praise  = M('articlepraises');
+        $result = array();
+        foreach($content as $key => $value){
+            $praise_condition = array(
+                "articletype_id"  => $type,
+                "article_id"      => $value['id'],
+                "stunum"          => I('post.stuNum')
+            );
+            $praise_exist = $praise->where($praise_condition)->find();
+            if($praise_exist){
+                $value['is_my_like'] = true;
+            }else{
+                $value['is_my_like'] = false;
+            }
+            array_push($result,$value);
+        }
+
+
+        $info = array(
+                'status' => '200',
+                "page"   => $page,
+                'data'   => $result
+        );
+        echo json_encode($info);
+    }
+
     public function listArticle(){
         $type = I('post.type_id');
         $page = I('post.page');
@@ -158,8 +208,7 @@ class ArticleController extends BaseController {
             'type_id' => $type
         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')->order('updated_time DESC')->select();
-
+        $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')->limit($start,$start+15)->order('updated_time DESC')->select();
         $praise  = M('articlepraises');
         $result = array();
         foreach($content as $key => $value){

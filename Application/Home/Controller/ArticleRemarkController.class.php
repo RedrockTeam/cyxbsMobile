@@ -50,15 +50,33 @@ class ArticleRemarkController extends BaseController {
             $condition = array(
                     "stunum"  => I('post.stuNum')
                 );
-            $article = M('articles');
             $condition_article = array(
-                    "id"  => $article_id,
-                );
-            $article->where($condition_article)->setInc('remark_num');
-            $article_update = array(
+                        "id"  => $article_id,
+                    );
+            if($type_id > 4){
+                $article = M('articles');
+                $article->where($condition_article)->setInc('remark_num');
+                $article_update = array(
                     "updated_time"=>date("Y-m-d H:i:s", time()),
                 );
-            $article->where($condition_article)->data($article_update)->save();
+                $article->where($condition_article)->data($article_update)->save();
+            }else{
+                $news = M('news');
+                $condition_news = array(
+                    "id"  => $article_id,
+                );
+                $news->where($condition_news)->setInc('remark_num');
+                $article_update = array(
+                    "updated_time"=>date("Y-m-d H:i:s", time()),
+                );
+                $news->where($condition_article)->data($article_update)->save();
+            }
+            $hotarticles = M('hotarticles');
+            $hotarticle_condition = array(
+                "article_id" => $article_id,
+                "articletype_id" =>$type_id
+            );
+            $hotarticles->where($hotarticle_condition)->setInc('remark_num');
             $user_id = $user->where($condition)->field('id')->find();
             $content = array(
                 "content"         => $content,
