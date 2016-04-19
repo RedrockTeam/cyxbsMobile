@@ -53,13 +53,26 @@ class ArticleRemarkController extends BaseController {
             $condition_article = array(
                         "id"  => $article_id,
                     );
-            if($type_id > 4){
+            if($type_id == 6){
+                $notice = M('notices');
+                $notice->where($condition_article)->setInc('remark_num');
+                $notcie_update = array(
+                    "updated_time" =>date("Y-m-d H:i:s", time()),
+                );
+                $notice->where($condition_article)->data($notcie_update)->save();
+            }elseif($type_id > 4){
                 $article = M('articles');
                 $article->where($condition_article)->setInc('remark_num');
                 $article_update = array(
                     "updated_time"=>date("Y-m-d H:i:s", time()),
                 );
                 $article->where($condition_article)->data($article_update)->save();
+                $hotarticles = M('hotarticles');
+                $hotarticle_condition = array(
+                    "article_id" => $article_id,
+                    "articletype_id" =>$type_id
+                );
+                $hotarticles->where($hotarticle_condition)->setInc('remark_num');
             }else{
                 $news = M('news');
                 $condition_news = array(
@@ -70,13 +83,13 @@ class ArticleRemarkController extends BaseController {
                     "updated_time"=>date("Y-m-d H:i:s", time()),
                 );
                 $news->where($condition_article)->data($article_update)->save();
+                $hotarticles = M('hotarticles');
+                $hotarticle_condition = array(
+                    "article_id" => $article_id,
+                    "articletype_id" =>$type_id
+                );
+                $hotarticles->where($hotarticle_condition)->setInc('remark_num');
             }
-            $hotarticles = M('hotarticles');
-            $hotarticle_condition = array(
-                "article_id" => $article_id,
-                "articletype_id" =>$type_id
-            );
-            $hotarticles->where($hotarticle_condition)->setInc('remark_num');
             $user_id = $user->where($condition)->field('id')->find();
             $content = array(
                 "content"         => $content,

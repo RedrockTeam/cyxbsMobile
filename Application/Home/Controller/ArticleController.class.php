@@ -2,7 +2,7 @@
 namespace Home\Controller;
 use Think\Controller;
 
-class ArticleController extends BaseController {
+class ArticleController extends Controller {
     protected    $newsList = array('jwzx','cyxw','xsjz','xwgg');
     public function index(){
         $article = D("hotarticles");
@@ -90,7 +90,7 @@ class ArticleController extends BaseController {
 
     public function addArticle(){
         $data = I('post.');
-        if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5){
+        if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5||$data['type_id'] == 6){
             $info = array(
                     'state' => 801,
                     'info'  => 'invalid parameter',
@@ -238,6 +238,7 @@ class ArticleController extends BaseController {
     public function searchHotArticle(){
         $hotArticle = D("hotarticles");
         $article = D("articles");
+        $praise  = M('articlepraises');
         $user = D('users');
         $page = I('post.page');
         $size = I('post.size');
@@ -245,8 +246,48 @@ class ArticleController extends BaseController {
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
         $info = array();
-        
         $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
+        if($page == 0){
+            $notice = M('notices');
+            $data_notice   = $notice->where("created_time > '$now_date'")->select();
+            foreach ($data_notice as $key => $value) {
+                $praise_condition = array(
+                    "articletypes_id" => "6",
+                    "article_id"      => $data_notice[$key]['id'],
+                    "stunum"          => I('post.stuNum')
+                );
+                $praise_exist = $praise->where($praise_condition)->find();
+                if($praise_exist){
+                    $exist = true;
+                }else{
+                    $exist = false;
+                }
+                $now_info = array(
+                    'status' => 200,
+                    'page'   => $page,
+                    'data'   =>array(
+                                'id'        => $data_notice[$key]['id'],
+                                'type'      => "notice",
+                                'type_id'   => "6",
+                                'article_id'=> $value['id'],
+                                'user_id'   => "0",
+                                'nick_name' => "管理员",
+                                'user_head' => '',
+                                'time'      => $value['created_time'],
+                                'content'   => $value['content'],
+                                'img'       => array(
+                                                'img_small_src' => $value['thumbnail_src'],
+                                                'img_src' => $value['photo_src'],
+                                            ),
+                                'like_num'  => $value['like_num'],
+                                'remark_num'=> $value['remark_num'],
+                                "is_my_Like"=> $exist,
+                            ),
+                );
+               array_push($info,$now_info);
+            }
+        }
+
         $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$start+15)->relation(true)->select();
         if($data == null){
             $info = array(
@@ -343,7 +384,45 @@ class ArticleController extends BaseController {
                 array_push($info,$now_info);
             }
         }
+
         echo json_encode($info);
+    }
+
+    public function postNotice(){
+        $administrators = M('administrators');
+        $users = M('users');
+        $user_condition = array(
+                "stunum" =>I('post.stuNum')
+            );
+        $user_id = $users->where($user_condition)->find();
+
+        $admin_condition = array(
+                "user_id" => $user_id['id']
+            );
+        $admin = $administrators->where($admin_condition)->find();
+        if(I('post.keyword') == 'cyxbsmobile' && $admin){
+            $notice = M('notices');
+            $content = array(
+                "user_id" => $user_id['id'],
+                "created_time" => date("Y-m-d H:i:s", time()),
+                "updated_time" => date("Y-m-d H:i:s", time()),
+                "content"      => I('post.content'),
+                "title"        => I('post.title'),
+            );
+            $notice->add($content);
+            $info = array(
+                    'state' => 200,
+                );
+            echo json_encode($info,true);exit;
+        }else{
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
     }
 
     public function praise(){
@@ -368,6 +447,7 @@ class ArticleController extends BaseController {
     			$praise->add($condition);
     		}
     	}
+
     	echo json_encode($info,true);
     }
 

@@ -2,11 +2,11 @@
 namespace Home\Controller;
 use Think\Controller;
 
-class PraiseController extends BaseController {
+class PraiseController extends Controller {
     public function addone(){
         $praise_id = I('post.article_id');
         $articletypes_id = I('post.type_id');
-        if($praise_id == null || $articletypes_id == nul){
+        if($praise_id == null || $articletypes_id == null){
             
             $info = array(
                     'state' => 801,
@@ -31,7 +31,32 @@ class PraiseController extends BaseController {
                 );
         }else{
             $hotarticle = M('hotarticles');
-            if($articletypes_id > 4){
+            if($articletypes_id == 6){
+                $notice = M('notices');
+                $condition = array(
+                    "id"  => $praise_id,
+                );
+                $notice->where($condition)->setInc('like_num');
+                $content = array(
+                    "article_id" => $praise_id,
+                    "stunum"     => I('post.stuNum'),
+                    "created_time" => date("Y-m-d H:i:s", time()),
+                    "updated_time"  => date("Y-m-d H:i:s", time()),
+                    "articletype_id"    => $articletypes_id
+                );
+                $condition_all = array(
+                    "article_id" => $praise_id,
+                    "articletype_id" => I('post.type_id')
+                );
+                $praise->add($content);
+                $num = $praise->where($condition_all)->count();
+                $info = array(
+                        'state' => 200,
+                        'like_num'  => $num,
+                    );
+                echo json_encode($info,true);
+                exit;
+            }elseif($articletypes_id > 4){
                 $article = M('articles');
                 $condition = array(
                     "id"  => $praise_id,
