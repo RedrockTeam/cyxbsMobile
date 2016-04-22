@@ -72,8 +72,14 @@ class CourseController extends Controller
         $jsonData = unserialize(strip_tags(trim($this->getJSON($table_id))));
         /*}}>*/
 
-        $this->assign(array('jsonData' => $jsonData));
-        $this->display('FreeTable/index');
+        $detect = new MobileDetectController;
+
+        if (!$detect->match('micromessenger') && !$detect->isMobile()) {
+            $this->assign(array('jsonData' => $jsonData));
+            $this->display('FreeTable/index');
+        } else {
+            return $this->download(json_decode($jsonData));
+        }
     }
 
     /**
@@ -142,8 +148,6 @@ class CourseController extends Controller
                 $redis->setex('mky_tables:key:' . $idx, 604800, serialize($post));
 
                 echo '/index.php/Home/get/' . $shortcode;
-            } else {
-                return $this->download(json_decode($post));
             }
 
         }
