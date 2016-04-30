@@ -68,7 +68,7 @@ class ArticleController extends Controller {
             $condition_article = array(
                     'user_id' =>$user['id']
                 );
-            $content = $article->where($condition_article)->order('updated_time DESC')->limit($start,$start+15)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
+            $content = $article->where($condition_article)->order('updated_time DESC')->limit($start,$start+$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
             $info = array(
                 'status' => '200',
                 "info"   => "success",
@@ -188,7 +188,7 @@ class ArticleController extends Controller {
             'type_id' => $type
         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->limit($start,$start+15)->order('id DESC')->select();
+        $content = $article->where($condition)->limit($start,$start+$size)->order('id DESC')->select();
 
         $praise  = M('articlepraises');
         $result = array();
@@ -238,7 +238,7 @@ class ArticleController extends Controller {
             'type_id' => $type
         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')->limit($start,$start+15)->order('updated_time DESC')->select();
+        $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')->limit($start,$start+$size)->order('updated_time DESC')->select();
         $praise  = M('articlepraises');
         $result = array();
         foreach($content as $key => $value){
@@ -320,7 +320,7 @@ class ArticleController extends Controller {
             }
         }
 
-        $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$start+15)->relation(true)->select();
+        $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$start+$size)->relation(true)->select();
         if($data == null){
             $info = array(
                     'state' => 801,
