@@ -91,7 +91,7 @@ class ArticleController extends Controller {
         $article = D('articles');
         $user_id = $user->where("stunum = '$stunum'")->find();
         $user_id = $user_id['id'];
-        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content,cyxbsmobile_articles.content as article_content ,cyxbsmobile_articles.photo_src as article_photo_src ,cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
+        $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content,cyxbsmobile_articles.content as article_content ,cyxbsmobile_articles.thumbnail_src as article_photo_src ,cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
                 FROM (cyxbsmobile_articleremarks JOIN cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id)JOIN cyxbsmobile_articles
         ON  cyxbsmobile_articleremarks.article_id = cyxbsmobile_articles.id
          WHERE 
@@ -99,7 +99,7 @@ class ArticleController extends Controller {
             cyxbsmobile_articleremarks.article_id IN(
                 SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
         ) UNION
-        SELECT 'praise' as type,'' as content,cyxbsmobile_articles.content as article_content,cyxbsmobile_articlepraises.created_time,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articlepraises.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
+        SELECT 'praise' as type,'' as content,cyxbsmobile_articles.content as article_content,cyxbsmobile_articles.thumbnail_src as article_photo_src,cyxbsmobile_articlepraises.created_time,cyxbsmobile_articlepraises.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
         FROM (cyxbsmobile_articlepraises JOIN cyxbsmobile_users ON cyxbsmobile_articlepraises.stunum = cyxbsmobile_users.stunum )JOIN cyxbsmobile_articles
         ON cyxbsmobile_articlepraises.article_id = cyxbsmobile_articles.id
         WHERE 
