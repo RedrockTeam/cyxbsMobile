@@ -26,15 +26,23 @@ class BaseController extends Controller {
         }else{
             $stunum = I('post.stuNum');
             $idNum  = I('post.idNum');
-            $condition = array(
-                "stuNum" => $stunum,
-                "idNum"  => $idNum
-            );
-            $needInfo = $this->curl_init($this->apiUrl,$condition);
-            $needInfo = json_decode($needInfo,true);
-            if($needInfo['status'] != 200){
-                echo json_encode($needInfo);
-                exit;
+            if(S($stunum) == $idNum){
+
+            }else{
+                $stunum = I('post.stuNum');
+                $idNum  = I('post.idNum');
+                $condition = array(
+                    "stuNum" => $stunum,
+                    "idNum"  => $idNum
+                );
+                $needInfo = $this->curl_init($this->apiUrl,$condition);
+                $needInfo = json_decode($needInfo,true);
+                if($needInfo['status'] != 200){
+                    echo json_encode($needInfo);
+                    exit;
+                }else{
+                    S($stunum, $idNum);
+                }
             }
         }
     }

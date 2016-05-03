@@ -2,7 +2,7 @@
 namespace Home\Controller;
 use Think\Controller;
 
-class ArticleController extends Controller {
+class ArticleController extends BaseController {
     protected    $newsList = array('jwzx','cyxw','xsjz','xwgg');
     public function index(){
         $article = D("hotarticles");
