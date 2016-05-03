@@ -115,7 +115,7 @@ class ArticleController extends BaseController {
                 "info"   => "success",
                 'data'   => $result
             );
-            echo json_encode($info);
+        echo json_encode($info);
     }
 
     public function addArticle(){
@@ -321,15 +321,6 @@ class ArticleController extends BaseController {
         }
 
         $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$start+$size)->relation(true)->select();
-        if($data == null){
-            $info = array(
-                    'state' => 801,
-                    'info'  => 'invalid parameter',
-                    'data'  => array(),
-                );
-            echo json_encode($info,true);
-            exit;
-        }
         foreach ($data as $key => $value) {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
