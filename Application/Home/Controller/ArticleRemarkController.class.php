@@ -9,6 +9,7 @@ class ArticleRemarkController extends BaseController {
         if($remark_id == null||$type_id == null){
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
@@ -27,6 +28,7 @@ class ArticleRemarkController extends BaseController {
         		->select();
        	$info = array(
                     'state' => 200,
+                    'status' => 200,
                     'data'  => $result,
                 );
         echo json_encode($info,true);
@@ -39,6 +41,7 @@ class ArticleRemarkController extends BaseController {
         if($content == null || $type_id == null || $article_id == null){
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
@@ -101,6 +104,7 @@ class ArticleRemarkController extends BaseController {
             $remark->add($content);
             $info = array(
                     'state' => 200,
+                    'status' => 200,
                 );
             echo json_encode($info,true);
         }

@@ -10,6 +10,7 @@ class PraiseController extends Controller {
             
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
@@ -26,6 +27,7 @@ class PraiseController extends Controller {
         if($result){
             $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'praised',
                     'data'  => array(),
                 );
@@ -52,6 +54,7 @@ class PraiseController extends Controller {
                 $num = $praise->where($condition_all)->count();
                 $info = array(
                         'state' => 200,
+                        'status' => 820001,
                         'like_num'  => $num,
                     );
                 echo json_encode($info,true);
@@ -90,6 +93,7 @@ class PraiseController extends Controller {
             $num = $praise->where($condition_all)->count();
             $info = array(
                     'state' => 200,
+                    'status' => 200,
                     'like_num'  => $num,
                 );
         }
@@ -102,6 +106,7 @@ class PraiseController extends Controller {
         if($praise_id == null || $articletypes_id == nul){
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
@@ -117,6 +122,7 @@ class PraiseController extends Controller {
         if(!$result){
             $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'praised',
                     'data'  => array(),
                 );
@@ -145,6 +151,7 @@ class PraiseController extends Controller {
             $num = $praise->where($condition_all)->count();
             $info = array(
                     'state' => 200,
+                    'status' => 200,
                     'like_num'  => $num,
                 );
 

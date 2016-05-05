@@ -18,12 +18,14 @@ class PhotoController extends Controller {
         if($goal){
              $info = array(
                     'state' => 200,
+                    'status' => 200,
                     'info'  => 'success',
                     'data'  => $goal,
                 );
          }else{
              $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'failed',
                     'data'  => array(),
                 );
@@ -36,6 +38,7 @@ class PhotoController extends Controller {
         if($img_id == null){
             $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'failed',
                     'data'  => array(),
                 );
@@ -53,6 +56,7 @@ class PhotoController extends Controller {
         if(I('post.stunum') == null){
             $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'failed',
                     'data'  => array(),
                 );
@@ -69,6 +73,7 @@ class PhotoController extends Controller {
         if($upload->getError() != null){
             $info = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
@@ -92,12 +97,14 @@ class PhotoController extends Controller {
             if($goal){
                 $info = array(
                     'state' => 200,
+                    'status' => 200,
                     'info'  => 'success',
                     'data'  => $content,
                 );
             }else{
                 $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'failed',
                     'data'  => array(),
                 );
@@ -116,6 +123,7 @@ class PhotoController extends Controller {
         if(I('post.stunum') == null){
             $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'failed',
                     'data'  => array(),
                 );
@@ -133,6 +141,7 @@ class PhotoController extends Controller {
         if($upload->getError() != null){
             $info = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
@@ -180,11 +189,13 @@ class PhotoController extends Controller {
             if($goal){
                 $info = array(
                     'state' => 200,
+                    'status' => 200,
                     'info'  => 'success',
                 );
             }else{
                 $info = array(
                     'state' => 404,
+                    'status' => 404,
                     'info'  => 'failed',
                     'data'  => array(),
                 );

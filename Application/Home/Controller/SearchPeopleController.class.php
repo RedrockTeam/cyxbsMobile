@@ -15,6 +15,7 @@ class SearchPeopleController extends Controller {
         if($people_num!=0&&strlen($studentNum)==10){
             $need_people = array(
                     'state' => 200,
+                    'status' => 200,
                     'info'  => 'success',
                     'data'  => array(
                         'stunum'   => $goal_people[1][0],
@@ -29,6 +30,7 @@ class SearchPeopleController extends Controller {
         }else{
             $need_people = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
@@ -45,18 +47,21 @@ class SearchPeopleController extends Controller {
         if(strlen($studentNum) == 0){
             $need_people = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
         }else if(!eregi("[^\x80-\xff]",$studentNum) && strlen($studentNum) == 3){
             $need_people = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
         }else if(is_numeric($studentNum) && strlen($studentNum) != 10){
             $need_people = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
@@ -70,6 +75,7 @@ class SearchPeopleController extends Controller {
             if(empty($goal_emp)){
                 $need_people = array(
                 'state' => 404,
+                'status' => 404,
                 'info'  => 'failed',
                 'data'  => array(),
             );
@@ -91,6 +97,7 @@ class SearchPeopleController extends Controller {
                 }
                 $need_people = array(
                         'state' => 200,
+                        'status' => 200,
                         'info'  => 'success',
                         'data'  => $studentList
                     );
