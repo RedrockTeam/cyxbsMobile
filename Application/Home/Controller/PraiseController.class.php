@@ -17,12 +17,28 @@ class PraiseController extends Controller {
             echo json_encode($info,true);
             exit;
         }
+
+        $user = M('users');
+        $condition_user = array(
+            "stunum" => I('post.stuNum'),
+        );
+        $user_exist = $user->where($condition_user)->find();
+        if(!$user_exist){
+            $info = array(
+                    'state' => 801,
+                    'info'  => 'invalid parameter',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
         $praise = M('articlepraises');
         $condition = array(
             "article_id" => $praise_id,
             "stunum"     => I('post.stuNum'),
             'articletype_id'=>$articletypes_id
         );
+
         $result = $praise->where($condition)->find();
         if($result){
             $info = array(
