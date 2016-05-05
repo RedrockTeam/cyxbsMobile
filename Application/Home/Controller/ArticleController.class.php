@@ -68,7 +68,7 @@ class ArticleController extends BaseController {
             $condition_article = array(
                     'user_id' =>$user['id']
                 );
-            $content = $article->where($condition_article)->order('updated_time DESC')->limit($start,$start+$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
+            $content = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
             $info = array(
                 'status' => '200',
                 "info"   => "success",
@@ -188,7 +188,7 @@ class ArticleController extends BaseController {
             'type_id' => $type
         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->limit($start,$start+$size)->order('id DESC')->select();
+        $content = $article->where($condition)->limit($start,$size)->order('id DESC')->select();
 
         $praise  = M('articlepraises');
         $result = array();
@@ -320,7 +320,7 @@ class ArticleController extends BaseController {
             }
         }
 
-        $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$start+$size)->relation(true)->select();
+        $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC')->limit($start,$size)->relation(true)->select();
         foreach ($data as $key => $value) {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
