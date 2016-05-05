@@ -392,7 +392,7 @@ class ArticleController extends BaseController {
                                 'article_id'=>$data[$key]['article_id'],
                                 'user_id'   => $articles['Users']['stunum'],
                                 'nick_name' => $articles['Users']['nickname'],
-                                'user_head' => "",
+                                'user_head' => $articles['Users']['photo_src'],
                                 'time'      => $articles['created_time'],
                                 'content'   => array(
                                                     "content" => $articles['content'],
