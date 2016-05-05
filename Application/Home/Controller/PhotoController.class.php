@@ -64,7 +64,7 @@ class PhotoController extends Controller {
             exit;
         }
         $upload = new \Think\Upload();
-        $upload->maxSize = 512000;
+        $upload->maxSize = 4194304;
         $upload->exts = array('png', 'jpeg',"jpg" , 'PNG','JPEG','JPG');
         $upload->rootPath  =  "./Public/photo/";
         $upload->saveName = time().'_'.mt_rand();
@@ -77,6 +77,7 @@ class PhotoController extends Controller {
                 'info'  => 'failed',
                 'data'  => array(),
             );
+            echo json_encode($info,true);exit;
         }else{
             $site = $_SERVER["SERVER_NAME"];
             $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
@@ -132,7 +133,7 @@ class PhotoController extends Controller {
         }
         $checkExist = $photo->where($condition)->find();
         $upload = new \Think\Upload();
-        $upload->maxSize = 512000;
+        $upload->maxSize = 4194304;
         $upload->exts = array('png', 'jpeg',"jpg" , 'PNG','JPEG','JPG');
         $upload->rootPath  =  "./Public/photo/";
         $upload->saveName = time().'_'.mt_rand();
