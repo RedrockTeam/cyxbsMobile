@@ -123,6 +123,7 @@ class ArticleController extends BaseController {
         if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5||$data['type_id'] == 6){
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                 );
             echo json_encode($info,true);
@@ -152,6 +153,7 @@ class ArticleController extends BaseController {
         if($article_check){
             $info = array(
                     'state' => 200,
+                    'status' => 200,
                     'info'  => 'success',
                 );
             echo json_encode($info,true);
@@ -159,6 +161,7 @@ class ArticleController extends BaseController {
         }else{
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                 );
             echo json_encode($info,true);
@@ -176,6 +179,7 @@ class ArticleController extends BaseController {
         if($type == null){
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
@@ -226,6 +230,7 @@ class ArticleController extends BaseController {
         if($type == null){
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
@@ -437,11 +442,13 @@ class ArticleController extends BaseController {
             $notice->add($content);
             $info = array(
                     'state' => 200,
+                    'status' => 200,
                 );
             echo json_encode($info,true);exit;
         }else{
             $info = array(
                     'state' => 801,
+                    'status' => 801,
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
