@@ -286,6 +286,7 @@ class ArticleController extends BaseController {
         if($page == 0){
             $notice = M('notices');
             $data_notice   = $notice->where("created_time > '$now_date'")->select();
+            $site = $_SERVER["SERVER_NAME"];
             foreach ($data_notice as $key => $value) {
                 $praise_condition = array(
                     "articletype_id" => "6",
