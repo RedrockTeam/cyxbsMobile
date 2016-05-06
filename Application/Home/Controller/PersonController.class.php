@@ -34,6 +34,28 @@ class PersonController extends BaseController {
 
     public function setInfo(){
         $all_info  = I('post.');
+
+        $bank_array = array('redrock','管理员','红岩','红岩网校工作站','重邮','重庆邮电大学');
+
+        $test_nickname = trim($all_info['nickname']);
+
+        $test_nickname = strtolower($test_nickname);
+
+        foreach($bank_array as $key => $value){
+            if(strpos($test_nickname,$value) === false){
+
+            }else{
+                $check_exist = true;
+                break;
+            }
+        }
+        if($check_exist){
+            $info = array(
+                    "status" => 801,
+                    "info"   => "failed"
+                );
+            echo json_encode($info);exit;
+        }
         $all_info['stunum'] = $all_info['stuNum'];
         $all_info['idnum'] = $all_info['idNum'];
         $all_info['updated_time'] = date("Y-m-d H:i:s", time());
