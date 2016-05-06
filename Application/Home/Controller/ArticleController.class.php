@@ -309,7 +309,7 @@ class ArticleController extends BaseController {
                                 'article_id'=> $value['id'],
                                 'user_id'   => "0",
                                 'nick_name' => "红岩网校工作站",
-                                'user_head' => "http://".$site.'/Public/HONGY.jpg',
+                                'user_head' => "http://".$site.'cyxbsMobile/Public/HONGY.jpg',
                                 'time'      => $value['created_time'],
                                 'content'   => array(
                                                     "content" =>$value['content'],
