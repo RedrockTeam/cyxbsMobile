@@ -307,8 +307,8 @@ class ArticleController extends BaseController {
                                 'type_id'   => "6",
                                 'article_id'=> $value['id'],
                                 'user_id'   => "0",
-                                'nick_name' => "管理员",
-                                'user_head' => '',
+                                'nick_name' => "红岩网校工作站",
+                                'user_head' => "http://".$site.'/'.'/Public/HONGY.jpg',
                                 'time'      => $value['created_time'],
                                 'content'   => array(
                                                     "content" =>$value['content'],
