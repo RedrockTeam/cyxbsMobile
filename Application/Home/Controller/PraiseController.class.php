@@ -133,7 +133,7 @@ class PraiseController extends Controller {
         $condition = array(
             "article_id" => $praise_id,
             "stunum"     => I('post.stuNum'),
-            "articletype_id" => $articletype_id
+            "articletype_id" => $articletypes_id
         );
         $result = $praise->where($condition)->find();
         if(!$result){
