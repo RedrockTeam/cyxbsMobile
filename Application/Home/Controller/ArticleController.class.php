@@ -108,6 +108,7 @@ class ArticleController extends BaseController {
                 SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
         ) 
             ORDER BY created_time DESC
+            limit $start,$size
         ";
         $result = M('')->query($sql);
         $info = array(
