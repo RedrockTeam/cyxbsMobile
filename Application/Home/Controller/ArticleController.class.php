@@ -324,7 +324,7 @@ class ArticleController extends BaseController {
                array_push($info,$now_info);
             }
         }
-
+        $info = array_reverse($info);
         $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC,updated_time DESC')->limit($start,$size)->relation(true)->select();
         foreach ($data as $key => $value) {
             $condiion_articles = array(
