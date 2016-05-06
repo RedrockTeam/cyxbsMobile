@@ -70,7 +70,7 @@ class PraiseController extends Controller {
                 $num = $praise->where($condition_all)->count();
                 $info = array(
                         'state' => 200,
-                        'status' => 820001,
+                        'status' => 200,
                         'like_num'  => $num,
                     );
                 echo json_encode($info,true);
@@ -156,7 +156,8 @@ class PraiseController extends Controller {
                         "article_id"     => $condition['id']
                     );
                 $praise->where($condition_praise)->delete(); 
-                $article->where($condition)->setDec('like_num');
+
+                $notices->where($condition)->setDec('like_num');
 
                 $condition_all = array(
                     "article_id" => $praise_id,
