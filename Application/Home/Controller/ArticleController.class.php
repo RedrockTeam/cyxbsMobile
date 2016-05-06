@@ -287,7 +287,7 @@ class ArticleController extends BaseController {
             $data_notice   = $notice->where("created_time > '$now_date'")->select();
             foreach ($data_notice as $key => $value) {
                 $praise_condition = array(
-                    "articletypes_id" => "6",
+                    "articletype_id" => "6",
                     "article_id"      => $data_notice[$key]['id'],
                     "stunum"          => I('post.stuNum')
                 );
@@ -433,11 +433,13 @@ class ArticleController extends BaseController {
         if(I('post.keyword') == 'cyxbsmobile' && $admin){
             $notice = M('notices');
             $content = array(
-                "user_id" => $user_id['id'],
+                "user_id"      => $user_id['id'],
                 "created_time" => date("Y-m-d H:i:s", time()),
                 "updated_time" => date("Y-m-d H:i:s", time()),
                 "content"      => I('post.content'),
                 "title"        => I('post.title'),
+                "photo_src"    => I('post.photo_src'),
+                "thumbnail_src"=> I('post.thumbnail_src')
             );
             $notice->add($content);
             $info = array(

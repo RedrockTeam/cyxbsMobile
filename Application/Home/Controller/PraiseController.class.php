@@ -132,7 +132,8 @@ class PraiseController extends Controller {
         $praise = M('articlepraises');
         $condition = array(
             "article_id" => $praise_id,
-            "stunum"     => I('post.stuNum')
+            "stunum"     => I('post.stuNum'),
+            "articletype_id" => $articletype_id
         );
         $result = $praise->where($condition)->find();
         if(!$result){
@@ -144,7 +145,31 @@ class PraiseController extends Controller {
                 );
         }else{
             $hotarticle = M('hotarticles');
-            if($praise_id > 4){
+            if($articletypes_id == 6){
+                $notices = M('notices');
+                $condition = array(
+                    "id"  => $praise_id,
+                );
+                $condition_praise = array(
+                        "articletype_id" => I('post.type_id'),
+                        "stunum"         => I('post.stuNum'),
+                        "article_id"     => $condition['id']
+                    );
+                $praise->where($condition_praise)->delete(); 
+                $article->where($condition)->setDec('like_num');
+
+                $condition_all = array(
+                    "article_id" => $praise_id,
+                    "articletype_id" => I('post.type_id')
+                );
+                $num = $praise->where($condition_all)->count();
+                $info = array(
+                    'state' => 200,
+                    'status' => 200,
+                    'like_num'  => $num,
+                );
+                echo json_encode($info,true);exit;
+            }elseif($articletypes_id > 4 && $articletypes_id != 6){
                 $article = M('articles');
                 $condition = array(
                     "id"  => $praise_id,
