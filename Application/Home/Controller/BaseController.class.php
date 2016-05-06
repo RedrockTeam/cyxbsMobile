@@ -13,7 +13,7 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
-        header("Content-type:JSON;");
+        header("Content-type:JSON");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
