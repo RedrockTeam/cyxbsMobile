@@ -13,6 +13,7 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
+        header("Content-type:JSON;");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
@@ -26,6 +27,16 @@ class BaseController extends Controller {
         }else{
             $stunum = I('post.stuNum');
             $idNum  = I('post.idNum');
+            $condition = array(
+                    "stuNum" => $stunum,
+                    "idNum"  => $idNum
+                );
+            $needInfo = $this->curl_init($this->apiUrl,$condition);
+            $needInfo = json_decode($needInfo,true);
+            if($needInfo['status'] != 200){
+                echo json_encode($needInfo);
+                exit;
+            }
             if(S($stunum) == $idNum){
 
             }else{

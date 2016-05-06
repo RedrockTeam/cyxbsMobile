@@ -121,7 +121,7 @@ class ArticleController extends BaseController {
 
     public function addArticle(){
         $data = I('post.');
-        if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['title']==null||$data['type_id'] == null||$data['type_id'] < 5||$data['type_id'] == 6){
+        if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['type_id'] == null||$data['type_id'] < 5||$data['type_id'] == 6){
             $info = array(
                     'state' => 801,
                     'status' => 801,
@@ -285,7 +285,11 @@ class ArticleController extends BaseController {
         $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
         if($page == 0){
             $notice = M('notices');
-            $data_notice   = $notice->where("created_time > '$now_date'")->select();
+            $data_notice_condition = array(
+                    "created_time" => array('GT',$now_date),
+                    "state"        => 1,
+                );
+            $data_notice   = $notice->where($data_notice_condition)->select();
             $site = $_SERVER["SERVER_NAME"];
             foreach ($data_notice as $key => $value) {
                 $praise_condition = array(
@@ -444,6 +448,46 @@ class ArticleController extends BaseController {
                 "thumbnail_src"=> I('post.thumbnail_src')
             );
             $notice->add($content);
+            $info = array(
+                    'state' => 200,
+                    'status' => 200,
+                );
+            echo json_encode($info,true);exit;
+        }else{
+            $info = array(
+                    'state' => 801,
+                    'status' => 801,
+                    'info'  => 'invalid parameter',
+                    'data'  => array(),
+                );
+            echo json_encode($info,true);
+            exit;
+        }
+    }
+
+    public function deleteNotice(){
+        $administrators = M('administrators');
+        $users = M('users');
+        $notice = M('notices');
+        $user_condition = array(
+                "stunum" => I('post.stuNum')
+            );
+        $user_id = $users->where($user_condition)->find();
+
+        $admin_condition = array(
+                "user_id" => $user_id['id']
+            );
+        $admin = $administrators->where($admin_condition)->find();
+        $notice_condition = array(
+                "id" => I('post.notice_id'),
+                "state" => 1
+            );
+        $notice_exist = $notice->where($notice_condition)->find();
+        if(I('post.keyword') == 'cyxbsmobile' && $admin && I('post.notice_id')&&$notice_exist){
+            $notice_info = array(
+                    "state" => 0
+                );
+            $notice->where($notice_condition)->data($notice_info)->save();
             $info = array(
                     'state' => 200,
                     'status' => 200,
