@@ -200,8 +200,4 @@ class PraiseController extends Controller {
         }
         echo json_encode($info,true);
     }
-
-    public function _empty() {
-        $this->display('Empty/index');
-    }
 }

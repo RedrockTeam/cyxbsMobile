@@ -110,7 +110,4 @@ class ArticleRemarkController extends BaseController {
         }
     }
 
-    public function _empty() {
-        $this->display('Empty/index');
-    }
 }

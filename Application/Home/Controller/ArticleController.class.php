@@ -522,7 +522,5 @@ class ArticleController extends BaseController {
     	echo json_encode($info,true);
     }
 
-    public function _empty() {
-        $this->display('Empty/index');
-    }
+
 }
