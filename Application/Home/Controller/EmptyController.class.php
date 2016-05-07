@@ -12,10 +12,12 @@ use Think\Exception;
 
 class EmptyController extends Controller {
     public function index(){
+    	header( "HTTP/1.1 404 Not Found" );
         $this->display('Empty/index');
     }
 
     public function _empty() {
-        $this->display('Empty/index');
+    	header( "HTTP/1.1 404 Not Found" );       
+    	$this->display('Empty/index');
     }
 }

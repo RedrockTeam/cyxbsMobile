@@ -177,16 +177,7 @@ class ArticleController extends BaseController {
         $page = empty($page) ? 0 : $page;
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
-        if($type == null){
-            $info = array(
-                    'state' => 801,
-                    'status' => 801,
-                    'info'  => 'invalid parameter',
-                    'data'  => array(),
-                );
-            echo json_encode($info,true);
-            exit;
-        }
+
         $articleType = D('articletypes');
         $article     = D('news');
         $condition = array(
