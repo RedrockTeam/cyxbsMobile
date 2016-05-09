@@ -176,7 +176,7 @@ class PraiseController extends Controller {
                     "id"  => $praise_id,
                 );
                 $article->where($condition)->setDec('like_num');
-            }elseif($articletypes_id < 4){
+            }elseif($articletypes_id < 5){
                 $news_now = M('news');
                 $condition_news_now = array(
                     "id"  => $praise_id,
