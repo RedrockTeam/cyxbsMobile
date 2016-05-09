@@ -92,7 +92,7 @@ class PraiseController extends Controller {
                 "article_id" => $praise_id,
                 "stunum"     => I('post.stuNum'),
                 "created_time" => date("Y-m-d H:i:s", time()),
-                "updated_time"  => date("Y-m-d H:i:s", time()),
+                "update_time"  => date("Y-m-d H:i:s", time()),
                 "articletype_id"    => $articletypes_id
             );
             $praise->add($content);
@@ -187,8 +187,8 @@ class PraiseController extends Controller {
                 );
             $condition_praise['articletype_id'] = I('post.type_id');
             $condition_praise['stunum'] = I('post.stuNum');
-            $condition_praise['article_id'] = $condition['id'];
-            $praise->where($condition_praise)->delete(); 
+            $condition_praise['article_id'] = $praise_id;
+            $goal = $praise->where($condition_praise)->delete(); 
             $b = $hotarticle->where($condition_all)->setDec('like_num');
             $num = $praise->where($condition_all)->count();
             $info = array(
