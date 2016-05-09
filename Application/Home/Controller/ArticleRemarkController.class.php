@@ -22,7 +22,7 @@ class ArticleRemarkController extends BaseController {
         $condition = array(
             "article_id" => $remark_id,
         );
-        if(!empty($page)){
+        if($page != null ){
             $page = empty($page) ? 0 : $page;
             $size = empty($size) ? 15 : $size;
             $start = $page*$size;
