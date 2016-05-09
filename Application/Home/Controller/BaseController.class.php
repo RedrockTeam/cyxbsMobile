@@ -13,7 +13,7 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
-        header("Content-type:JSON");
+        header("Content-type: application/json");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
@@ -25,7 +25,6 @@ class BaseController extends Controller {
             echo json_encode($info,true);
             exit;
         }else{
-
             if(S($stunum) == $idNum){
 
             }else{
