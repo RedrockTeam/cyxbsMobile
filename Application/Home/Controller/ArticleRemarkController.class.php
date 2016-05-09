@@ -4,6 +4,8 @@ use Think\Controller;
 
 class ArticleRemarkController extends BaseController {
     public function getRemark(){
+        $page = I('post.page');
+        $size = I('post.size');
         $remark_id = I('post.article_id');
         $type_id   = I('post.type_id');
         if($remark_id == null||$type_id == null){
@@ -20,12 +22,25 @@ class ArticleRemarkController extends BaseController {
         $condition = array(
             "article_id" => $remark_id,
         );
-        $result = $remark
-        		->join('cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id =cyxbsmobile_users.id')
-        		->where("cyxbsmobile_articleremarks.article_id = '$remark_id' and cyxbsmobile_articleremarks.articletypes_id = '$type_id'")
+        if(!empty($page)){
+            $page = empty($page) ? 0 : $page;
+            $size = empty($size) ? 15 : $size;
+            $start = $page*$size;
+            $result = $remark
+                ->join('cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id =cyxbsmobile_users.id')
+                ->where("cyxbsmobile_articleremarks.article_id = '$remark_id' and cyxbsmobile_articleremarks.articletypes_id = '$type_id'")
                 ->order('created_time DESC')
-        		->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content')
-        		->select();
+                ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content')
+                ->limit($start,$size)
+                ->select();
+        }else{
+            $result = $remark
+                ->join('cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id =cyxbsmobile_users.id')
+                ->where("cyxbsmobile_articleremarks.article_id = '$remark_id' and cyxbsmobile_articleremarks.articletypes_id = '$type_id'")
+                ->order('created_time DESC')
+                ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content')
+                ->select();
+        }
        	$info = array(
                     'state' => 200,
                     'status' => 200,
