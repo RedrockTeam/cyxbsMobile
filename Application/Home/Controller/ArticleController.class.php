@@ -330,10 +330,10 @@ class ArticleController extends BaseController {
             if($data[$key]['Articletypes']['typename'] == null){
 
             }elseif($data[$key]['articletype_id'] < 5){
-                $article = M($data[$key]['Articletypes']['typename']);
+                $article = M("news");
                 $praise  = M('articlepraises');
                 $praise_condition = array(
-                    "articletype_id" => $data[$key]['articletype_id'],
+                    "articletype_id"  => $data[$key]['articletype_id'],
                     "article_id"      => $data[$key]['article_id'],
                     "stunum"          => I('post.stuNum')
                 );
