@@ -38,7 +38,7 @@ class PersonController extends BaseController {
         $bank_array = array('redrock','管理员','红岩','红岩网校工作站','重邮','重庆邮电大学','cqupt','大学','邮电');
 
         $test_nickname = trim($all_info['nickname']);
-
+        $test_nickname = str_replace(' ', '', $test_nickname);
         $test_nickname = strtolower($test_nickname);
 
         foreach($bank_array as $key => $value){
