@@ -134,6 +134,18 @@ class ArticleController extends BaseController {
         $user_condition = array(
             "stunum" =>$data['stuNum']
         );
+        // $thumbnail_src_array = I('post.thumbnail_src');
+        // $photo_src_array = I('post.photo_src_array');
+        // $thumbnail_src_array=explode(",",$thumbnail_src_array);
+        // if(sizeof($thumbnail_src_array) > 10){
+        //     $photo_src_array=explode(",",$photo_src_array);
+        //     $photo_src_array=array_slice($photo_src_array,0,9);
+        //     $photo_src_string = implode(',',$photo_src_array).",";
+        //     $thumbnail_src_array=array_slice($thumbnail_src_array,0,9);
+        //     $thumbnail_src_string = implode(',',$thumbnail_src_array).",";
+        //     $data['thumbnail_src'] = $thumbnail_src_string;
+        //     $data['photo_src'] = $$photo_src_string;
+        // }
         $user_id = $user->where($user_condition)->find();
         $article  = D('articles');
         $article_field = $article->getDbFields();
@@ -180,9 +192,9 @@ class ArticleController extends BaseController {
 
         $articleType = D('articletypes');
         $article     = D('news');
-        $condition = array(
-            'type_id' => $type
-        );
+        // $condition = array(
+        //     'articletype_id' => $type
+        // );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
         $content = $article->where($condition)->limit($start,$size)->order('id DESC')->select();
 
@@ -190,7 +202,7 @@ class ArticleController extends BaseController {
         $result = array();
         foreach($content as $key => $value){
             $praise_condition = array(
-                "articletype_id"  => $type,
+                "articletype_id"  => $value['articletype_id'],
                 "article_id"      => $value['id'],
                 "stunum"          => I('post.stuNum')
             );
