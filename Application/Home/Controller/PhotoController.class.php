@@ -9,6 +9,7 @@ class PhotoController extends Controller {
     }
 
     public function search(){
+        header("Content-type: application/json");
         $stunum = I('post.stunum');        
         $photo = M('photo');
         $condition = array(
@@ -34,6 +35,7 @@ class PhotoController extends Controller {
     }
 
     public function searchArticle(){
+        header("Content-type: application/json");
         $img_id = I('post.img_id');
         if($img_id == null){
             $info = array(
@@ -52,6 +54,7 @@ class PhotoController extends Controller {
     }
 
     public function uploadArticle(){
+        header("Content-type: application/json");
         $articlePhoto = D('articlephoto');
         if(I('post.stunum') == null){
             $info = array(
@@ -117,6 +120,7 @@ class PhotoController extends Controller {
     }
 
     public function upload(){
+        header("Content-type: application/json");
         $photo = M('photo');
         $condition = array(
                 "stunum" => I('post.stunum')
