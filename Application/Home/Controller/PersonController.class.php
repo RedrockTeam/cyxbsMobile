@@ -35,7 +35,7 @@ class PersonController extends BaseController {
     public function setInfo(){
         $all_info  = I('post.');
 
-        $bank_array = array('redrock','管理员','红岩','红岩网校工作站','重邮','重庆邮电大学');
+        $bank_array = array('redrock','管理员','红岩','红岩网校工作站','重邮','重庆邮电大学','cqupt');
 
         $test_nickname = trim($all_info['nickname']);
 
