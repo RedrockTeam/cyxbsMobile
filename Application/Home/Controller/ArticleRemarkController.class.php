@@ -73,14 +73,34 @@ class ArticleRemarkController extends BaseController {
                     );
             if($type_id == 6){
                 $notice = M('notices');
-                $notice->where($condition_article)->setInc('remark_num');
+                $goal = $notice->where($condition_article)->setInc('remark_num');
+                if(!$goal){
+                    $info = array(
+                        'state' => 801,
+                        'status' => 801,
+                        'info'  => 'invalid parameter',
+                        'data'  => array(),
+                    );
+                    echo json_encode($info,true);
+                    exit;
+                }
                 $notcie_update = array(
                     "updated_time" =>date("Y-m-d H:i:s", time()),
                 );
                 $notice->where($condition_article)->data($notcie_update)->save();
             }elseif($type_id > 4){
                 $article = M('articles');
-                $article->where($condition_article)->setInc('remark_num');
+                $goal = $article->where($condition_article)->setInc('remark_num');
+                if(!$goal){
+                    $info = array(
+                        'state' => 801,
+                        'status' => 801,
+                        'info'  => 'invalid parameter',
+                        'data'  => array(),
+                    );
+                    echo json_encode($info,true);
+                    exit;
+                }
                 $article_update = array(
                     "updated_time"=>date("Y-m-d H:i:s", time()),
                 );
@@ -96,7 +116,17 @@ class ArticleRemarkController extends BaseController {
                 $condition_news = array(
                     "id"  => $article_id,
                 );
-                $news->where($condition_news)->setInc('remark_num');
+                $goal = $news->where($condition_news)->setInc('remark_num');
+                if(!$goal){
+                    $info = array(
+                        'state' => 801,
+                        'status' => 801,
+                        'info'  => 'invalid parameter',
+                        'data'  => array(),
+                    );
+                    echo json_encode($info,true);
+                    exit;
+                }
                 $article_update = array(
                     "updated_time"=>date("Y-m-d H:i:s", time()),
                 );
