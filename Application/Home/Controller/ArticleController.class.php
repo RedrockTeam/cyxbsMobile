@@ -292,7 +292,7 @@ class ArticleController extends BaseController {
                     "created_time" => array('GT',$now_date),
                     "state"        => 1,
                 );
-            $data_notice   = $notice->where($data_notice_condition)->order('created_time DESC')->select();
+            $data_notice   = $notice->where($data_notice_condition)->order('created_time')->select();
             $site = $_SERVER["SERVER_NAME"];
             foreach ($data_notice as $key => $value) {
                 $praise_condition = array(
