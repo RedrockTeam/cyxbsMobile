@@ -30,7 +30,7 @@ class ArticleRemarkController extends BaseController {
                 ->join('cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id =cyxbsmobile_users.id')
                 ->where("cyxbsmobile_articleremarks.article_id = '$remark_id' and cyxbsmobile_articleremarks.articletypes_id = '$type_id'")
                 ->order('created_time DESC')
-                ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content')
+                ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content,answer_user_id')
                 ->limit($start,$size)
                 ->select();
         }else{
@@ -38,7 +38,7 @@ class ArticleRemarkController extends BaseController {
                 ->join('cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id =cyxbsmobile_users.id')
                 ->where("cyxbsmobile_articleremarks.article_id = '$remark_id' and cyxbsmobile_articleremarks.articletypes_id = '$type_id'")
                 ->order('created_time DESC')
-                ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content')
+                ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content,answer_user_id')
                 ->select();
         }
        	$info = array(
@@ -53,6 +53,7 @@ class ArticleRemarkController extends BaseController {
         $content = I('post.content');
         $article_id = I('post.article_id');
         $type_id    = I('post.type_id');
+        $answer_user_id = I('post.answer_user_id')?I('post.answer_user_id'):0;
         if($content == null || $type_id == null || $article_id == null){
             $info = array(
                     'state' => 801,
@@ -145,6 +146,7 @@ class ArticleRemarkController extends BaseController {
                 "user_id"         =>  $user_id['id'],
                 "article_id"      => $article_id,
                 "articletypes_id" => $type_id,
+                "answer_user_id"  => $answer_user_id
             );
             $remark->add($content);
             $info = array(
