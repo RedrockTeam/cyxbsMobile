@@ -60,7 +60,9 @@ class ArticleRemarkController extends BaseController {
                 'stunum' => $answer_user_id
             );
             $user_id = $user->where($answer_user_condition)->field('id')->find();
-            $answer_user_id = $user_id['id'];
+            if($user_id){
+                $answer_user_id = $user_id['id'];
+            }
         }
         if($content == null || $type_id == null || $article_id == null){
             $info = array(
