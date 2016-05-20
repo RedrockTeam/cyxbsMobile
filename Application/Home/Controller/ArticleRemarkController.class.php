@@ -53,7 +53,15 @@ class ArticleRemarkController extends BaseController {
         $content = I('post.content');
         $article_id = I('post.article_id');
         $type_id    = I('post.type_id');
+        $user = M('users');
         $answer_user_id = I('post.answer_user_id')?I('post.answer_user_id'):0;
+        if($answer_user_id){
+            $answer_user_condition = array(
+                'stunum' => $answer_user_id
+            );
+            $user_id = $user->where($answer_user_condition)->field('id')->find();
+            $answer_user_id = $user_id['id'];
+        }
         if($content == null || $type_id == null || $article_id == null){
             $info = array(
                     'state' => 801,
@@ -65,7 +73,6 @@ class ArticleRemarkController extends BaseController {
             exit;
         }else{
             $remark = M('articleremarks');
-            $user = M('users');
             $condition = array(
                     "stunum"  => I('post.stuNum')
                 );
