@@ -25,11 +25,11 @@ class ArticleController extends BaseController {
                 "stunum" => $stunum
             );
             $condition_article = array(
-                    'id'      => $article_id,
-                    'type_id' => $type_id,
+                    'cyxbsmobile_articles.id'      => $article_id,
+                    'cyxbsmobile_articles.type_id' => $type_id,
 
                 );
-            $content = $article->where($condition_article)->field('id,photo_src,thumbnail_src,content,type_id,updated_time,created_time,like_num,remark_num')->select();
+            $content = $article->where($condition_article)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.content,cyxbsmobile_articles.type_id,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,cyxbsmobile_articles.like_num,cyxbsmobile_articles.remark_num,cyxbsmobile_users.photo_src as user_photo,cyxbsmobile_users.nickname')->select();
             $info = array(
                 'status' => '200',
                 "info"   => "success",
