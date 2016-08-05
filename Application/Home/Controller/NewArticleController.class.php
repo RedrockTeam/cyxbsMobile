@@ -8,8 +8,13 @@ class NewArticleController extends Controller
 {
 	protected    $newsList = array('jwzx','cyxw','xsjz','xwgg');
 
+    public function index(){
+        $article = D("hotarticles");
+        $articles = $article->relation(true)->select();
+    }
 	public function searchHotArticle() {
-		$hotArticle = D("hotarticles");
+		
+        $hotArticle = D("hotarticles");
 		$article = D("articles");
         $praise  = M('articlepraises');
         $user = D('users');
@@ -20,6 +25,7 @@ class NewArticleController extends Controller
         $start = $page*$size;
         $info = array();
         $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
+        
         if ($page == 0) {
             $notice = M('notices');
             $data_notice_condition = array(
@@ -34,7 +40,8 @@ class NewArticleController extends Controller
                     "article_id"      => $data_notice[$key]['id'],
                     "stunum"          => I('post.stuNum')
                 );
-                if(!empty(I('post.stuNum'))){
+                $stuNum = I('post.stuNum');
+                if(!empty($stuNum)){
                 	$praise_exist = $praise->where($praise_condition)->find();
                 	if($praise_exist){
                     	$exist = true;
@@ -87,7 +94,8 @@ class NewArticleController extends Controller
                     "article_id"      => $data[$key]['article_id'],
                     "stunum"          => I('post.stuNum')
                 );
-                if (empty(I('post.stuNum'))) {
+                $stuNum = I('post.stuNum');
+                if(!empty($stuNum)){
 	                $praise_exist = $praise->where($praise_condition)->find();
 	                if($praise_exist){
 	                    $exist = true;
@@ -131,7 +139,9 @@ class NewArticleController extends Controller
                     "article_id"      => $data[$key]['article_id'],
                     "stunum"          => I('post.stuNum')
                 );
-                if(empty(I('post.stuNum'))) {
+                
+                $stuNum = I('post.stuNum');
+                if(!empty($stuNum)){
 	                $praise_exist = $praise->where($praise_condition)->find();
 	                if($praise_exist){
 	                    $exist = true;
@@ -205,7 +215,8 @@ class NewArticleController extends Controller
                 "article_id"      => $value['id'],
                 "stunum"          => I('post.stuNum')
             );
-            if (!empty(I('post.stuNum'))) {
+            $stuNum = I('post.stuNum');
+            if(!empty($stuNum)){
 	            $praise_exist = $praise->where($praise_condition)->find();
 	            if($praise_exist){
 	                $value['is_my_like'] = true;
@@ -251,7 +262,8 @@ class NewArticleController extends Controller
                 "article_id"      => $value['id'],
                 "stunum"          => I('post.stuNum')
             );
-            if (!empty(I('post.stuNum'))) {
+            $stuNum = I('post.stuNum');
+            if(!empty($stuNum)){
             	$praise_exist = $praise->where($praise_condition)->find();
             	if($praise_exist){
                 	$value['is_my_like'] = true;
