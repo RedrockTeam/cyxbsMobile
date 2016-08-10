@@ -343,6 +343,25 @@ class NewArticleController extends Controller
 
                 );
             $content = $article->where($condition_article)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.content,cyxbsmobile_articles.type_id,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,cyxbsmobile_articles.like_num,cyxbsmobile_articles.remark_num,cyxbsmobile_users.photo_src as user_photo,cyxbsmobile_users.nickname')->select();
+            if($content){
+                $mark = empty($stunum);
+                if (!$mark) {
+                    $praise_condition = array(
+                        'article_id'    => $article_id,
+                        'type_id'       => $type_id,
+                        'stunum'        =>  $stunum
+                        );
+                    $praise = M('articlepraises');
+                    $praise_exist = $praise->where($praise_condition)->find();
+                    if ($praise_exist) {
+                        $content['is_my_like'] = true;
+                    } else {
+                        $content['is_my_like'] = false;
+                    }
+                } else {
+                    $content['is_my_like'] = true;
+                }
+            }
             $info = array(
                 'status' => '200',
                 "info"   => "success",
