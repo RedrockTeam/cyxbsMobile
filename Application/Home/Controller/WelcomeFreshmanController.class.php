@@ -40,7 +40,6 @@ class WelcomeFreshmanController extends Controller
 			'id',
 			'name',
 			'message' => 'address',
-			'introduction',
 		);
 		$json = $this->selectMessage($sql, $field);
 		echo $json;
@@ -98,6 +97,7 @@ class WelcomeFreshmanController extends Controller
 			'name',
 		);
 		$json = $this->selectMessage($sql, $field);
+		echo $json;
 	}
 	/**
 	 * 优秀学子
