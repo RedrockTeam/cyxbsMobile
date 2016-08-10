@@ -95,6 +95,7 @@ class WelcomeFreshmanController extends Controller
 		$field = array(
 			'id',
 			'name',
+			'message' => 'college'
 		);
 		$json = $this->selectMessage($sql, $field);
 		echo $json;
