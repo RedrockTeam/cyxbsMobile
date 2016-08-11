@@ -58,10 +58,10 @@ config.php
 Application/Data/
 Application/Runtime/
 Application/Common/Conf/db.php
-Public/photo/
+#Public/photo/
 # Created by .ignore support plugin (hsz.mobi)
 
 
 #test
-#Public/member_image/*
+Public/member_image/*
 Public/jwzxnews/*
