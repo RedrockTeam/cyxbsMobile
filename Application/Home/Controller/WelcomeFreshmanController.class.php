@@ -149,6 +149,7 @@ class WelcomeFreshmanController extends Controller
 						->where($sql)
 						->field($field)
 						->limit($limit)
+						->order('id')
 						->select();
 		$info = array(
 			'status' 	=> '200',
