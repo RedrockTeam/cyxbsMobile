@@ -15,6 +15,7 @@ class WelcomeFreshmanController extends Controller
 		'yccy' => 4,
 		'yxxz' => 5,
 		'yxjs' => 6,
+		'mzcy' => 7,
 	);
 
 	/**
@@ -114,6 +115,18 @@ class WelcomeFreshmanController extends Controller
 		$json = $this->selectMessage($sql, $field);
 		echo $json;
 	}
+
+	public function cquptView() {
+		$sql = 'type='.$this->type['mzcy'];
+		$field = array(
+			'id',
+			'name',	
+		);
+		$json = $this->selectMessage($sql, $field);
+		echo $json;
+
+	}
+
 	/**
 	 * 数据库查询
 	 * @param  string $sql    指定地址
@@ -124,9 +137,13 @@ class WelcomeFreshmanController extends Controller
 		$page = I('page');
 		$size = I('size');
 		$page = empty($page)? 0 : $page;
-		$size = empty($size)? 15: $size;
+		$size = empty($size)? 5 : $size;
 		$firstRow = $page*$size;
 		$welcome = D('Welcomefreshman');
+		$total = $welcome->field('count(*)')
+						 ->where($sql)
+						 ->select();
+		$total = $total[0]['count(*)'];
 		$limit = $firstRow.','.$size;
 		$data = $welcome->relation(true)
 						->where($sql)
@@ -136,9 +153,12 @@ class WelcomeFreshmanController extends Controller
 		$info = array(
 			'status' 	=> '200',
 			'info'		=> 'success',
+			'total'		=> $total,
 			'data'		=> $data
 		);
 		return json_encode($info);
 	}
+
+	
 
 }
