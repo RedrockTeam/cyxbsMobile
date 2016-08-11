@@ -365,10 +365,14 @@ class NewArticleController extends Controller
                     }
                 }
             }
+            $num = count($content);
+            if($num == 1) {
+                $content = $content['0'];
+            }
             $info = array(
                 'status' => '200',
                 "info"   => "success",
-                'data'   => $content['0']
+                'data'   => $content
             );
             echo json_encode($info);
         }
