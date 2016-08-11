@@ -368,7 +368,7 @@ class NewArticleController extends Controller
             $info = array(
                 'status' => '200',
                 "info"   => "success",
-                'data'   => $content
+                'data'   => $content['0']
             );
             echo json_encode($info);
         }
