@@ -133,11 +133,11 @@ class WelcomeFreshmanController extends Controller
 						->field($field)
 						->limit($limit)
 						->select();
-		$info = [
+		$info = array(
 			'status' 	=> '200',
 			'info'		=> 'success',
 			'data'		=> $data
-		];
+		);
 		return json_encode($info);
 	}
 
