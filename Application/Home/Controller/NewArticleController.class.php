@@ -359,7 +359,7 @@ class NewArticleController extends Controller
                         $content['is_my_like'] = false;
                     }
                 } else {
-                    $content['is_my_like'] = true;
+                    $content['is_my_like'] = false;
                 }
             }
             $info = array(
