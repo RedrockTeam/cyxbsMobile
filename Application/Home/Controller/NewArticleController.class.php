@@ -323,7 +323,6 @@ class NewArticleController extends Controller
     }
 
     public function searchContent() {
-        $article    = D('articles');
         $type_id = I('post.type_id');
         $stunum = I('post.stuNum');
         $article_id = I('post.article_id');
@@ -337,12 +336,39 @@ class NewArticleController extends Controller
             $condition_user = array(
                 "stunum" => $stunum
             );
-            $condition_article = array(
-                    'cyxbsmobile_articles.id'      => $article_id,
-                    'cyxbsmobile_articles.type_id' => $type_id,
+            if($type_id >= 5) {
+                $article    = D('articles');
+                $condition_article = array(
+                        'cyxbsmobile_articles.id'      => $article_id,
+                        'cyxbsmobile_articles.type_id' => $type_id,
 
-                );
-            $content = $article->where($condition_article)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.content,cyxbsmobile_articles.type_id,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,cyxbsmobile_articles.like_num,cyxbsmobile_articles.remark_num,cyxbsmobile_users.photo_src as user_photo,cyxbsmobile_users.nickname')->select();
+                    );
+                $content = $article->where($condition_article)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.content,cyxbsmobile_articles.type_id,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,cyxbsmobile_articles.like_num,cyxbsmobile_articles.remark_num,cyxbsmobile_users.photo_src as user_photo,cyxbsmobile_users.nickname')->select();
+            } elseif ($type_id > 0 && $type_id <5) {                  //新闻
+                $news = D('news');
+                $condition_news = array(
+                    'id'               => $article_id,
+                    'articletype_id'  => $type_id,
+                    );
+                $field = array(
+                    'title',
+                    'id',
+                    'articletype_id'   => 'type_id',
+                    'content',
+                    'date',
+                    'like_num',
+                    'remark_num',
+                    'read',
+                    );
+                $content = $news->where($condition_news)->field($field)->select();
+            } else {
+                 $info = array(
+                "status" => 801,
+                "info"   => "invalid parameter"
+                 );
+            echo json_encode($info);exit;
+            }
+
             foreach ($content as $key => &$value) {
            
                 if($value){
@@ -365,10 +391,6 @@ class NewArticleController extends Controller
                     }
                 }
             }
-            // $num = count($content);
-            // if($num == 1) {
-            //     $content = $content['0'];
-            // }
             $info = array(
                 'status' => '200',
                 "info"   => "success",
