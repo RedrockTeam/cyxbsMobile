@@ -318,7 +318,7 @@ class NewArticleController extends Controller
             $praise = M('articlepraises');
             foreach ($contents as &$content) {
                 if (empty($mynum)) {
-                    $conten['is_my_like'] = false;
+                    $content['is_my_like'] = false;
                 } else {
                     $position = array(
                         'article_id'=> $content['id'],
@@ -327,9 +327,9 @@ class NewArticleController extends Controller
                     );
                     $praise_exist = $praise->where($position)->find();
                     if($praise_exist) {
-                        $conten['is_my_like'] = true;
+                        $content['is_my_like'] = true;
                     } else {
-                        $conten['is_my_like'] = false;
+                        $content['is_my_like'] = false;
                     }
                 }
             }
