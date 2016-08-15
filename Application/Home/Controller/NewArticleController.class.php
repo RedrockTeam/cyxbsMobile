@@ -312,11 +312,31 @@ class NewArticleController extends Controller
             $condition_article = array(
                     'user_id' =>$user['id']
                 );
-            $content = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
+            $contents = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
+            //判断自己是否点过赞
+            $mynum = I('post.stuNum');
+            $praise = M('articlepraises');
+            foreach ($contents as &$content) {
+                if (empty($mynum)) {
+                    $conten['is_my_like'] = false;
+                } else {
+                    $position = array(
+                        'article_id'=> $content['id'],
+                        'type_id'   => $content['type_id'],
+                        'stunum'    => $mynum,
+                    );
+                    $praise_exist = $praise->where($position)->find();
+                    if($praise_exist) {
+                        $conten['is_my_like'] = true;
+                    } else {
+                        $conten['is_my_like'] = false;
+                    }
+                }
+            }
             $info = array(
                 'status' => '200',
                 "info"   => "success",
-                'data'   => $content
+                'data'   => $contents
             );
             echo json_encode($info);
         }
@@ -344,7 +364,7 @@ class NewArticleController extends Controller
 
                     );
                 $content = $article->where($condition_article)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.content,cyxbsmobile_articles.type_id,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,cyxbsmobile_articles.like_num,cyxbsmobile_articles.remark_num,cyxbsmobile_users.photo_src as user_photo,cyxbsmobile_users.nickname')->select();
-            } elseif ($type_id > 0 && $type_id <5) {                  //新闻
+            } elseif ($type_id > 0 && $type_id <5) {                  //新闻内容
                 $news = D('news');
                 $condition_news = array(
                     'id'               => $article_id,
