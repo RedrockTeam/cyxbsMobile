@@ -8,7 +8,14 @@ class EditController extends BaseController
 {
 	protected $writor_allowed_type = array(5);
 	protected $admin_allowed_type = array(5,6);
-	protected $role;
+	protected $table_type = array(
+			1 		=> 'news',
+			2		=> 'news',
+			3 		=> 'news',
+			4 		=> 'news',
+			5 		=> 'articles',
+			6		=>	'notices',
+		);
 	/**
 	 * 删除文章
 	 * @return [type] [description]
@@ -39,13 +46,29 @@ class EditController extends BaseController
 			exit;
 		}
 		if ($role == 'admin'  || ($role == 'writor' && in_array($type_id, $this->writor_allowed_type))) {
-			if($type_id == 5){
-				D('articles')->where('id='.$article_id)->delete();
-			} elseif($type_id == 6) {
-				D('notices')->where('id='.$article_id);
-			}
-			$this->returnJson(200);
-		} else {
+				//应用事务进行删除
+				$article = M($this->table_type[$type_id]);
+				$praise = M('articlepraises');
+				$remark = M('articleremarks');
+				M()->startTrans();
+				$result = $remark->where(array(
+					'article_id'			=> $article_id,
+					'articletypes_id'		=> $type_id,
+					))->delete();
+				$result1 = $praise->where(array(
+					'article_id'			=> $article_id,
+					'articletype_id'		=> $type_id,
+					))->delete();
+				$result2 = $article->where('id='.$article_id)->delete();
+				if($result && $result1 && $result2) {
+					M()->commit();
+					$this->returnJson(200);
+				} else {
+					M()->rollback();
+					$this->returnJson(404, array(), '操作失败');
+				}
+			
+		} else {	
 			$this->returnJson(403);
 		}
 
@@ -57,16 +80,8 @@ class EditController extends BaseController
 	 * @return bool|array      不存在返回false,存在返回文章数据
 	 */
 	protected function getArticle($article_id, $type_id) {
-		$position = array(
-			'id'		=> $article_id,
-			'type_id'	=> $type_id,
-			);
-		if ($type_id == 5){
-			$Article = D('articles')->where($position)->find();
-		} elseif($type_id == 6) {
-			$Article = D('notices')->where($position)->find();
-		}
-		
+		$position = array('id'		=> $article_id,);
+		$Article = D($this->table_type[$type_id])->where($position)->find();
 		if(empty($Article)) {
 			return false;
 		}
@@ -124,7 +139,7 @@ class EditController extends BaseController
 			return false;
 		}
 		$user = D('users')->where('stunum='.$stunum)->find();
-		$admin_exist = D('administrators')->where('user_id='.$user['id'])->find();
+		$admin_exist = M('administrators')->where('user_id='.$user['id'])->find();
 		if ($admin_exist) {
 			return $role = 'admin';
 		} elseif ($writor_id == $user['id']) {
