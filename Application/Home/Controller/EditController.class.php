@@ -39,7 +39,11 @@ class EditController extends BaseController
 			exit;
 		}
 		if ($role == 'admin'  || ($role == 'writor' && in_array($type_id, $this->writor_allowed_type))) {
-			D('articles')->where('id='.$article_id)->delete();
+			if($type_id == 5){
+				D('articles')->where('id='.$article_id)->delete();
+			} elseif($type_id == 6) {
+				D('notices')->where('id='.$article_id);
+			}
 			$this->returnJson(200);
 		} else {
 			$this->returnJson(403);
