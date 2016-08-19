@@ -17,7 +17,9 @@ class BaseController extends Controller {
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
-        if(I('post.stuNum')==null||I('post.idNum') == null){
+        $stunum = I('post.stuNum');
+        $idNum = I('post.idNum');
+        if($stunum==null|| $idNum == null){
             $info = array(
                 "status" => 801,
                 "info"   => "invalid parameter"
@@ -26,10 +28,9 @@ class BaseController extends Controller {
             exit;
         }else{
             if(S($stunum) == $idNum){
-
             }else{
-                $stunum = I('post.stuNum');
-                $idNum  = I('post.idNum');
+                // $stunum = I('post.stuNum');
+                // $idNum  = I('post.idNum');
                 $condition = array(
                     "stuNum" => $stunum,
                     "idNum"  => $idNum
