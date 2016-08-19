@@ -61,7 +61,12 @@ class EditController extends BaseController
 			'id'		=> $article_id,
 			'type_id'	=> $type_id,
 			);
-		$Article = D('articles')->where($position)->find();
+		if ($type_id == 5){
+			$Article = D('articles')->where($position)->find();
+		} elseif($type_id == 6) {
+			$Article = D('notices')->where($position)->find();
+		}
+		
 		if(empty($Article)) {
 			return false;
 		}
