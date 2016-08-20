@@ -51,16 +51,32 @@ class EditController extends BaseController
 				$praise = M('articlepraises');
 				$remark = M('articleremarks');
 				M()->startTrans();
-				$result = $remark->where(array(
-					'article_id'			=> $article_id,
-					'articletypes_id'		=> $type_id,
-					))->delete();
-				$result1 = $praise->where(array(
+				$remark_exist = $remark->where(array(
+					'article_id'		=> $article_id,
+					'articletypes_id'	=> $type_id,
+					))->select();
+				if (empty($remark_exist)){
+					$remark_result = true;
+				} else {
+					$remark_result = $remark->where(array(
+						'article_id'	 => $article_id,
+						'articletypes_id'=> $type_id,))
+						->delete();
+				}
+				$praise_exist = $praise->where(array(
 					'article_id'			=> $article_id,
 					'articletype_id'		=> $type_id,
+					))->select();
+				if (empty($praise_exist)) {
+					$praise_result = true;
+				} else {
+					$praise_result = $praise->where(array(
+					'article_id'	=> $article_id,
+					'articletype_id'=> $type_id,
 					))->delete();
-				$result2 = $article->where('id='.$article_id)->delete();
-				if($result && $result1 && $result2) {
+				}
+				$article_result = $article->where('id='.$article_id)->delete();
+				if($remark_result && $praise_result && $article_result) {
 					M()->commit();
 					$this->returnJson(200);
 				} else {
