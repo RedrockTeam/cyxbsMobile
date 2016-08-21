@@ -100,29 +100,7 @@ class EditController extends BaseController
 
 	}
 
-	public function dealError() {
-		$stuNum = I('post.stuNum');
-		if (!$this->is_admin($stuNum)) {
-			$this->returnJson(403);
-			exit;
-		}
-		$id = I('post.id');
-		if (empty($id)) {
-			$this->returnJson('801');
-			exit;
-		}
-		$hotarticles = M('hotarticles');
-		M()->startTrans();
-		$result = $hotarticles->where('id='.$id)->delete();
-		if($result) {
-			M()->commit();
-			$this->returnJson(200);
-		} else {
-			M()->rollback();
-			$this->returnJson(404, '', 'hotArticle不存在');
-		}
 
-	}
 	/**
 	 * 获取文章的信息
 	 * @param  int  $article_id 文章的id值
