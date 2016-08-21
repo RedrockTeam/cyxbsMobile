@@ -14,13 +14,14 @@ class EditController extends BaseController
 			3 		=> 'news',
 			4 		=> 'news',
 			5 		=> 'articles',
-			6		=>	'notices',
+			6		=> 'notices',
 		);
 	/**
 	 * 删除文章
 	 * @return [type] [description]
 	 */
-	public function deleteArticle() {
+	public function deleteArticle() 
+	{
 		$type_id 	= I('post.type_id');
 		$article_id = I('post.article_id');
 		$stunum		= I('post.stuNum');
@@ -75,6 +76,15 @@ class EditController extends BaseController
 					'articletype_id'=> $type_id,
 					))->delete();
 				}
+				if ($type_id != 6) {
+					$hotarticles = M('hotarticles');
+					$hotarticles_result = $hotarticles->where(array(
+						'article_id' 	=> $article_id,
+						'articletype_id' => $type_id,
+						))->delete();
+				} else {
+					$hotarticles_result = true;
+				}
 				$article_result = $article->where('id='.$article_id)->delete();
 				if($remark_result && $praise_result && $article_result) {
 					M()->commit();
@@ -86,6 +96,30 @@ class EditController extends BaseController
 			
 		} else {	
 			$this->returnJson(403);
+		}
+
+	}
+
+	public function dealError() {
+		$stuNum = I('post.stuNum');
+		if (!$this->is_admin($stuNum)) {
+			$this->returnJson(403);
+			exit;
+		}
+		$id = I('post.id');
+		if (empty($id)) {
+			$this->returnJson('801');
+			exit;
+		}
+		$hotarticles = M('hotarticles');
+		M()->startTrans();
+		$result = $hotarticles->where('id='.$id)->delete();
+		if($result) {
+			M()->commit();
+			$this->returnJson(200);
+		} else {
+			M()->rollback();
+			$this->returnJson(404, '', 'hotArticle不存在');
 		}
 
 	}
@@ -104,44 +138,6 @@ class EditController extends BaseController
 		return $Article;
 	}
 
-	/**
-	 * 根据status返回对应的json语句
-	 * @param  int $status 		http请求码
-	 * @param  array  $data   json里需要返回的数据
-	 * @param  string $info   重写info信息
-	 * @return [type]         [description]
-	 */
-	protected function returnJson($status, $data = array(), $info="") {
-		switch ($status) {
-			case 404: 
-				$report = array('status'=>'404', 'info'=>'请求参数错误');
-				break;
-			case 403:
-				$report = array('status'=>'403', 'info'=>'Don\'t permit');
-				break;
-			case 801:
-				$report = array('status'=>'801', 'info'=>'invalid parameter');
-				break;
-			case 200:
-				$report = array('status'=>'200', 'info'=>'success');
-				break;
-			default:
-				$report = array('status'=>$status, 'info'=>"");
-		}
-
-		if(!empty($info)) {
-			$report['info'] = $info;
-		}
-		if(!empty($data)) {
-			if(array_key_exists('info', $data) || array_key_exists('status', $data)) {
-				return false;
-			} else {
-				$report = array_merge($report, $data);
-			}
-		}
-		$json = json_encode($report);
-		echo $json;
-	}
 
 	/**
 	 * 得到该用户的角色
@@ -154,9 +150,8 @@ class EditController extends BaseController
 			$this->returnJson('404');
 			return false;
 		}
-		$user = D('users')->where('stunum='.$stunum)->find();
-		$admin_exist = M('administrators')->where('user_id='.$user['id'])->find();
-		if ($admin_exist) {
+		$is_admin = $this->is_admin($stunum);
+		if ($is_admin) {
 			return $role = 'admin';
 		} elseif ($writor_id == $user['id']) {
 			return $role = 'writor';
