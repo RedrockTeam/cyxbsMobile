@@ -86,7 +86,7 @@ class EditController extends BaseController
 					$hotarticles_result = true;
 				}
 				$article_result = $article->where('id='.$article_id)->delete();
-				if($remark_result && $praise_result && $article_result) {
+				if($remark_result && $praise_result && $article_result && hotarticles_result) {
 					M()->commit();
 					$this->returnJson(200);
 				} else {
