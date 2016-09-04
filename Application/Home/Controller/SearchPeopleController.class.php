@@ -33,7 +33,7 @@ class SearchPeopleController extends Controller {
         $studentList = array();
         if(strlen($studentNum) == 0){
            $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
-        }else if(!eregi("[^\x80-\xff]",$studentNum) && strlen($studentNum) == 3){
+        }else if(!preg_match("/[^\\x80-\\xff]/",$studentNum) && strlen($studentNum) == 3){
             $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
         }else if(is_numeric($studentNum) && strlen($studentNum) != 10){
             $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
@@ -104,7 +104,7 @@ class SearchPeopleController extends Controller {
                 'depart'   => $student->yxm,
                 'grade'    => $student->nj
                 );
-            $data = array_push($data, $value);
+            array_push($data, $value);
         }
         if($total>$parameter['page']*$parameter['rows']) {
             $parameter['page'] += 1;
@@ -153,6 +153,7 @@ class SearchPeopleController extends Controller {
      */
     protected function returnJson($status, $info='', $data=array(), $json='')
     {
+        print_r(debug_backtrace());
          switch ($status) {
             case 404: 
                 $report = array( 'state'=> 404,'status'=>'404', 'info'=>'请求参数错误');
@@ -175,7 +176,7 @@ class SearchPeopleController extends Controller {
         }
         
         $report['data'] = $data;
-        //header('Content-type:application/json');
+        header('Content-type:application/json');
         if (empty($json)) {
             $json = json_encode($report);
         } else {
