@@ -153,19 +153,18 @@ class SearchPeopleController extends Controller {
      */
     protected function returnJson($status, $info='', $data=array(), $json='')
     {
-        print_r(debug_backtrace());
          switch ($status) {
             case 404: 
-                $report = array( 'state'=> 404,'status'=>'404', 'info'=>'请求参数错误');
+                $report = array( 'state'=> 404,'status'=>404, 'info'=>'请求参数错误');
                 break;
             case 403:
-                $report = array('state'=> 403, 'status'=>'403', 'info'=>'Don\'t permit');
+                $report = array('state'=> 403, 'status'=>403, 'info'=>'Don\'t permit');
                 break;
             case 801:
-                $report = array('state'=>801, 'status'=>'801', 'info'=>'invalid parameter');
+                $report = array('state'=>801, 'status'=>801, 'info'=>'invalid parameter');
                 break;
             case 200:
-                $report = array('state'=>200, 'status'=>'200', 'info'=>'success');
+                $report = array('state'=>200, 'status'=>200, 'info'=>'success');
                 break;
             default:
                 $report = array('state'=>$status, 'status'=>$status, 'info'=>"");
