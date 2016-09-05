@@ -8,14 +8,7 @@ class SearchPeopleController extends Controller {
 
     public function index(){
         $studentNum = I('stunum');
-        $goal_people = $this->_curl_init("http://jwzx.cqupt.edu.cn/pubBjStu.php?searchKey=$studentNum");
-        $goal_people = mb_convert_encoding($goal_people,'utf-8','gbk');
-        $info_pattern = "/<td>&nbsp;(.*?)<\/td>/";
-        $goal_people = $this->_patternGoal($info_pattern,$goal_people);
-        //var_dump($goal_people);
-        $people_num = implode('',$goal_people[1]);
-        $people_num = strlen($people_num);
-        if($people_num!=0&&strlen($studentNum)==10){
+        if(strlen($studentNum)==10){
             $data = $this->exec($this->url ,$studentNum);
             if (empty($data)) {
                 $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
@@ -153,6 +146,7 @@ class SearchPeopleController extends Controller {
      */
     protected function returnJson($status, $info='', $data=array(), $json='')
     {
+       // print_r(debug_backtrace());
          switch ($status) {
             case 404: 
                 $report = array( 'state'=> 404,'status'=>404, 'info'=>'请求参数错误');
