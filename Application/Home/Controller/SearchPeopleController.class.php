@@ -43,7 +43,7 @@ class SearchPeopleController extends Controller {
             if (empty($data)) {
                $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
             }else{
-                $this->returnJson(200, '', $data, JSON_FORCE_OBJECT);
+                $this->returnJson(200, '', $data, true);
             }
         }
     }
