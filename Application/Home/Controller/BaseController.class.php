@@ -56,7 +56,7 @@ class BaseController extends Controller {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         $output = curl_exec($ch);
@@ -123,6 +123,7 @@ class BaseController extends Controller {
                 $report = array_merge($report, $data);
             }
         }
+        header('Content-type:application/json');
         $json = json_encode($report);
         echo $json;
     }
