@@ -27,30 +27,37 @@ class BaseController extends Controller {
             echo json_encode($info,true);
             exit;
         }else{
-            if(S($stunum) == $idNum){
-            }else{
+            $this->verify($stunum, $idNum);
+           
                 // $stunum = I('post.stuNum');
                 // $idNum  = I('post.idNum');
-                $condition = array(
-                    "stuNum" => $stunum,
-                    "idNum"  => $idNum
-                );
-                $needInfo = $this->curl_init($this->apiUrl,$condition);
-                $needInfo = json_decode($needInfo,true);
-                if($needInfo['status'] != 200){
-                    echo json_encode($needInfo);
-                    exit;
-                }else{
-                    S($stunum, $idNum);
-                }
-            }
+                
+            
         }
     }
     public function index(){
 
 
     }
-
+    protected function verify($stunum, $idnum)
+    {
+        if(S($stunum) == $idNum){
+        
+        }else{
+            $condition = array(
+                "stuNum" => $stunum,
+                "idNum"  => $idnum
+            );
+            $needInfo = $this->curl_init($this->apiUrl,$condition);
+            $needInfo = json_decode($needInfo,true);
+            if($needInfo['status'] != 200){
+                echo json_encode($needInfo);
+                exit;
+            }else{
+                S($stunum, $idNum);
+            }
+        }
+    }
     protected function curl_init($url,$data){//初始化目标网站
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -98,16 +105,16 @@ class BaseController extends Controller {
     {
         switch ($status) {
             case 404: 
-                $report = array('status'=>'404', 'info'=>'请求参数错误');
+                $report = array('status'=> 404, 'info'=>'请求参数错误');
                 break;
             case 403:
-                $report = array('status'=>'403', 'info'=>'Don\'t permit');
+                $report = array('status'=> 403, 'info'=>'Don\'t permit');
                 break;
             case 801:
-                $report = array('status'=>'801', 'info'=>'invalid parameter');
+                $report = array('status'=> 801, 'info'=>'invalid parameter');
                 break;
             case 200:
-                $report = array('status'=>'200', 'info'=>'success');
+                $report = array('status'=> 200, 'info'=>'success');
                 break;
             default:
                 $report = array('status'=>$status, 'info'=>"");
@@ -126,5 +133,27 @@ class BaseController extends Controller {
         header('Content-type:application/json');
         $json = json_encode($report);
         echo $json;
+    }
+
+    /**
+     * 信息加密
+     * @param  string $data 需要加密的信息
+     * @param  string $salt 盐
+     * @return string       加密后的字符串
+     */
+    protected function encrypt($data, $salt='')
+    {
+
+    }
+
+    /**
+     * 信息解密
+     * @param  string $data 加密的信息
+     * @param  string $salt 盐
+     * @return string      解密的信息
+     */
+    protected function decrypt($data, $salt='')
+    {
+        return base64_decode($data);
     }
 }
