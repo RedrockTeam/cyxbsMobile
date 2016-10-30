@@ -25,16 +25,16 @@ class SearchPeopleController extends Controller {
         $goal_mod = strlen($studentNum)%3;
         $studentList = array();
         if(strlen($studentNum) == 0){
-           $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
+           $this->returnJson(404, '', array(), true);
         }else if(!preg_match("/[^\\x80-\\xff]/",$studentNum) && strlen($studentNum) == 3){
-            $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
+            $this->returnJson(404, '', array(), true);
         }else if(is_numeric($studentNum) && strlen($studentNum) != 10){
-            $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
+            $this->returnJson(404, '', array(), true);
         }else{
             
             $data = $this->exec($this->url, $studentNum);
             if (empty($data)) {
-               $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
+               $this->returnJson(404, '', array(), true);
             }else{
                 $this->returnJson(200, '', $data, true);
             }
