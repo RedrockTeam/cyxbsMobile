@@ -13,6 +13,13 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
+        $admin = session('admin.id');
+        if (isset($admin)) {
+            $admin = M('admin')->find($admin);
+            if ($admin) {
+                return ;
+            }
+        }
         header("Content-type: application/json");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
@@ -39,7 +46,7 @@ class BaseController extends Controller {
 
 
     }
-    protected function verify($stunum, $idnum)
+    public function verify($stunum, $idnum)
     {
         if(S($stunum) == $idNum){
         
@@ -56,6 +63,7 @@ class BaseController extends Controller {
             }else{
                 S($stunum, $idNum);
             }
+            return true;
         }
     }
     protected function curl_init($url,$data){//初始化目标网站
@@ -76,22 +84,34 @@ class BaseController extends Controller {
         $this->redirect(CONTROLLER_NAME . 'Index/index');
     }
 
+
+    /**
+     * 判断是否为管理员
+     * @param  string  $stunum 学号
+     * @return boolean         是否为管理员
+     */
     public function is_admin($stunum) 
     {
         if (empty($stunum)) {
             return false;
         }
-        $stu = D('users')->where('stunum='.$stunum)->find();
+        $stu = D('users')->where('stunum="%s"', $stunum)->find();
         if (empty($stu)) {
             return false;
         }
         $id = $stu['id'];
-        $is_admin  = M('administrators')->where('user_id='.$id)->find();
-        if(!$is_admin) {
-            return false;
-        } else {
+        $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
+        if($is_admin) {
             return true;
+        } else {
+            $is_admin = M('administrators')->where('user_id='.$id)->find();
+            if (is_admin) {
+                return true;
+            }
         }
+
+        return false;
+        
     }
 
     /**
@@ -133,6 +153,7 @@ class BaseController extends Controller {
         header('Content-type:application/json');
         $json = json_encode($report);
         echo $json;
+        exit;
     }
 
     /**
