@@ -47,50 +47,10 @@ class EditController extends BaseController
 			exit;
 		}
 		if ($role == 'admin'  || ($role == 'writor' && in_array($type_id, $this->writor_allowed_type))) {
-				//应用事务进行删除
-				$article = M($this->table_type[$type_id]);
-				$praise = M('articlepraises');
-				$remark = M('articleremarks');
-				M()->startTrans();
-				$remark_exist = $remark->where(array(
-					'article_id'		=> $article_id,
-					'articletypes_id'	=> $type_id,
-					))->select();
-				if (empty($remark_exist)){
-					$remark_result = true;
-				} else {
-					$remark_result = $remark->where(array(
-						'article_id'	 => $article_id,
-						'articletypes_id'=> $type_id,))
-						->delete();
-				}
-				$praise_exist = $praise->where(array(
-					'article_id'			=> $article_id,
-					'articletype_id'		=> $type_id,
-					))->select();
-				if (empty($praise_exist)) {
-					$praise_result = true;
-				} else {
-					$praise_result = $praise->where(array(
-					'article_id'	=> $article_id,
-					'articletype_id'=> $type_id,
-					))->delete();
-				}
-				if ($type_id != 6) {
-					$hotarticles = M('hotarticles');
-					$hotarticles_result = $hotarticles->where(array(
-						'article_id' 	=> $article_id,
-						'articletype_id' => $type_id,
-						))->delete();
-				} else {
-					$hotarticles_result = true;
-				}
-				$article_result = $article->where('id='.$article_id)->delete();
-				if($remark_result && $praise_result && $article_result && hotarticles_result) {
-					M()->commit();
+				$result = $this->delete($article_id, $type_id);
+				if($result) {
 					$this->returnJson(200);
 				} else {
-					M()->rollback();
 					$this->returnJson(404, array(), '操作失败');
 				}
 			
@@ -137,5 +97,65 @@ class EditController extends BaseController
 			$this->returnJson('403');
 			return false;
 		}
+	}
+	/**
+	 * 进行文章的删除工作
+	 * @param  [type] $article_id [description]
+	 * @param  [type] $type_id    [description]
+	 * @return [type]             [description]
+	 */
+	public function delete($article_id, $type_id)
+	{
+		if (empty($article_id) || empty($type_id)) {
+			return false;
+		}
+		$article = M($this->table_type[$type_id]);
+		$praise = M('articlepraises');
+		$remark = M('articleremarks');
+		//应用事务进行删除
+		M()->startTrans();
+		$remark_exist = $remark->where(array(
+			'article_id'		=> $article_id,
+			'articletypes_id'	=> $type_id,
+			))->select();
+		if (empty($remark_exist)){
+			$remark_result = true;
+		} else {
+			$remark_result = $remark->where(array(
+				'article_id'	 => $article_id,
+				'articletypes_id'=> $type_id,))
+				->delete();
+		}
+		$praise_exist = $praise->where(array(
+			'article_id'			=> $article_id,
+			'articletype_id'		=> $type_id,
+			))->select();
+		if (empty($praise_exist)) {
+			$praise_result = true;
+		} else {
+			$praise_result = $praise->where(array(
+			'article_id'	=> $article_id,
+			'articletype_id'=> $type_id,
+			))->delete();
+		}
+		//不为通知则删除hotarticle里的内容
+		if ($type_id != 6) {
+			$hotarticles = M('hotarticles');
+			$hotarticles_result = $hotarticles->where(array(
+				'article_id' 	=> $article_id,
+				'articletype_id' => $type_id,
+				))->delete();
+		} else {
+			$hotarticles_result = true;
+		}
+		$article_result = $article->where('id='.$article_id)->delete();
+
+		$result = $remark_result && $praise_result && $article_result && hotarticles_result;
+		if ($result) {
+			M()->commit();
+		} else {
+			M()->rollback();
+		}
+		return $result;
 	}	
 }
