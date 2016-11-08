@@ -228,8 +228,8 @@ class PersonController extends BaseController {
             $this->returnJson(403);
         $field = array(
             'id',
-            'class' => 'hash_lesson',
-            'day'   => 'hash_day',
+            'class',
+            'day', 
             'time',
             'title',
             'content',
