@@ -344,7 +344,8 @@ class PersonController extends BaseController {
                     if(!is_array($value)) {
                         $value = explode(',',$value);
                     }
-
+                    $value = array_flip($value);
+                    $value = array_flip($value); 
                     foreach ($value as $week) {
                         if(!is_numeric($week) || $week <= 0 || $week > 21) 
                             return false;
