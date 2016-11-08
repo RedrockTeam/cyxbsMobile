@@ -151,7 +151,7 @@ class PersonController extends BaseController {
             'title' => $information['title'],
             'content' => $information['content'],
             'id' => $id,
-            'updated_time' => $current_time,
+            'created_time' => $current_time,
             'user_id'      => $user_id,
             'term'         => $term,
         );
@@ -197,7 +197,7 @@ class PersonController extends BaseController {
         $data = array(
             'id' => $information['id'],
             'state' => $state['after'],
-            'updated_time' => $time
+            'created_time' => $time
         );
         
         if (!is_array($state['before'])) {
@@ -271,7 +271,7 @@ class PersonController extends BaseController {
             }
         }
         $change['id'] = $information['id'];
-        $change['updated_time'] = date('Y-m-d H:i:s');
+        $change['created_time'] = date('Y-m-d H:i:s');
         if (M('transaction')->data($change)->save()) {
             $this->returnJson(200);
         } else {
