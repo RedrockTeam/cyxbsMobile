@@ -341,15 +341,17 @@ class PersonController extends BaseController {
                     return false;
                 
                 case 'week':            
-                    if(is_array($value)) {
-                        foreach ($value as $week) {
-                            if(!is_numeric($week) || $week <= 0 || $week > 21) 
-                                return false;
-                        }
-                        $value = implode(',', $value);
-                    } else 
-                        if (!is_numeric($value) || $value <=0 || $value > 21)
+                    if(!is_array($value)) {
+                        $value = explode(',',$value);
+                    }
+
+                    foreach ($value as $week) {
+                        if(!is_numeric($week) || $week <= 0 || $week > 21) 
                             return false;
+                    }
+                    
+                    $value = implode(',', $value);
+                  
                     break;
 
                 case 'time':
