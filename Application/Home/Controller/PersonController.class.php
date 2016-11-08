@@ -159,7 +159,7 @@ class PersonController extends BaseController {
         if (!$result) {
             $this->returnJson(500, '','error');
         }
-        $this->returnJson(200);
+        $this->returnJson(200, array('id' => $id));
     }
 
 
