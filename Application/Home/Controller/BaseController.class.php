@@ -151,7 +151,7 @@ class BaseController extends Controller {
             }
         }
         header('Content-type:application/json');
-        $json = json_encode($report);
+        $json = json_encode($report, JSON_NUMERIC_CHECK);
         echo $json;
         exit;
     }
