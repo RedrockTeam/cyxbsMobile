@@ -100,7 +100,8 @@ class BaseController extends Controller {
             return false;
         }
         $id = $stu['id'];
-        $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
+        $is_admin = false;
+        // $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
         if($is_admin) {
             return true;
         } else {
