@@ -415,15 +415,18 @@ class PersonController extends BaseController {
         if ($is_edit && empty($information['id'])) {
             return false;
         }
-        t;
+        var_dump($information);
         foreach ($information as $field => &$value) {
             $inField = true;
             //选择类型 
             switch($field) {
+                var_dump('field:'.$field);
                 case 'date' :
                     if (!is_array($value)) {
                         $value = htmlspecialchars_decode($value);
+                        var_dump($value);
                         $value = json_decode($value, true);
+                        var_dump($value);
                     }
                     $stack = array();
                     foreach($value as $key => &$date) {
