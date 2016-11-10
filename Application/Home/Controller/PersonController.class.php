@@ -267,23 +267,22 @@ class PersonController extends BaseController {
         if (!$user) 
             returnJson(403);
         $field = array(
-            'id',
+            'cyxbsmobile_transaction.id' => 'id',
             'class',
             'day', 
             'time',
             'title',
-            'content',
-            'state',            
+            'content',          
             'week',          
         );
         $pos = array(
-            'stunum' => $stuNum,   
-            'state'=> array('neq', 0), 
+            'user_id' => $user['id'],   
+            'cyxbsmobile_transaction.state'=> array('neq', 0), 
             'term' => $term
         );
         $data = M('transaction')
                             ->where($pos)
-                            ->join('__TRANSACTION_TIME__ ON __TRANSACTION__.id=__TRANSACTION_TIME__.transaction_id AND __TRANSACTION_TIME__!=0')
+                            ->join('__TRANSACTION_TIME__ ON __TRANSACTION__.id=__TRANSACTION_TIME__.transaction_id AND __TRANSACTION_TIME__.state!=0')
                             ->field($field)
                             ->order('day, class, time DESC')
                             ->select();
