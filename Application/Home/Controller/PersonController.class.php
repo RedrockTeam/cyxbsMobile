@@ -478,6 +478,9 @@ class PersonController extends BaseController {
                 
                 case 'content':
                     $value = trim($value);
+                    if (is_null($value)) {
+                        $value = '';
+                    }
                     break;
                 case 'id':
                     $inField = false;
