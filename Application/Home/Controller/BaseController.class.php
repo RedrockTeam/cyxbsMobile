@@ -31,8 +31,7 @@ class BaseController extends Controller {
                 "status" => 801,
                 "info"   => "invalid parameter"
             );
-            echo json_encode($info,true);
-            exit;
+            returnJson(801);
         }else{
             $this->verify($stunum, $idNum);
            
