@@ -28,17 +28,17 @@ class EditController extends BaseController
 
 		//确认参数完整
 		if (empty($type_id) || empty($article_id)) {
-			$this->returnJson(801);
+			returnJson(801);
 			exit;
 		}
 
 		if(!in_array($type_id, $this->admin_allowed_type)) {
-			$this->returnJson(403);
+			returnJson(403);
 			exit;
 		}
 		$article = $this->getArticle($article_id, $type_id);
 		if($article === false) {
-			$this->returnJson(404, '', '该文章不存在');
+			returnJson(404, '该文章不存在');
 			exit;
 		}
 		//获取角色
@@ -49,13 +49,13 @@ class EditController extends BaseController
 		if ($role == 'admin'  || ($role == 'writor' && in_array($type_id, $this->writor_allowed_type))) {
 				$result = $this->delete($article_id, $type_id);
 				if($result) {
-					$this->returnJson(200);
+					returnJson(200);
 				} else {
-					$this->returnJson(404, array(), '操作失败');
+					returnJson(404, '操作失败');
 				}
 			
 		} else {	
-			$this->returnJson(403);
+			returnJson(403);
 		}
 
 	}
@@ -68,7 +68,7 @@ class EditController extends BaseController
 	 * @return bool|array      不存在返回false,存在返回文章数据
 	 */
 	protected function getArticle($article_id, $type_id) {
-		$position = array('id'		=> $article_id,);
+		$position = array('id'	=> $article_id,);
 		$Article = D($this->table_type[$type_id])->where($position)->find();
 		if(empty($Article)) {
 			return false;
@@ -85,7 +85,7 @@ class EditController extends BaseController
 	 */
 	protected function getRole($writor_id, $stunum) {
 		if(empty($writor_id) || empty($stunum)) {
-			$this->returnJson('404');
+			returnJson('404');
 			return false;
 		}
 		$is_admin = $this->is_admin($stunum);
@@ -94,7 +94,7 @@ class EditController extends BaseController
 		} elseif ($writor_id == $user['id']) {
 			return $role = 'writor';
 		} else {
-			$this->returnJson('403');
+			returnJson('403');
 			return false;
 		}
 	}
