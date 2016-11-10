@@ -424,9 +424,8 @@ class PersonController extends BaseController {
                 case 'date' :
                     if (!is_array($value)) {
                         $value = htmlspecialchars_decode($value);
-                        var_dump($value);
+                        $value = stripslashes($value);
                         $value = json_decode($value, true);
-                        var_dump($value);
                     }
                     $stack = array();
                     foreach($value as $key => &$date) {
