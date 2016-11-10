@@ -418,9 +418,9 @@ class PersonController extends BaseController {
         var_dump($information);
         foreach ($information as $field => &$value) {
             $inField = true;
+            var_dump('field:'.$field);
             //选择类型 
             switch($field) {
-                var_dump('field:'.$field);
                 case 'date' :
                     if (!is_array($value)) {
                         $value = htmlspecialchars_decode($value);
