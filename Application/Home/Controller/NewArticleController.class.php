@@ -79,7 +79,7 @@ class NewArticleController extends Controller
             }
         }
         $info = array_reverse($info);
-        $data = $hotArticle->where("created_time > '$now_date'")->order('(remark_num*2+like_num) DESC,updated_time DESC')->limit($start,$size)->relation(true)->select();
+        $data = $hotArticle->where("created_time > '$now_date'")->order('((remark_num-self_remark_num)*2+like_num) DESC,updated_time DESC')->limit($start,$size)->relation(true)->select();
         foreach ($data as $key => $value) {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
@@ -203,7 +203,8 @@ class NewArticleController extends Controller
         $articleType = D('articletypes');
         $article     = D('articles');
         $condition = array(
-            'type_id' => $type
+            'type_id' => $type,
+            'state'   => array('neq', 0),
         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
         $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')->limit($start,$size)->order('updated_time DESC')->select();
@@ -288,7 +289,7 @@ class NewArticleController extends Controller
         $type = I('post.type_id');
         $page = I('post.page');
         $size = I('post.size');
-        $page = empty($page) ? 0 : $page;
+        $page = empty($page) ? 0  : $page;
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
         if($stunum_other == null){
@@ -310,7 +311,9 @@ class NewArticleController extends Controller
             $user = $user->where($condition_user)->find();
             $article = D('articles');
             $condition_article = array(
-                    'user_id' =>$user['id']
+                    'user_id' =>$user['id'],
+                    'state'   => array('neq', 0),
+
                 );
             $contents = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
             //判断自己是否点过赞
@@ -361,7 +364,7 @@ class NewArticleController extends Controller
                 $condition_article = array(
                         'cyxbsmobile_articles.id'      => $article_id,
                         'cyxbsmobile_articles.type_id' => $type_id,
-
+                        'state'   => array('neq', 0),
                     );
                 $content = $article->where($condition_article)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src,cyxbsmobile_articles.thumbnail_src,cyxbsmobile_articles.content,cyxbsmobile_articles.type_id,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,cyxbsmobile_articles.like_num,cyxbsmobile_articles.remark_num,cyxbsmobile_users.photo_src as user_photo,cyxbsmobile_users.nickname')->select();
             } elseif ($type_id > 0 && $type_id <5) {                  //新闻内容
