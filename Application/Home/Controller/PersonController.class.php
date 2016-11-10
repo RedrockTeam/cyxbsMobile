@@ -419,7 +419,6 @@ class PersonController extends BaseController {
         t;
         foreach ($information as $field => &$value) {
             $inField = true;
-            var_dump($field);
             //选择类型 
             switch($field) {
                 case 'date' :
