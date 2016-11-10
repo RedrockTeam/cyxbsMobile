@@ -6,8 +6,8 @@ class PersonController extends BaseController {
     protected $changeState = array(
         'start' => array('before'=> -1, 'after'=>1),
         'close' => array('before'=> 1, 'after'=>-1),
-        'delete'=> array('before'=>'1,-1', 'after' => 0),
-        'recover' => array('before'=> 0, 'after' => 1),
+        'delete'=> array('before'=>'1,-1', 'after' => 0, 'function'=>'deleteTransactionTime'),
+        'recover' => array('before'=> 0, 'after' => 1, 'function'=> 'recoverTransactionTime'),
     );
 
     public function search(){
@@ -131,35 +131,46 @@ class PersonController extends BaseController {
     public function addTransaction()
     {
         $information = I('post.');
+
         if (!$this->produceTransaction($information)) {
-            $this->returnJson(404);
+            returnJson(404);
         }
 
         $user = M('users')->where("stunum='%s'", $information['stuNum'])->find();
         if(!$user) {
-            $this->returnJson(404, '', '没有完善信息,无法添加事务');
+            returnJson(404, '', '没有完善信息,无法添加事务');
         }
         $user_id = $user['id'];
         $id = empty($information['id']) ? getMillisecond().sprintf("%04.0f",mt_rand(0000,9999)) : $information['id'];
         $current_time = date("Y-m-d H:i:s");
         $term = $this->getTerm();
         $data = array(
-            "week" => $information['week'],
-            'class'=> $information['class'],
             "time" => $information['time'],
-            'day'  => $information['day'],
             'title' => $information['title'],
             'content' => $information['content'],
             'id' => $id,
-            'created_time' => $current_time,
+            'updated_time' => $current_time,
             'user_id'      => $user_id,
             'term'         => $term,
         );
         $result = M('transaction')->add($data);
         if (!$result) {
-            $this->returnJson(500, '','error');
+           returnJson(500,'error');
         }
-        $this->returnJson(200, array('id' => $id));
+
+        $transaction_time = M('transaction_time');
+        
+        foreach($information['date'] as $date) {
+            $data = $date;
+            $data['transaction_id'] = $id;
+            $data['updated_time'] = $current_time;
+         
+            if (!$transaction_time->add($data)) {
+                returnJson(500, 'error');
+            }
+        }
+
+        returnJson(200, '', array('id' => $id));
     }
 
 
@@ -168,10 +179,10 @@ class PersonController extends BaseController {
     {   
         $pattern = "/([a-zA-Z_]+)Transaction/";
         if(preg_match($pattern, $name, $result)) {
-            $state = $this->changeState[$result[1]];
-            if (isset($state)) {
+            $operate = $this->changeState[$result[1]];
+            if (isset($operate)) {
                 $information = I('post.');
-                call_user_func(array($this,'changeTransactionState'), $information, $state);
+                call_user_func(array($this,'changeTransactionState'), $information, $operate);
             }
         }
         header( "HTTP/1.1 404 Not Found" );       
@@ -180,38 +191,67 @@ class PersonController extends BaseController {
      /**
      * 改变事务状态
      */
-    protected function changeTransactionState($information, $state)
+    protected function changeTransactionState($information, $operate)
     {    
         $term = $information['term'];
         $term = empty($term) ?  $this->getTerm() : $term;
-        if (!$transaction = $this->isTransactionOwner($information['id'], $information['stuNum'], $term)) {
+
+        if (!is_array($operate['before'])) {
+            $operate['before'] = explode(',', $operate['before']);
+        }
+        //是否对已删除的事项进行操作
+        $operateForDeleted = in_array(0, $operate['before']);
+       
+        if (!$transaction = $this->isTransactionOwner($information['id'], $information['stuNum'], $operateForDeleted)) {
              if(!$this->is_admin($information['stuNum'])) {
-               $this->returnJson(403);
+               returnJson(403);
             }
 
             $transaction = M('transaction')->find($information['id']);
+        }
+
+        if (isset($operate['function'])) {
+            $result = call_user_func(array($this, $operate['function']), $information);
+            if (!$result) {
+                returnJson(500);
+            }
         }
          
         //state为0 为删除
         $time = date("Y-m-d H:i:s");
         $data = array(
             'id' => $information['id'],
-            'state' => $state['after'],
-            'created_time' => $time
+            'state' => $operate['after'],
+            'updated_time' => $time
         );
-        
-        if (!is_array($state['before'])) {
-            $state['before'] = explode(',', $state['before']);
-        }
-        if (!in_array($transaction['state'] ,$state['before'])) {
-            $this->returnJson(404);
+    
+        if (!in_array($transaction['state'] ,$operate['before'])) {
+            returnJson(404);
         } 
         if (M('transaction')->data($data)->save())
-            $this->returnJson(200);
+            returnJson(200);
         else {
-            $this->returnJson(500, '', 'error');
+            returnJson(500, 'error');
         }
         
+    }
+    //当事项被删除时，改变其时间的状态为-1
+    protected function deleteTransactionTime($information)
+    {
+        $pos = array('transaction_id' => $information['id'], 'state'=>1);
+        $data['updated_time'] = date('Y-m-d H:i:s');
+        $data['state'] = -1;
+        $result = M('transaction_time')->where($pos)->data($data)->save();
+        return $result;
+    }
+    //当事项被恢复时，改变其时间的状态为1
+    protected function recoverTransactionTime($information)
+    {
+        $pos = array('transaction_id' => $information['id'], 'state'=>-1);
+        $data['updated_time'] = date('Y-m-d H:i:s');
+        $data['state'] = 1;
+        $result = M('transaction_time')->where($pos)->data($data)->save();
+        return $result;
     }
 
 
@@ -225,7 +265,7 @@ class PersonController extends BaseController {
         $term = empty($term) ?  $this->getTerm() : $term; 
         $user = M('users')->where('stunum="%s"', $stuNum)->find();
         if (!$user) 
-            $this->returnJson(403);
+            returnJson(403);
         $field = array(
             'id',
             'class',
@@ -241,12 +281,17 @@ class PersonController extends BaseController {
             'state'=> array('neq', 0), 
             'term' => $term
         );
-        $data = M('transaction')->where($pos)->field($field)->select();
+        $data = M('transaction')
+                            ->where($pos)
+                            ->join('__TRANSACTION_TIME__ ON __TRANSACTION__.id=__TRANSACTION_TIME__.transaction_id AND __TRANSACTION_TIME__!=0')
+                            ->field($field)
+                            ->order('day, class, time DESC')
+                            ->select();
         foreach ($data as &$value) {
             $value['week'] = explode(',', $value['week']);
         }
         $data = compact('term', 'stuNum', 'data');
-        $this->returnJson(200, $data);
+        returnJson(200, '', $data);
     }
 
     /**
@@ -258,39 +303,88 @@ class PersonController extends BaseController {
         $information = I('post.');
         
         if (!$this->produceTransaction($information, true, $change)) {
-            $this->returnJson(404);
+            returnJson(404);
         }
         //未修改
         if (empty($change)) {
-            $this->returnJson(801);
+            returnJson(801);
         }
         //是否有权修改
-        if (!$this->isTransactionOwner($information['id'], $information['stuNum'], $information['term'])) {
+        if (!$this->isTransactionOwner($information['id'], $information['stuNum'])) {
             if(!$this->is_admin($information['stuNum'])) {
-               $this->returnJson(403);
+               returnJson(403);
             }
         }
         $change['id'] = $information['id'];
-        $change['created_time'] = date('Y-m-d H:i:s');
+        $change['updated_time'] = date('Y-m-d H:i:s');
+        if (isset($change['date'])) {
+            if (!$this->editTransactionTime($change['id'], $change['date']))
+                returnJson(404);
+        }
         if (M('transaction')->data($change)->save()) {
-            $this->returnJson(200);
+            returnJson(200);
         } else {
-            $this->returnJson(500, '', 'error');
+            returnJson(500, 'error');
         }
     }
-
-    public function isTransactionOwner($id, $stunum, $term='')
+    /**
+     * 修改事项的时间
+     * @param  bigint $id   事项的id
+     * @param  array $date 事项的时间
+     * @return bool       修改是否成功
+     */
+    protected function editTransactionTime($id, $dates)
     {
-        if (empty($term))
-            $term = $information['term'];
+        $pos = array("transaction_id"=>$id);
+        $before_dates = M('transaction_time')->where($pos)->select();
+        $before_count = count($before_dates);
+        $after_count = count($dates);
+        $max = $before_count > $after_count ? $before_count : $after_count;
+        $result = true;
+        for($i=0; $i<$before_count; $i++) {
+            if ($i >= $after_count) {
+                $before_dates[$i]['state'] = 0;
+                $result = M('transaction_time')->data($before_dates[$i])->save();
+            } elseif ($i >= $before_count) {
+                $date = $dates[$i];
+                $date['transaction_id'] = $id;
+                $date['updated_time'] = date('Y-m-d H:i:s');
+                $result = M('transaction_time')->data($date)->add();
+            } else {
+                $date = $dates[$i];
+                $date['id'] = $before_dates[$i]['id'];
+                $date['updated_time'] = date('Y-m-d H:i:s');
+                $result = M('transaction_time')->data($date)->save();
+            }
+            if (!$result) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 判断是否为事项的拥有者
+     * @param  bigint  $id     事项id
+     * @param  int     $stunum 学号
+     * @param  bool  $operateForDeleted   是否对已删除的进行操作
+     * @return boolean         true为有权利
+     */
+    public function isTransactionOwner($id, $stunum, $operateForDeleted = false)
+    {
+    
         $pos = array('id'=>$id);
+
+        if (!$operateForDeleted) {
+            $pos['state'] = array('neq', 0);
+        }
         $transaction = M('transaction')->where($pos)->find();
         if (!$transaction) {
             return false;
         }
         $user = M('users')->where('stunum="%s"', $stunum)->find();
         if (!$user)
-            $this->returnJson(403);
+            returnJson(403);
       return ($user['id'] == $transaction['user_id']) ? $transaction : false; 
         
     }
@@ -313,6 +407,8 @@ class PersonController extends BaseController {
     /**
      * 判断传入参数是否合法，并对一些信息进行处理
      * @param  array &$information 传入信息
+     * @param  bool  $is_edit    是否为修改
+     * @param array $parameter 将符合的参数存放到该变量里
      * @return bool               是否合法
      */
     protected function produceTransaction(&$information, $is_edit = false, &$parameter=array())
@@ -320,40 +416,57 @@ class PersonController extends BaseController {
         if ($is_edit && empty($information['id'])) {
             return false;
         }
-
+        t;
         foreach ($information as $field => &$value) {
             $inField = true;
+            var_dump($field);
             //选择类型 
             switch($field) {
-                
-                case 'day':
-                    if (is_numeric($value))
-                        if ($value <= 6 || $value >= 0) {
-                            break;
-                        }
-                    return false;
-               
-                case 'lesson':            
-                    if (is_numeric($value))
-                        if ($value <= 5 || $value >= 0) {
-                            break;
-                        }
-                    return false;
-                
-                case 'week':            
-                    if(!is_array($value)) {
-                        $value = explode(',',$value);
+                case 'date' :
+                    if (!is_array($value)) {
+                        $value = htmlspecialchars_decode($value);
+                        $value = json_decode($value, true);
                     }
-                    $value = array_flip($value);
-                    $value = array_flip($value); 
-                    foreach ($value as $week) {
-                        if(!is_numeric($week) || $week <= 0 || $week > 21) 
-                            return false;
-                    }
-                    
-                    $value = implode(',', $value);
-                  
-                    break;
+                    $stack = array();
+                    foreach($value as $key => &$date) {
+                        //判断星期
+                        if (is_numeric($date['day'])) {
+                            if ($date['day'] > 6 || $date['day'] < 0) {
+                                return false;
+                            }
+                        }
+                        else    return false;
+
+                        //判断课程        
+                        if (is_numeric($date['class'])) {
+                            if ($date['class'] > 5 || $date['class'] < 0) {
+                                 return false;
+                            }
+                        }
+                        else    return false;
+                        
+                        //判断week
+                        if(!is_array($date['week'])) {
+                            $date['week'] = explode(',',$date['week']);
+                        }
+                        //反转去重
+                        $date['week'] = array_flip($date['week']);
+                        $date['week'] = array_flip($date['week']);
+                        sort($date['week']); 
+                        foreach ($date['week'] as $week) {
+                            if(!is_numeric($week) || $week <= 0 || $week > 21) 
+                                return false;
+                        }
+
+                        $date['week'] = implode(',', $date['week']);
+                        //防重复
+                        if(!empty($stack[$date['day']][$date['class']])) {
+                            unset($value[$key]);
+                            continue;
+                        }
+                       $stack[$date['day']][$date['class']] = $date['week'];
+                    }  
+                  break;
 
                 case 'time':
                     if (!is_numeric($value)) 
@@ -367,6 +480,13 @@ class PersonController extends BaseController {
                 case 'content':
                     $value = trim($value);
                     break;
+                case 'id':
+                    $inField = false;
+                    $len = strlen($value);
+                    if ($len !== 17 || !is_numeric($value)) {
+                        return false;
+                    }
+                    break;
                 
                 default:
                     $inField = false;
@@ -376,11 +496,11 @@ class PersonController extends BaseController {
                     if (!empty($value))
                         $parameter[$field] = $value; 
                }
-       }
+        }
         if (isset($information['state'])) 
             unset($information['state']);  
        if (!$is_edit) {
-            if (empty($information['title']) || empty($information['week']) || empty($information['day']) || empty($information['class']) || empty($information['time']))
+            if (empty($information['title']) || empty($information['date']) || empty($information['time']))
                 return false;
        } 
                 
