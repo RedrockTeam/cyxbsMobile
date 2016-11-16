@@ -138,9 +138,13 @@ class PersonController extends BaseController {
 
         $user = M('users')->where("stunum='%s'", $information['stuNum'])->find();
         if(!$user) {
-            returnJson(404, '', '没有完善信息,无法添加事务');
+            returnJson(404,'没有完善信息,无法添加事务');
         }
         $user_id = $user['id'];
+        if(!$this->derepeat($user_id, $information, $information['date'], $error)) {
+            returnJson(404, $error);
+        }
+
         $id = empty($information['id']) ? getMillisecond().sprintf("%04.0f",mt_rand(0000,9999)) : $information['id'];
         $current_time = date("Y-m-d H:i:s");
         $term = $this->getTerm();
@@ -174,7 +178,7 @@ class PersonController extends BaseController {
     }
 
 
-
+    //类似魔术方法改变事务状态
     public function _empty($name)
     {   
         $pattern = "/([a-zA-Z_]+)Transaction/";
@@ -314,6 +318,7 @@ class PersonController extends BaseController {
                returnJson(403);
             }
         }
+
         $change['id'] = $information['id'];
         $change['updated_time'] = date('Y-m-d H:i:s');
         if (isset($change['date'])) {
@@ -388,11 +393,91 @@ class PersonController extends BaseController {
         
     }
 
-    //获取当前的学期
-    protected function getTerm()
+    /**
+     * 防止完全相同的事项出现
+     * @param int $user_id            用户的id值
+     * @param array $transactionMessage 事项的基本参数
+     * @param array &$transactionDate   事项的时间
+     * @param string &$error             错误信息
+     * @return boolean            true代表生成正确的时间
+     */
+    protected function derepeat($user_id, $transactionMessage, &$transactionDate, &$error='')
     {
-        $year = date('Y');
-        $month = date('m');
+        if (!is_numeric($user_id) || empty($transactionMessage) || empty($transactionDate)) {
+            $error = 'Missing Parameters';
+            return false;
+        }
+
+        $term = empty($transactionMessage['term']) ? $this->getTerm() : $transactionMessage['term'];
+        //查找对应信息相同的有哪些
+        $data = array(
+            'user_id' => $user_id,
+            'title'   => $transactionMessage['title'],
+            'content' => $transactionMessage['content'],
+            'time'    => $transactionMessage['time'],
+            'term'    => $term,
+            'state'   => array('neq', 0),
+        );
+        //var_dump($data);
+        $transactions = M('transaction')->where($data)->field('id')->select();
+        //echo $transactions;exit;
+        if (!$transactions) {
+            return true;
+        } else {
+            $transaction_ids = array();
+            foreach($transactions as $transaction)
+                $transaction_ids[] = $transaction['id'];
+        }
+        foreach($transactionDate as $key => $date) {
+            $data = array('date'=>$date);
+
+            //验证格式正确
+            if (!$this->produceTransaction($data, true)) {
+                $error .= $key.'parameter is error, ';
+                unset($transactionDate[$key]);
+                continue;
+            } 
+            $data = $data['date'];
+            $data['state'] = array('neq', 0);
+            //查找重复的
+            foreach ($transaction_ids as $transaction_id) {
+               $data['transaction_id'] = $transaction_id;
+               $result = M('transaction_time')->where($data)->find();
+               //已存在时间的，去掉该时间
+               if($result) {
+                    unset($transactionDate[$key]);
+                    break;
+               }
+            }
+        }
+        if(empty($transactionDate)) {
+            $error = "all parameter is exist";
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * /获取当前的学期
+     * @param  int   $timestamp = time() 
+     * @return bool|int 返回学期标示或false           
+     */
+    protected function getTerm($timestamp)
+    {
+        if (empty($timestamp)) {
+            $timestamp = time();
+        } elseif (is_numeric($timestamp)) {
+            if(strlen($timestamp) > 10) {
+                $timestamp = substr($timestamp, 0, 10);
+            } elseif (strlen($timestamp) <= 10) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        $year = date('Y', $timestamp);
+        $month = date('m', $timestamp);
         if ($month < 3) {
             $term = ($year-1).$year.'1';
         } else if($month >= 9) {
@@ -415,7 +500,7 @@ class PersonController extends BaseController {
         if ($is_edit && empty($information['id'])) {
             return false;
         }
-        
+
         foreach ($information as $field => &$value) {
             $inField = true;
             //选择类型 
@@ -423,7 +508,7 @@ class PersonController extends BaseController {
                 case 'date' :
                     if (!is_array($value)) {
                         $value = htmlspecialchars_decode($value);
-                        $value = stripslashes($value);
+                        // $value = stripslashes($value);
                         $value = json_decode($value, true);
                     }
                     $stack = array();
@@ -458,7 +543,7 @@ class PersonController extends BaseController {
                         }
 
                         $date['week'] = implode(',', $date['week']);
-                        //防重复
+                        //三元组去重复
                         if(!empty($stack[$date['day']][$date['class']])) {
                             unset($value[$key]);
                             continue;
@@ -478,9 +563,6 @@ class PersonController extends BaseController {
                 
                 case 'content':
                     $value = trim($value);
-                    if (is_null($value)) {
-                        $value = '';
-                    }
                     break;
                 case 'id':
                     $inField = false;
@@ -500,8 +582,11 @@ class PersonController extends BaseController {
                }
         }
         if (isset($information['state'])) 
-            unset($information['state']);  
+            unset($information['state']);
        if (!$is_edit) {
+            if (is_null($information['content'])) {
+                $information['content'] = '';
+            } 
             if (empty($information['title']) || empty($information['date']) || empty($information['time']))
                 return false;
        } 
