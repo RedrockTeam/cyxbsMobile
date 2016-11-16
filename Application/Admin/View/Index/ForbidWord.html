@@ -1,0 +1,133 @@
+  <div class="portlet light portlet-fit portlet-datatable bordered">
+   <div class="portlet-title">
+    <div class="caption">
+     <i class="fa fa-ban font-green"></i>
+     <span class="caption-subject font-green sbold uppercase">违规字列表</span>
+    </div>
+    <div class="actions">
+      <div class="btn-group">
+        <a class="btn btn-circle blue-hoki" href="javascript:;" data-target="#addForbidWord" data-toggle="modal">增加违规字 <i class="fa fa-plus"></i> </a>
+      </div>
+    </div>
+   </div>
+   <div class="portlet-body">
+    <div class="table-toolbar">
+     <div class="row" target-table="forbidwordListTable">
+      <div class="col-md-6">
+       <div class="btn-group">
+        <button data-state="all" class="btn sbold blue-madison"> 全部违规字 <i class="fa fa-ban"></i></button>
+       </div>
+       <div class="btn-group">
+        <button data-state="normal" class="btn sbold green-meadow"> 启用的违规字 <i class="fa fa-check"></i></button>
+       </div>
+       <div class="btn-group">
+        <button  class="btn sbold blue-hoki" data-state="black"> 禁用违规字 <i class="fa fa-close"></i></button>
+       </div>
+      </div>
+     <div class="col-md-6">
+      <div class="btn-group pull-right btn-group-circle">
+       <button class="btn green" href="javascript:;" data-toggle="dropdown"> <i class="fa fa-th"></i> 违规字 <i class="fa fa-angle-down"></i> </button>
+       <ul class="dropdown-menu">
+        <li> <a href="javascript:;" operate="recover"><i class="fa fa-history"></i> 启用 </a> </li>
+        <li> <a href="javascript:;" operate="delete"><i class="fa fa-trash-o"></i> 禁用 </a> </li>
+       </ul>
+      </div>
+     </div>
+    </div>
+    </div>
+    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="forbidwordListTable">
+     <thead>
+      <tr>
+       <th class="table-checkbox"> <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"> <input type="checkbox" class="group-checkable" data-set="#forbidwordListTable .checkboxes" /> <span></span> </label> </th>
+       <th data-data="id" data-searchable="false" data-visible="false">Id</th>
+       <th data-data="value" data-searchable="true">关键词</th>
+       <th data-data="type" data-searchable="true">范围</th>
+       <th data-data="updated_time" data-searchable="false">上次修改时间</th>
+       <th data-data="state" data-searchable="false">状态</th>
+      </tr>
+     </thead>
+     <tbody>
+     </tbody>
+    </table>
+   </div>
+  </div>
+  <div id="addForbidWord" class="modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+      <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="false">×</button>
+          <h4 class="modal-title"><i class="fa fa-plus"></i> 添加违规字 </h4>
+      </div>
+      <div class="modal-body">
+        <div class="portlet-body form">
+            <div class="form-group">
+              <div class="input-icon" >
+                <i class="fa fa-bell-o font-green"></i>
+                <input type="text" class="form-control" placeholder="违规字" name="forbidword"> </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label">作用域</label>
+              <select name="range" id="rangelist" class="form-control .select2-multiple" multiple>
+                <option value=""></option>
+              </select>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button type="button" data-dismiss="modal" class="btn dark btn-outline">关闭</button>
+          <button type="button" class="btn green" action="submit" >添加</button>
+      </div>
+  </div>
+  <script type="text/javascript">
+    jQuery(document).ready(function(){
+        initTable('forbidwordListTable', '{:U("Data/forbidwordList")}', '{:U("forbidword/operate")}', ['id', 'type_id']);
+        var modal = $("#addForbidWord");
+        $("input[name='forbidword'").on('blur', function(){
+          $.ajax({
+
+          });
+        });
+        modal.on("shown.bs.modal", function(){
+            $("[name='range']", modal).select2({
+              allowClear: true,
+              width: "auto",
+              placeholder : '选择作用的范围',
+              tokenSeparators: [',', ' '],
+              ajax:{
+                url: getUrl()+"/Admin/Forbidword/range",
+                cache: true,
+                processResults: function(data) {
+                  data = connection.decode(data);
+                  data = data.data;
+                  return {results: data};
+                },
+              },
+            });
+            $("[action='submit']", modal).on('click', function(){
+              var forbidword = $("[name='forbidword']", modal);
+              var range = $("[name='range']",modal);
+              var data = {
+                forbidword: forbidword.val(),
+                range: range.val(),
+              };
+              $.ajax({
+                url: getUrl()+'/Admin/Forbidword/forbidword',
+                data: connection.encode(data),
+                type: 'post',
+                dataType: 'text',
+                success: function(data) {
+                  data = connection.decode(data);
+                  console.log(data);
+                  if (data.status == '200') {
+                    forbidword.val('');
+                    range.val(null);
+                    modal.modal('destroy');
+                  } else {
+                    alert(data.info);
+                  }
+                },
+              });
+            });
+        });
+
+    });
+
+</script>

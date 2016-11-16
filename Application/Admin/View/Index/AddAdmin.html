@@ -1,0 +1,163 @@
+<div class="page-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="portlet light bordered" id="form_wizard_1">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class=" icon-layers font-red"></i>
+                        <span class="caption-subject font-red bold uppercase">修改职务
+                            <span class="step-title"> Step 1 of 3 </span>
+                        </span>
+                    </div>
+                </div>
+                <div class="portlet-body form">
+                    <form class="form-horizontal" action="#" id="submit_form" method="POST">
+                        <div class="form-wizard">
+                            <div class="form-body">
+                                <ul class="nav nav-pills nav-justified steps">
+                                    <li>
+                                        <a href="#tab1" data-toggle="tab" class="step">
+                                            <span class="number"> 1 </span>
+                                            <span class="desc">
+                                                <i class="fa fa-check"></i>选择用户</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#tab2" data-toggle="tab" class="step">
+                                            <span class="number"> 2 </span>
+                                            <span class="desc">
+                                                <i class="fa fa-check"></i>选择职务</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#tab3" data-toggle="tab" class="step">
+                                            <span class="number"> 3 </span>
+                                            <span class="desc">
+                                                <i class="fa fa-check"></i> 确认 </span>
+                                        </a>
+                                    </li>
+                               </ul>
+                                <div id="bar" class="progress progress-striped" role="progressbar">
+                                    <div class="progress-bar progress-bar-success"> </div>
+                                </div>
+                                <div class="tab-content">
+                                    <div class="alert alert-danger display-none">
+                                        <button class="close" data-dismiss="alert"></button> 你填写的信息有些错误 </div>
+                                    <div class="alert alert-success display-none">
+                                        <button class="close" data-dismiss="alert"></button> 你的信息都通过了！ </div>
+                                    <div class="tab-pane active" id="tab1">
+                                        <h3 class="block">查询信息</h3>
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label">学号</label>
+                                            <div class="col-md-4">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon input-circle-left">
+                                                        <i class="fa fa-mortar-board"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control input-circle-right"  name="stuNum" id="stuNum">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group form-md-line-input">
+                                          <label class="col-md-3 control-label" for="username">姓名</label>
+                                          <div class="col-md-4">
+                                         	    <div class="input-icon">
+                                                  <i class="fa fa fa-user"></i>
+                                                  <input type="text" class="form-control" readonly="" id="username" name="username">
+                                              <div class="form-control-focus"> </div>
+                                              </div>
+                                          </div>
+                                        </div>
+                                        <div class="form-group form-md-line-input">
+                                            <label class="col-md-3 control-label" for="gender">
+                                            性别
+                                            </label>
+                                            <div class="col-md-4">
+                                                <div class="input-icon">
+                                                    <i class="fa fa-bell-o"></i>
+                                                    <input type="text" class="form-control" readonly="" id="gender" name="gender">
+                                                    <div class="form-control-focus"> </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                      <div class="form-group form-md-line-input">
+                                          <label class="col-md-3 control-label" for="role" >
+                                          Role
+                                          </label>
+                                          <div class="col-md-4">
+                                              <div class="input-icon">
+                                                  <i class="fa fa-bell-o"></i>
+                                                  <input type="text" class="form-control" readonly="" id="role" name="role">
+                                                  <div class="form-control-focus"> </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                    </div>
+                                    <div class="tab-pane" id="tab2">
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">职务</label>
+                                            <div class="col-md-5">
+                                                <select name="roleList" id="roleList" class="form-control">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tab3">
+                                        <h3 class="block">确认信息</h3>
+                                        <h4 class="form-section">个人信息</h4>
+                                         <div class="form-group">
+                                            <label class="control-label col-md-3">学号:</label>
+                                            <div class="col-md-4">
+                                                <p class="form-control-static" data-display="stuNum"> </p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">姓名:</label>
+                                            <div class="col-md-4">
+                                                <p class="form-control-static" data-display="username"> </p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">现在的职务:</label>
+                                            <div class="col-md-4">
+                                                <p class="form-control-static" data-display="role"> </p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">更改后的职务:</label>
+                                            <div class="col-md-4">
+                                                <p class="form-control-static" data-display="roleList"> </p>
+                                            </div>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <div class="row">
+                                    <div class="col-md-offset-3 col-md-9">
+                                        <a href="javascript:;" class="btn default button-previous">
+                                            <i class="fa fa-angle-left"></i> Back </a>
+                                        <a href="javascript:;" class="btn btn-outline green button-next"> Continue
+                                            <i class="fa fa-angle-right"></i>
+                                        </a>
+                                        <a href="javascript:;" class="btn green button-submit"> Submit
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+    FormWizard.init();
+  });
+   
+</script>

@@ -1,0 +1,190 @@
+<if condition="$isedit">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- <label>
+                <input type="checkbox" id="autoopen">&nbsp;Auto-open next field</label> -->
+            <label>
+                <input type="checkbox" id="inline">&nbsp;Inline editing</label>
+            <button id="enable" class="btn green">Enable / Disable</button>
+            <hr>
+            </div>
+    </div>
+</if>
+<div class="portlet light portlet-fit bordered">
+    <div class="portlet-title">
+        <div class="caption">
+            <i class="icon-settings font-dark"></i>
+            <span class="caption-subject font-dark sbold uppercase">个人信息</span>
+        </div>
+    </div>
+    <div class="portlet-body">
+        <div class="row">
+            <div class="col-md-12">
+                <table id="admin" class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <td style="width:25%"> 姓名 </td>
+                            <td style="width:75">
+                                <a href="javascript:;" id="username" data-type="text" data-pk="1" data-original-title="Enter username"> {$username} </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> 身份 </td>
+                            <td>
+                                <a href="javascript:;" id="role" data-type="select" data-pk="1" data-value="5" data-source="/groups" data-original-title="Select Role"> {$role} </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> 登录ip </td>
+                            <td>
+                               <a href="javascript:;" id="last_login_ip" data-type="text" data-pk="1" data-original-title="Enter ip">  {$last_login_ip} </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> 登陆时间 </td>
+                            <td>
+                                <a href="javascript:;" id="last_login_time" data-type="datetime" data-pk="1" data-placement="right" title="Set date & time"> {$last_login_time} </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> 状态 </td>
+                            <td>
+                                <a href="javascript:;" id="status" data-type="select" data-pk="1" data-value="{$state}" data-original-title="Select status"> {$state} </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> 密码 </td>
+                            <td>
+                                <a href="#changePassword" class="btn btn-xs red" data-toggle="modal" > 修改密码
+                                <i class="fa fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="changePassword" class="modal fade " tabindex="-1" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="false">×</button>
+                        <h4 class="modal-title"><i class="fa fa-pencil-square"></i> 修改密码 </h4>
+                    </div>
+                    <div class="modal-body">
+                    <form>
+                        <div class="portlet-body form">
+                            <div class="form-body">
+                                <div class="scroller" style="height:230px" data-always-visible="1" data-rail-visible1="1">
+                                    <div class="row center-block">
+                                        <div class="input-icon right input-large margin-top-10">
+                                            <i class="fa fa-check"></i>
+                                            <input type="password" class="form-control" placeholder="原密码" name="oldpassword" >
+                                        </div>
+                                        <div class="input-icon right input-large margin-top-10">
+                                            <i class="fa fa-check"></i>
+                                            <input type="password" class="form-control" placeholder="新密码" name="newpassword" >
+                                        </div>
+                                        <div class="input-icon right input-large margin-top-10">
+                                            <i class="fa fa-check"></i>
+                                            <input type="password" class="form-control" placeholder="再输入新密码" name="confirmpassword">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-dismiss="modal" class="btn dark btn-outline">关闭</button>
+                        <button type="button" class="btn green" action="submit" >修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+        FormEditable.init("#admin");
+        UIExtendedModals.init();
+    });
+    var modal = $('#changePassword');
+    var form = $('form', modal);
+    var validator = form.validate({
+        doNotHideMessage: true,
+        errorElement: 'span',
+        errorClass: 'help-block help-block-error',
+        focusInvalid: false,
+        rules: {
+            oldpassword: {
+                required: true,
+            },
+            newpassword: {
+                required: true,
+                rangelength: [8, 20],
+                pwdstrength: 2,
+            },
+            confirmpassword:{
+                equalTo: '[name="newpassword"]',
+            },
+        },
+
+        messages: {
+            oldpassword: {
+                required: "现在密码的密码不能为空！",
+            },
+            newpassword: {
+                required: "新密码不能为空!",
+                rangelength: "密码长度需要为{0}-{1}个字符。。",
+            },
+            confirmpassword: {
+                equalTo: "确认密码和输入密码不相同！",
+            }
+        },
+
+        errorPlacement: function(error, element) {
+            error.insertAfter(element);
+        },
+        highlight: function (element) { // hightlight error inputs
+            $(element).prev("i").removeClass("fa-check font-green").addClass("fa-times font-red");
+            $(element)
+                .closest('div').removeClass('has-success').addClass('has-error'); // set error class to the control group
+        },
+
+        unhighlight: function (element) { // revert the change done by hightlight
+            $(element).prev("i").removeClass("fa-times font-red").addClass("fa-check font-green");
+            $(element)
+                .closest('div').removeClass('has-error'); // set error class to the control group
+        },
+
+        success: function (label, element) {
+            label
+                .addClass('valid') // mark the current input as valid and display OK icon
+            .closest('div').removeClass('has-error').addClass('has-success'); // set success class to the control group
+        },
+
+    });
+    $("[action=submit]", changePassword).on('click', function(){
+        if(form.valid() == false) {
+            return false;
+        }
+        var password = {};
+        $(":password", form).each(function(key, value){
+            password[$(value).attr('name')] = value.value;
+        });
+
+        $.ajax({
+            url: getUrl()+"/Admin/Admin/changePassword",
+            type: "post",
+            data: connection.encode(password),
+            dataType: 'text',
+            success: function(data){
+                data = connection.decode(data);
+                if (data.status === 200) {
+                    alert('密码修改成功');
+                } else {
+                    alert('密码修改失败');
+                }
+                $(":password", modal).val('');
+                modal.modal('hide');
+            },
+        });
+    });
+</script>

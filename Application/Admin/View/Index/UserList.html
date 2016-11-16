@@ -1,0 +1,61 @@
+  <div class="portlet light portlet-fit portlet-datatable bordered">
+   <div class="portlet-title">
+    <div class="caption">
+     <i class=" icon-layers font-green"></i>
+     <span class="caption-subject font-green sbold uppercase">用户名单</span>
+    </div>
+   </div>
+   <div class="portlet-body">
+    <div class="table-toolbar">
+     <div class="row" target-table="userListTable">
+      <div class="col-md-6">
+       <div class="btn-group">
+        <button data-state="all" class="btn sbold blue-madison"> 全部用户 <i class="fa fa-user"></i></button>
+       </div>
+       <div class="btn-group">
+        <button data-state="normal" class="btn sbold green-meadow"> 正常用户 <i class="fa fa-child"></i></button>
+       </div>
+       <div class="btn-group">
+        <button id="blackUser" class="btn sbold blue-hoki" data-state="black"> 黑名单 <i class="fa fa-user-times"></i></button>
+       </div>
+      </div>
+      <div class="col-md-6">
+       <div class="btn-group pull-right btn-group-circle">
+        <button class="btn green" href="javascript:;" data-toggle="dropdown">
+          <i class="fa fa-user"></i> 用户
+          <i class="fa fa-angle-down"></i>
+        </button>
+        <ul class="dropdown-menu">
+         <li> <a href="javascript:;" operate="recover"><i class="fa fa-history"></i> 恢复 </a> </li>
+         <li> <a href="javascript:;" operate="delete"><i class="fa fa-trash-o"></i> 删除 </a> </li>
+        </ul>
+       </div>
+      </div>
+     </div>
+    </div>
+    <table class="table table-striped table-bordered table-hover table-checkable order-column" id="userListTable">
+     <thead>
+      <tr>
+       <th class="table-checkbox"> <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline"> <input type="checkbox" class="group-checkable" data-set="#userListTable .checkboxes" /> <span></span> </label> </th>
+       <th data-data="id" data-visible="false" data-searchable="false">Id</th>
+       <th data-data="username" data-searchable="true">姓名</th>
+       <th data-data="stunum" data-searchable="true">学号</th>
+       <th data-data="gender" data-searchable="false">性别</th>
+       <th data-data="jscy_age" data-searchable="false">掌龄</th>
+       <th data-data="last_article_time" data-searchable="false">最新发布文章的时间</th>
+       <th data-data="last_remark_time" data-searchable="false">最新评论的时间</th>
+       <th data-data="state" data-searchable="false">用户状态</th>
+       <!-- <th>状态</th> -->
+      </tr>
+     </thead>
+     <!-- <tbody></tbody> -->
+     <tbody>
+     </tbody>
+    </table>
+   </div>
+  </div>
+  <script type="text/javascript">
+    jQuery(document).ready(function(){
+        initTable('userListTable', '{:U("Data/userList")}', '{:U("User/operate")}');
+    });
+</script>

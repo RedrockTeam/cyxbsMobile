@@ -1,0 +1,93 @@
+<html>
+ <head></head>
+ <body>
+  <extend name="layouts:core" /> 
+  <block name="css"> 
+   <link href="__PUBLIC__/css/dashboard.css" rel="stylesheet" /> 
+   <link href="__PUBLIC__/icon/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" /> 
+   <link href="__PUBLIC__/css/plugins.min.css" rel="stylesheet" /> 
+   <include file="layouts/pluginsCss" /> 
+  </block> 
+  <block name="body"> 
+   <nav class="navbar navbar-inverse navbar-fixed-top"> 
+    <div class="container-fluid"> 
+     <div class="navbar-header"> 
+      <a class="navbar-brand" href="__CONTROLLER__/index">掌上重邮</a> 
+     </div> 
+     <div id="navbar" class="navbar-collapse collapse"> 
+      <ul class="nav navbar-nav navbar-right"> 
+       <li><a href="{:U('Admin/logout')}">Exit</a></li> 
+      </ul> 
+     </div> 
+    </div> 
+   </nav> 
+   <div class="container-fluid"> 
+    <div class="col-sm-3 col-md-2 sidebar panel-group" role="tablist" id="accordion" aria-multiselectable="false"> 
+     <div> 
+      <div class="panel-heading"> 
+       <h4> <a href="#AdminInfo" id="AdminInfo-tab" data-toggle="tab" aria-controls="AdminInfo"> 个人信息 </a> </h4> 
+      </div> 
+     </div> 
+     <div> 
+      <div class="panel-heading" role="tab" id="collapseListGroupHeading2"> 
+       <h4> <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseListGroup2" aria-expanded="false" aria-controls="collapseListGroup2"> 管理员列表 </a> </h4> 
+      </div> 
+      <div class="panel-collapse collapse" id="collapseListGroup2" role="tabpane2" aria-labelledby="collapseListGroupHeading" aria-expanded="false"> 
+       <ul class="nav nav-sidebar"> 
+        <li> <a href="#AdminList" id="AdminList-tab" data-toggle="tab" aria-controls="AdminList"> 管理员列表 </a> </li> 
+        <li> <a href="#AddAdmin" id="AddAdmin-tab" data-toggle="tab" aria-controls="AddAdmin"> 添加管理员 </a> </li> 
+       </ul> 
+      </div> 
+     </div>
+     <div> 
+      <div class="panel-heading"> 
+       <h4> <a href="#UserList" id="UserList-tab" data-toggle="tab" aria-controls="UserList"> 用户列表 </a> </h4> 
+      </div> 
+     </div>  
+     <div> 
+      <div class="panel-heading"> 
+       <h4> <a href="#ArticleList" id="ArticleList-tab" data-toggle="tab" aria-controls="ArticleList"> 文章管理 </a> </h4> 
+      </div> 
+     </div> 
+     <div> 
+      <div class="panel-heading"> 
+       <h4> <a href="#ForbidWord" id="ForbidWord-tab" data-toggle="tab" aria-controls="ForbidWord"> 违规字设置 </a> </h4> 
+      </div> 
+     </div> 
+     <div> 
+      <div class="panel-heading"> 
+       <h4> <a href="#Feedback" id="Feedback-tab" data-toggle="tab" aria-controls="Feedback"> 意见反馈 </a> </h4> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2  main" style="margin-top: 35px;"> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade active in" id="AdminInfo" aria-labelledby="AdminInfo-tab"> 
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="AdminList" aria-labelledby="AdminList-tab"> 
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="AddAdmin" aria-labelledby="AddAdmin-tab"> 
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="UserList" aria-labelledby="UserList-tab"> 
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="LimitUserList" aria-labelledby="LimitUserList-tab">
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="ArticleList" aria-labelledby="ArticleList-tab"> 
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="ForbidWord" aria-labelledby="ForbidWord-tab"> 
+     </div> 
+     <div role="tabpanel" class="col-md-11 tab-pane fade" id="Feedback" aria-labelledby="Feedback-tab"> 
+      <h1 class="page-header">Feedback</h1> 
+     </div> 
+    </div> 
+   </div> 
+  </block> 
+  <block name="js"> 
+   <include file="layouts/pluginsJs" /> 
+   <script src="__PUBLIC__/js/admin/index.js"></script> 
+   <script src="__PUBLIC__/js/admin/app.js"></script> 
+   <script src="__PUBLIC__/js/admin/layout.js"></script> 
+   <script src="__PUBLIC__/js/admin/mydatatable.js"></script> 
+   <script src="__PUBLIC__/js/admin/ui-extended-modals.js"> </script> 
+  </block> 
+ </body>
+</html>
