@@ -168,4 +168,11 @@ class ArticleController extends Controller
 
         }
 
+        protected function hotArticle($article_id, $operate)
+        {
+            
+        }
+
+
+
 }
