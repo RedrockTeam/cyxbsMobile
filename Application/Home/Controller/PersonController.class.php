@@ -271,13 +271,10 @@ class PersonController extends BaseController {
         if (!$user) 
             returnJson(403);
         $field = array(
-            'cyxbsmobile_transaction.id' => 'id',
-            'class',
-            'day', 
+            'id',
             'time',
             'title',
-            'content',          
-            'week',          
+            'content',       
         );
         $pos = array(
             'user_id' => $user['id'],   
@@ -286,12 +283,18 @@ class PersonController extends BaseController {
         );
         $data = M('transaction')
                             ->where($pos)
-                            ->join('__TRANSACTION_TIME__ ON __TRANSACTION__.id=__TRANSACTION_TIME__.transaction_id AND __TRANSACTION_TIME__.state!=0')
                             ->field($field)
-                            ->order('day, class, time DESC')
+                            ->order('updated_time')
                             ->select();
-        foreach ($data as &$value) {
-            $value['week'] = explode(',', $value['week']);
+        foreach ($data as &$transaction) {
+            $transaction['date'] = M('transaction_time')
+                                ->where(array('transaction_id'=>$transaction['id']))
+                                ->field('class, day, week')
+                                ->select();
+            foreach($transaction['date'] as &$value) {
+                $value['week'] = explode(',', $value['week']);
+            }
+            
         }
         $data = compact('term', 'stuNum', 'data');
         returnJson(200, '', $data);
@@ -500,7 +503,6 @@ class PersonController extends BaseController {
         if ($is_edit && empty($information['id'])) {
             return false;
         }
-
         foreach ($information as $field => &$value) {
             $inField = true;
             //选择类型 
@@ -553,7 +555,9 @@ class PersonController extends BaseController {
                   break;
 
                 case 'time':
-                    if (!is_numeric($value)) 
+                    if (empty($value)) {
+                        $value=NULL;
+                    } elseif (!is_numeric($value)) 
                         return false;
                     break;
 
@@ -577,8 +581,7 @@ class PersonController extends BaseController {
                }
                
                if ($inField) {
-                    if (!empty($value))
-                        $parameter[$field] = $value; 
+                    $parameter[$field] = $value; 
                }
         }
         if (isset($information['state'])) 
@@ -589,8 +592,7 @@ class PersonController extends BaseController {
             } 
             if (empty($information['title']) || empty($information['date']))
                 return false;
-       } 
-                
+       }
        return true;
 
     }
