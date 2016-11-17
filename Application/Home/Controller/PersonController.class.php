@@ -587,7 +587,7 @@ class PersonController extends BaseController {
             if (is_null($information['content'])) {
                 $information['content'] = '';
             } 
-            if (empty($information['title']) || empty($information['date']) || empty($information['time']))
+            if (empty($information['title']) || empty($information['date']))
                 return false;
        } 
                 
