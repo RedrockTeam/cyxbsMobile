@@ -421,9 +421,9 @@ class PersonController extends BaseController {
             'term'    => $term,
             'state'   => array('neq', 0),
         );
-        //var_dump($data);
+       
         $transactions = M('transaction')->where($data)->field('id')->select();
-        //echo $transactions;exit;
+        
         if (!$transactions) {
             return true;
         } else {
@@ -562,12 +562,10 @@ class PersonController extends BaseController {
                     break;
 
                 case 'title':
-                    $value = trim($value);
-                    break;
-                
                 case 'content':
                     $value = trim($value);
                     break;
+                
                 case 'id':
                     $inField = false;
                     $len = strlen($value);
