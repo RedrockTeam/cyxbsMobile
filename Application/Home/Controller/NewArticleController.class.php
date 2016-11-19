@@ -423,4 +423,55 @@ class NewArticleController extends Controller
         }
     }
 
+    /**
+     * 话题范围
+     * @return [type] [description]
+     */
+    public function  topicList()
+    {
+        $vertion = '0.0.1';
+        $post = I('post.');
+        $get = I('get.');
+        $information = array_merge($get, $post);
+        $information['page'] = isset($information['page']) ? $information['page'] : 0;
+        $information['size'] = isset($information['size']) ? $information['size'] : 3;
+
+        $displayField = array(
+            "topics.id" => "topic_id",
+            "stunum" => 'user_id',
+            "knickname",
+            "title",
+            'content',
+            'keyword',
+            'topics.photo_src',
+            'topics.thumbnail_src',
+            'join_num',
+            'like_num',
+            'article_num',
+        );
+        $pos = array(
+            "keyword" => array('like', $information['key'].'%'),
+            'created_time' => array('ELT', date('Y-m-d H:i:s')),
+            "state"   => 1,
+            );
+        //话题信息的查询
+        $data = M('topics')
+                    ->alias('topics')
+                    ->join('__USERS__ ON topics.user_id=__USERS__.id', 'LEFT')
+                    ->where($pos)
+                    ->filed($displayField)
+                    ->order('created_time')
+                    ->limit($information['page']*$information['size'], $information['size'])
+                    ->select();
+        $foreach ($data as $key => &$value) {
+            $value['img']['img_small_src'] = $value['photo_src'];
+            $value['img']['img_src'] = $value['thumbnail_src'];
+            unset($value['photo_src']);
+            unset($value['thumbnail_src']);
+            $value['content'] = array("content" => $value['content']);
+        }
+        returnJson(200, , compact($data, $vertion));
+    }
+
+
 }
