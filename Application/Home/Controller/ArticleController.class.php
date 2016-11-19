@@ -119,9 +119,13 @@ class ArticleController extends BaseController {
         echo json_encode($info);
     }
 
-    public function addArticle(){
+    /**
+     * 添加文章
+     */
+    public function addArticle()
+    {
         $data = I('post.');
-        if($data['user_id']==null||$data['user_id']==$data['stuNum']||$data['type_id'] == null||$data['type_id'] < 5||$data['type_id'] == 6){
+        if($this->produceArticleInformation($data, $true, $error)){
             $info = array(
                     'state' => 801,
                     'status' => 801,
@@ -147,8 +151,28 @@ class ArticleController extends BaseController {
         //     $data['photo_src'] = $$photo_src_string;
         // }
         $user_id = $user->where($user_condition)->find();
-        $article  = D('articles');
+        switch ($data['type_id']) {
+            case 5:        
+                $article  = D('articles');
+                break;
+            
+            case 7:
+                if(empty($data['keyword'])) {
+                    returnJson(801);
+                }
+                $result = M('topic')->where('keyword' => $data['keyword'])->find();
+                if (!$result) {
+                    returnJson(801, 'this topic isn\'t exist');
+                }
+                $data['topic_id'] = $result['id'];
+                $article = D('topicarticles');
+                break;
+            
+            default:
+            returnJson(801, 'error type_id');
+        }
         $article_field = $article->getDbFields();
+        
         foreach ($data as $key => $value) {
             if(!in_array($key, $article_field)){
                 unset($data[$key]);
@@ -273,6 +297,8 @@ class ArticleController extends BaseController {
         );
         echo json_encode($info);
     }
+
+    
 
     public function searchHotArticle(){
         $hotArticle = D("hotarticles");
@@ -508,7 +534,8 @@ class ArticleController extends BaseController {
         }
     }
 
-    public function praise(){
+    public function praise()
+    {
     	if(I('post.id') == null){
     		$info = array(
                 "status" => 801,
@@ -532,6 +559,124 @@ class ArticleController extends BaseController {
     	}
 
     	echo json_encode($info,true);
+    }
+
+
+    /**
+     * 添加话题
+     */
+    public function addTopic()
+    {
+        $infomation = I('post.');
+  
+        if ($this->produceTopicInformation($information, true, $error)) {
+            returnJson(404, $error);
+        }
+
+        if ($information['official'] == 'redrock') {
+            //官方发起话题
+            if (!$this->is_admin($information['stuNum'])) {
+                returnJson(403, '你还不是管理员哟');
+            }
+            $information['user_id'] = 0;            //以红岩网校工作站名义创建的话题
+        } else {
+            //个人发起话题
+            $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();
+            if(!$user) {
+                returnJson(403, '你还不是掌邮的用户');
+            }
+            $information['user_id'] = $user['id'];
+        }
+        $information['created_time'] = date("Y-m-d H:i:s");
+        $information['updated_time'] = date("Y-m-d H:i:s");
+        $result = M('topics')->add($information);
+        if ($result) {
+            returnJson(200);
+        } else {
+            returnJson(404);
+        }
+
+    }
+
+
+    public function produceTopicInformation(&$information, $is_add=false, &$error='')
+    {
+        if(empty($information)) {
+            return $information;
+        }
+        
+        foreach ($information as $field => $value) {
+        
+            switch ($field) {
+                
+                case 'keyword':            
+                case 'content':
+                case 'title':
+                    if(empty($value) || !Forbidword::check($value, $field)) {
+                        $error = $field."'s value is error";    
+                        return false;
+                    }
+                    break;
+                
+                case 'topic_id':
+                case 'id':
+                    if (!is_numeric($value) && !$is_add) {
+                        $error = $field."'s value is error";
+                        return false;
+                    }
+                    break;
+            }
+        }
+
+        if ($is_add) {
+            if(empty($keyword)) {
+                $error = "keyword is not matched";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    public function produceArticleInformation(&$information, $is_add=false, &$error='')
+    {
+        if(empty($information)) {
+            $error = "empty information";
+            return false;
+        }
+
+        foreach ($information as $field => $value) {
+            case 'title':
+            case 'content':
+                 if(empty($value) || !Forbidword::check($value, $field)) {
+                        $error = $field."'s value is error";    
+                        return false;
+                    }
+                break;
+            
+            case 'type_id':
+                if ($value < 5 || $value ==6 ){
+                    $error = "this type is not allowed";
+                    return false;
+                }
+            case 'article_id':
+                if (!is_numeric($value) && !$is_add) {
+                    $error = $field."'s value is error";
+                    return false;
+                }
+                break;
+
+            case 'stuNum':
+                if (strlen($value) !== 10) {
+                    $error = 'errpr student number';
+                    return false;
+                } 
+        }
+        if (empty($information['type_id']) || empty($information['stuNum'])) {
+            $error = 'Don\'t match the type_id in the information';
+            return false;
+        }   
     }
 
 
