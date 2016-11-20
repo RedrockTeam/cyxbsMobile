@@ -619,20 +619,22 @@ class ArticleController extends BaseController {
                     break;
                 
                 case 'topic_id':
-                case 'id':
                     if (!is_numeric($value) && !$is_add) {
                         $error = $field."'s value is error";
                         return false;
                     }
                     break;
+
+                case 'state'
+                unset($information[$field]);
+                break; 
             }
         }
 
-        if ($is_add) {
-            if(empty($keyword)) {
-                $error = "keyword is not matched";
-                return false;
-            }
+      
+        if(empty($keyword)) {
+            $error = "keyword is not matched";
+            return false;
         }
 
         return true;
@@ -671,11 +673,22 @@ class ArticleController extends BaseController {
                 if (strlen($value) !== 10) {
                     $error = 'errpr student number';
                     return false;
-                } 
+                }
+            
+            case 'state'
+                unset($information[$field]);
+                break; 
         }
         if (empty($information['type_id']) || empty($information['stuNum'])) {
             $error = 'Don\'t match the type_id in the information';
             return false;
+        }
+        //当不为添加的时候，文章的id必须存在
+        if (!$is_add) {
+            if(empty($information['article_id'])) {
+                $error = 'Can\'t match the article_id';
+                return false;
+            }
         }   
     }
 
