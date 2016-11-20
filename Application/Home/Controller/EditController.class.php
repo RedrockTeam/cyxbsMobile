@@ -8,7 +8,7 @@ use Home\Controller\ArticleController;
 
 class EditController extends BaseController
 {
-	protected $table_type = array(
+	public static $table_type = array(
 			1 		=> 'news',
 			2		=> 'news',
 			3 		=> 'news',
@@ -64,7 +64,7 @@ class EditController extends BaseController
 	 */
 	protected function getArticle($article_id, $type) {
 		$position = array('id'	=> $article_id,);
-		$Article = D($this->table_type[$type])->where($position)->find();
+		$Article = D(self::$table_type[$type])->where($position)->find();
 		if(empty($Article)) {
 			return false;
 		}
@@ -83,7 +83,7 @@ class EditController extends BaseController
 		if (empty($article_id) || empty($type_id)) {
 			return false;
 		}
-		$article = M($this->table_type[$type_id]);
+		$article = M(self::$table_type[$type_id]);
 		$praise = M('articlepraises');
 		$remark = M('articleremarks');
 		//应用事务进行删除
@@ -140,13 +140,13 @@ class EditController extends BaseController
     public function editTopic()
     {
         $information = I('post.');
-        $topic = $this->getArticle($information['id'], 'topic');
+        $topic = $this->getArticle($information['topic_id'], 'topic');
         
         if (!$topic) {
             returnJson(404);
         }
         
-        if (!hasPower($information['id'], 'topics', $information['stuNum'], $error)) {
+        if (!$this->hasPower($information['topic_id'], 'topics', $information['stuNum'], $error)) {
             returnJson(403, $error);
         }
         $controller = new ArticleController;
@@ -165,7 +165,25 @@ class EditController extends BaseController
 
     public function editArticle()
     {
-    	
+    	$information = I('post.');
+
+    	if (!$this->hasPower($information['article_id'], $information['type_id'], $information['stuNum'], $error)) {
+    		returnJson(403, $error);
+    	}
+
+    	$article = new ArticleController;
+
+    	if ($article->produceArticleInformation($information, false, $error)) {
+    		returnJson(404, $error);
+    	}
+
+    	$information['updated_time'] = date('Y-m-d H:i:s');
+    	$result = M(self::$table_type[$type_id])->save($information);
+    	if ($result) {
+    		returnJson(200);
+    	} else {
+    		returnJson(500, 'error');
+    	}
     }
 
     /**
