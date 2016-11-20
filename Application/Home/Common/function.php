@@ -73,4 +73,5 @@ function encrypt($data, $salt='')
 function decrypt($data, $salt='')
 {
     return base64_decode($data);
-} 
+}
+
