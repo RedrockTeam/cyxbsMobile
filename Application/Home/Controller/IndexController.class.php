@@ -44,5 +44,12 @@ class IndexController extends Controller {
     public function _empty() {
         $this->display('Empty/index');
     }
+
+    public function test() {
+        $forbidword  = new \Home\Common\Forbidword;
+        $wordList = array('shit', 'sb');
+        print_r($forbidword->transForbidwordList($wordList));
+        
+    }
 }
 
