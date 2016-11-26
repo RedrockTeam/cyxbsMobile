@@ -21,34 +21,59 @@ class Forbidword
 		);
 
 
-	public function check($string, $IsIgnoreCase=false)
+	public function check(&$string, $IsIgnoreCase=false)
 	{
 		$len = strlen($string);
-		
+		$has_forbid = false;
+
 		if ($len===0) {
 			return $string;
 		}
+		if($IsIgnoreCase) {
+			for ($i; $i<$len; $i++) {
+				$q = $i;
+				while(is_array($p) || !empty($stack)) {
+					while(is_array($p)) {
+						if($string[$p]>='a' && $string[$p]<='z') {
+							$stack['char'][] = strtoupper($stirng[$q]);
+							$stack['pos'][] = $q;
+						} elseif($string[$p]>='A' && $string[$p]<='Z') {
+							$stack[] = strtolower($string[$q]);
+							$stack['pos'][] = $q;
+						}
+						$q++; $p = $this->forbidwordList[$string[$q]];
+					}
 
-		for($i; $i<$len; $i++) {
-			//$q 为string的字符，$p对应该字符对应的数组
-			$q = $i;
-			$p = $this->forbidwordList[$string[$q]];
-
-			while(is_array($p)) {
-				$q++;
-				$p = $this->forbidwordList[$string[$q]];
-			}
-
-			if (empty($p)) {
-				continue;
-			} else {
-				//替换
-				while($i <= $q) {
-					$string[$i] = $this->replace;
-					$i++;
 				}
 			}
-		}                                      
+		} else {
+			for($i; $i<$len; $i++) {
+				//$q 为string的字符，$p对应该字符对应的数组
+				$q = $i;
+				$p = $this->forbidwordList[$string[$q]];
+				$length;
+				while(empty($p)) {
+					if(isset($p['length'])) {
+						$length = $p['length'];
+					}
+					$q++;
+					$p = $this->forbidwordList[$string[$q]];
+				}
+
+				if (empty($length)) {
+					continue;
+				} else {
+					//替换
+					$has_forbid = true;
+					while(--$length) {
+						$string[$i] = $this->replace;
+						$i++;
+					}
+				}
+			}
+		}
+
+		return $has_forbid;                                   
 	}
 
 	//根据字段设置敏感词列表
@@ -81,7 +106,7 @@ class Forbidword
 	}
 
 
-	protected function transForbidwordList($wordList)
+	public function transForbidwordList($wordList)
 	{
 		if (empty($wordList)) {
 			return $wordList;
@@ -99,10 +124,12 @@ class Forbidword
 				$char = substr($word, 0, 1);
 				$word = substr($word, 1);
 				$len++;
-				$point[$char] = array();
+				if (!isset($point[$char])) {
+					$point[$char] = array();
+				}
 				$point = &$point[$char];
 			}
-			$point = '&'.$len;
+			$point['length'] = $len;
 		}
 
 		return $forbidwordList;
@@ -148,3 +175,4 @@ class Forbidword
 		return $this->error;
 	} 
 }
+
