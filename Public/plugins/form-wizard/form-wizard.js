@@ -244,9 +244,8 @@ var FormWizard = function () {
                     before_role_id: before_role_id,
                     after_role_id: after_role_id,
                     after_role_name: after_role_name,
-                    __hash__: token
+                    __hash__: token,
                 };
-                console.log;
                 $.ajax({
                     url: url+'/Admin/Admin/changeRole',
                     type: 'POST',
@@ -296,9 +295,9 @@ var FormWizard = function () {
                                 data_role_id: value.role_id}
                             );
                         } else {
-                              $('#username', form).val('')
-                              $('#gender', form).val('')
-                              $('#role', form).val('')
+                              $('#username', form).val('');
+                              $('#gender', form).val('');
+                              $('#role', form).val('');
                         }
                     }
 

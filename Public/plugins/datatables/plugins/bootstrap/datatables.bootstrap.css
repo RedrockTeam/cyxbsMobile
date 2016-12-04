@@ -68,7 +68,7 @@ table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:after, 
     font-family: 'Glyphicons Halflings';
     opacity: 0.5;
 }
-table.dataTable thead .sorting:after {
+/*table.dataTable thead .sorting:after {
     opacity: 0.2;
     content: "\e150"}
 table.dataTable thead .sorting_asc:after {
@@ -77,7 +77,7 @@ table.dataTable thead .sorting_desc:after {
     content: "\e156"}
 table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:after {
     color: #eee;
-}
+}*/
 div.dataTables_scrollHead table.dataTable {
     margin-bottom: 0 !important;
 }
