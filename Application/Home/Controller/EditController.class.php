@@ -157,5 +157,6 @@ class EditController extends BaseController
 			M()->rollback();
 		}
 		return $result;
-	}	
+	}
+
 }
