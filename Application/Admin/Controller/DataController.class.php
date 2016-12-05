@@ -504,17 +504,17 @@ class DataController extends Controller
                 $articleRemarksField = $this->displayField($articleRemarksField, 'articles');
                 //mysql不能full join 坑！所以用 left join union right join
                 $articleRemarksSql_Left = M('articles')
-                                                        ->join('__ARTICLEREMARKS__ ON __ARTICLEREMARKS__.user_id = __ARTICLES__.user_id','left')
-                                                        ->group('user_id')
-                                                        ->field($articleRemarksField)
-                                                        ->select(false);
+                                            ->join('__ARTICLEREMARKS__ ON __ARTICLEREMARKS__.user_id = __ARTICLES__.user_id','left')
+                                            ->group('user_id')
+                                            ->field($articleRemarksField)
+                                            ->select(false);
 
                 $articleRemarksSql = M('articles')
-                                                        ->join('__ARTICLEREMARKS__ ON __ARTICLEREMARKS__.user_id = __ARTICLES__.user_id','right')
-                                                        ->group('user_id')
-                                                        ->field($articleRemarksField)
-                                                        ->union($articleRemarksSql_Left)
-                                                        ->buildSql();
+                                        ->join('__ARTICLEREMARKS__ ON __ARTICLEREMARKS__.user_id = __ARTICLES__.user_id','right')
+                                        ->group('user_id')
+                                        ->field($articleRemarksField)
+                                        ->union($articleRemarksSql_Left)
+                                        ->buildSql();
                 $data = M('users')
                                 ->join('LEFT JOIN '.$articleRemarksSql.' articleremark ON __USERS__.id = articleremark.user_id')
                                 ->where($parameter)
@@ -542,9 +542,9 @@ class DataController extends Controller
         public function role()
         {
                 $fields = M('role')
-                                                ->where(array('state'=>1, 'name' => array('neq', 'root')))
-                                                ->field('id,display_name')
-                                                ->select();
+                            ->where(array('state'=>1, 'name' => array('neq', 'root')))
+                            ->field('id,display_name')
+                            ->select();
                 $stunum = I('post.value');
                 if (empty($stunum)) {
                         returnJson(801);
@@ -602,10 +602,10 @@ class DataController extends Controller
                 ), 'word_range');
                 //构建子查询
                 $typeTable = M('word_range')
-                                                        ->where("state=%d", 1)
-                                                        ->field($typeDisplayField)
-                                                        ->group('w_id')
-                                                        ->buildSql();
+                                ->where("state=%d", 1)
+                                ->field($typeDisplayField)
+                                ->group('w_id')
+                                ->buildSql();
                 $columns = $information['columns'];
                 $parameter = array();
                 //框定条件
@@ -686,8 +686,8 @@ class DataController extends Controller
                         case 'stunum':
                                 foreach ($data as $val) {
                                         $mark = $mark && (
-                                                        $is_like ? is_numeric($val) :
-                                                        (preg_match('/^20[0-9]{2}21[0-9]{4}$/', $val) > 0));
+                                            $is_like ? is_numeric($val) :
+                                            (preg_match('/^20[0-9]{2}21[0-9]{4}$/', $val) > 0));
                                 }
                                 break;
 
@@ -699,20 +699,20 @@ class DataController extends Controller
                         //用户的真名
                         case 'username':
                                 foreach ($data as $val) {
-                                        $mark = $mark && (preg_match('/^[\x{4e00}-\x{9fa5}]+\·?[\x{4e00}-\x{9fa5}]*$/u', $val) > 0);
+                                    $mark = $mark && (preg_match('/^[\x{4e00}-\x{9fa5}]+\·?[\x{4e00}-\x{9fa5}]*$/u', $val) > 0);
                                 }
                                 break;
 
                         //id值
                         case 'id' :
                                 foreach ($data as $val) {
-                                        $mark = $mark && is_numeric($val);
+                                    $mark = $mark && is_numeric($val);
                                 }
                                 break;
 
                         case 'state':
                                 foreach ($data as $val) {
-                                        $mark = $mark && is_numeric($val);
+                                    $mark = $mark && is_numeric($val);
                                 }
                                 break;
 
