@@ -80,11 +80,11 @@
     jQuery(document).ready(function(){
         initTable('forbidwordListTable', '{:U("Data/forbidwordList")}', '{:U("forbidword/operate")}', ['id', 'type_id']);
         var modal = $("#addForbidWord");
-        $("input[name='forbidword'").on('blur', function(){
-          $.ajax({
+        // $("input[name='forbidword'").on('blur', function(){
+        //   $.ajax({
 
-          });
-        });
+        //   });
+        // });
         modal.on("shown.bs.modal", function(){
             $("[name='range']", modal).select2({
               allowClear: true,
