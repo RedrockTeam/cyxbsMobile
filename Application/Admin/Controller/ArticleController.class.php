@@ -25,13 +25,15 @@ class ArticleController extends Controller
         );
 
         protected static $article_type = array(
-                1               => 'cyxw',
-                2               => 'jwzx',
-                3               => 'xxjz',
-                4               => 'xwgg',
-                5               => 'bbdd',
-                6               => 'notice',
+                1               => '重邮新闻',
+                2               => '教务在线',
+                3               => '学术讲座',
+                4               => '校务公告',
+                5               => '哔哔叨叨',
+                6               => '公告',
+                7               => '话题',
         );
+
         private $_state = array(
                 'delete' => 0,
                 'normal' => 1,
@@ -42,14 +44,15 @@ class ArticleController extends Controller
         public function _initialize()
         {
 
-                //初始化
-                $this->_status = array(
-                        'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
-                        'unlock' => array('before_state'=>$this->_state['lock'],'after_state'=>$this->_state['normal']),
-                        'lock' => array('before_state'=>$this->_state['normal'],'after_state'=>$this->_state['lock']),
-                        'delete' => array('before_state'=>array($this->_state['normal'], $this->_state['lock']),'after_state'=>$this->_state['delete']),
-                );
+            //初始化
+            $this->_status = array(
+                    'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
+                    'unlock' => array('before_state'=>$this->_state['lock'],'after_state'=>$this->_state['normal']),
+                    'lock' => array('before_state'=>$this->_state['normal'],'after_state'=>$this->_state['lock']),
+                    'delete' => array('before_state'=>array($this->_state['normal'], $this->_state['lock']),'after_state'=>$this->_state['delete']),
+            );
         }
+        
         public static function getType()
         {
                 return self::$article_type;
@@ -168,11 +171,52 @@ class ArticleController extends Controller
 
         }
 
-        protected function hotArticle($article_id, $operate)
+        public function getWriteType()
         {
-            
+            $data = array();
+            foreach (self::$article_type as $key => $value) {
+                if ($key > 4) {
+                    $data[] = array('id'=>$key, 'text' => $value);
+                }       
+            }
+            returnJson(200, '', $data);
         }
 
+        public function getWriteTemplet()
+        {
+            $templet = array(
+                    'title' => array('type' => 'text', 'text'=>'标题', 'name'=>'title', 'placeholder'=> '请输入标题'),
+                    'content' => array('type' => 'text', 'text' => '内容', 'name'=> 'content', 'placeholder'=> '详细内容..'),
+                    'photo' => array('type' => 'file', 'text' => '上传图片', 'name'=>'photo_src'),
+                    'keyword' => array('type' => 'text', 'text'=>'话题', 'name' => 'keyword', 'placeholder' => '话题..')
+            );
 
+            $display = array(
+
+                '5' =>    array(
+                                'title', 
+                                'content',
+                                'photo', 
+                            ),
+                '6' =>  array(
+                                'title', 
+                                'content',
+                                'photo', 
+                            ),
+                '7' => array(
+                                'title', 
+                                'keyword',
+                                'content',
+                                'photo',
+                            ),
+            );
+
+            $type_id = I('type_id');
+            $data = $display[$type_id];
+            if (empty($data)) {
+                returnJson(404);
+            }
+           returnJson(200, '', $data);
+        }
 
 }
