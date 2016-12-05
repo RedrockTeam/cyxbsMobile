@@ -222,9 +222,9 @@ class ForbidwordController extends Controller
                         $data = array("value" => $data);
                 }
                 $forbidword = M("forbidword")
-                                                        ->where("state=%d",$this->_state['normal'])
-                                                        ->where($data)
-                                                        ->find();
+                                ->where("state=%d",$this->_state['normal'])
+                                ->where($data)
+                                ->find();
 
                 if (!$forbidword) {
                         $this->_error = "Can't find which forbidword's value is ".$value;
@@ -232,10 +232,10 @@ class ForbidwordController extends Controller
                 }
                 //获取所有应用范围
                 $range = M("word_range")
-                                                ->where("w_id=%d", $forbidword['id'])
-                                                ->where("state=%d", $this->_state['normal'])
-                                                ->fields('type_id')
-                                                ->select();
+                            ->where("w_id=%d", $forbidword['id'])
+                            ->where("state=%d", $this->_state['normal'])
+                            ->fields('type_id')
+                            ->select();
 
                 if ($range === false) {
                         $this->_error = 'select is error';
