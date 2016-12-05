@@ -31,8 +31,7 @@ class BaseController extends Controller {
                 "status" => 801,
                 "info"   => "invalid parameter"
             );
-            echo json_encode($info,true);
-            exit;
+            returnJson(801);
         }else{
             $this->verify($stunum, $idNum);
            
@@ -100,7 +99,8 @@ class BaseController extends Controller {
             return false;
         }
         $id = $stu['id'];
-        $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
+        $is_admin = false;
+        // $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
         if($is_admin) {
             return true;
         } else {

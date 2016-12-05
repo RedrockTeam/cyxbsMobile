@@ -3,18 +3,20 @@
 namespace Home\Controller;
 
 use Think\Controller;
+use Home\Controller\BaseController;
+use Home\Controller\ArticleController;
 
 class EditController extends BaseController
 {
-	protected $writor_allowed_type = array(5);
-	protected $admin_allowed_type = array(5,6);
-	protected $table_type = array(
+	public static $table_type = array(
 			1 		=> 'news',
 			2		=> 'news',
 			3 		=> 'news',
 			4 		=> 'news',
 			5 		=> 'articles',
 			6		=> 'notices',
+			7		=> 'topicarticles',
+			'topic' => 'topics',
 		);
 	/**
 	 * 删除文章
@@ -28,34 +30,27 @@ class EditController extends BaseController
 
 		//确认参数完整
 		if (empty($type_id) || empty($article_id)) {
-			$this->returnJson(801);
+			returnJson(801);
 			exit;
 		}
 
-		if(!in_array($type_id, $this->admin_allowed_type)) {
-			$this->returnJson(403);
-			exit;
-		}
 		$article = $this->getArticle($article_id, $type_id);
+		
 		if($article === false) {
-			$this->returnJson(404, '', '该文章不存在');
+			returnJson(404, '该文章不存在');
 			exit;
 		}
-		//获取角色
-		$role = $this->getRole($article['user_id'], $stunum);
-		if (!$role){
-			exit;
-		}
-		if ($role == 'admin'  || ($role == 'writor' && in_array($type_id, $this->writor_allowed_type))) {
+		//是否有权力删除文章
+		if ($this->hasPower($article_id, $type_id, $stunum, $error)) {
 				$result = $this->delete($article_id, $type_id);
 				if($result) {
-					$this->returnJson(200);
+					returnJson(200);
 				} else {
-					$this->returnJson(404, array(), '操作失败');
+					returnJson(404, '操作失败');
 				}
 			
 		} else {	
-			$this->returnJson(403);
+			returnJson(403, $error);
 		}
 
 	}
@@ -64,12 +59,12 @@ class EditController extends BaseController
 	/**
 	 * 获取文章的信息
 	 * @param  int  $article_id 文章的id值
-	 * @param  int $type_id    文章类型
+	 * @param  mix 	$type   	文章类型
 	 * @return bool|array      不存在返回false,存在返回文章数据
 	 */
-	protected function getArticle($article_id, $type_id) {
-		$position = array('id'		=> $article_id,);
-		$Article = D($this->table_type[$type_id])->where($position)->find();
+	protected function getArticle($article_id, $type) {
+		$position = array('id'	=> $article_id,);
+		$Article = D(self::$table_type[$type])->where($position)->find();
 		if(empty($Article)) {
 			return false;
 		}
@@ -77,27 +72,6 @@ class EditController extends BaseController
 	}
 
 
-	/**
-	 * 得到该用户的角色
-	 * @param  int $article_user_id 文章作者的id
-	 * @param  int $stunum          学号
-	 * @return bool                  
-	 */
-	protected function getRole($writor_id, $stunum) {
-		if(empty($writor_id) || empty($stunum)) {
-			$this->returnJson('404');
-			return false;
-		}
-		$is_admin = $this->is_admin($stunum);
-		if ($is_admin) {
-			return $role = 'admin';
-		} elseif ($writor_id == $user['id']) {
-			return $role = 'writor';
-		} else {
-			$this->returnJson('403');
-			return false;
-		}
-	}
 	/**
 	 * 进行文章的删除工作
 	 * @param  [type] $article_id [description]
@@ -109,7 +83,7 @@ class EditController extends BaseController
 		if (empty($article_id) || empty($type_id)) {
 			return false;
 		}
-		$article = M($this->table_type[$type_id]);
+		$article = M(self::$table_type[$type_id]);
 		$praise = M('articlepraises');
 		$remark = M('articleremarks');
 		//应用事务进行删除
@@ -148,7 +122,8 @@ class EditController extends BaseController
 		} else {
 			$hotarticles_result = true;
 		}
-		$article_result = $article->where('id='.$article_id)->delete();
+
+		$article_result = $article->where('id=%d',$article_id)->delete();
 
 		$result = $remark_result && $praise_result && $article_result && hotarticles_result;
 		if ($result) {
@@ -158,5 +133,89 @@ class EditController extends BaseController
 		}
 		return $result;
 	}
+
+
+
+	/**
+     * 修改topic
+     */
+    public function editTopic()
+    {
+        $information = I('post.');
+        $topic = $this->getArticle($information['topic_id'], 'topic');
+        
+        if (!$topic) {
+            returnJson(404);
+        }
+        
+        if (!$this->hasPower($information['topic_id'], 'topics', $information['stuNum'], $error)) {
+            returnJson(403, $error);
+        }
+        $controller = new ArticleController;
+        if (!$controller->produceTopicInformation($information, false,$error)) {
+            returnJson(404, $error);
+        }
+
+        $information['updated_time'] = date('Y-m-d H:i:s');
+        $result = $topic->data($information)->save();
+        if ($result)
+            returnJson(200);
+        else
+            returnJson(500, 'unknow error');
+        
+    }
+
+    public function editArticle()
+    {
+    	$information = I('post.');
+
+    	if (!$this->hasPower($information['article_id'], $information['type_id'], $information['stuNum'], $error)) {
+    		returnJson(403, $error);
+    	}
+
+    	$article = new ArticleController;
+
+    	if ($article->produceArticleInformation($information, false, $error)) {
+    		returnJson(404, $error);
+    	}
+
+    	$information['updated_time'] = date('Y-m-d H:i:s');
+    	$result = M(self::$table_type[$type_id])->save($information);
+    	if ($result) {
+    		returnJson(200);
+    	} else {
+    		returnJson(500, 'error');
+    	}
+    }
+
+    /**
+     * 判断是否有修改文章的权限
+     * @param  number  $id      文章的id
+     * @param  mix     $type_id 文章类型id
+     * @param  string  $stunum  学号
+     * @param  string  $error   没有权限的原因
+     * @return boolean          是否有权力
+     */
+    protected function hasPower($id, $type_id, $stunum, $error='')
+    {
+    	$article = $this->getArticle($id, $type_id);
+
+        //判断文章是否存在
+        if (!$article) {
+            $error = 'not match the article';
+            return false;
+        }
+        //是否有权限
+        if ($type_id == 6 || $type_id <= 4 || $article['user_id'] == 0) {
+            return $this->is_admin($stunum);
+        } else {
+            //如果为管理员
+            if ($this->is_admin($stunum)) {
+                return true;
+            }
+            $user = M('users')->find($article['user_id']);
+            return $user['stunum'] == $stunum;
+        }
+    }	
 
 }
