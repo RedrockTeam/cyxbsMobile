@@ -71,7 +71,7 @@ var createArticle = function() {
               <!-- The template to display files available for download -->\
               <script id="template-download" type="text/x-tmpl">\
               {% for (var i=0, file; file=o.files[i]; i++) { %}\
-                  <tr class="template-download fade">\
+                  <tr class="template-download fade" style="width:490px;" >\
                       <td>\
                           <span class="preview">\
                               {% if (file.thumbnailUrl) { %}\
@@ -140,7 +140,7 @@ var createArticle = function() {
                 var form = lastInput.next();
                 var FormAttrbution = {
                   id: 'upload',
-                  action: getUrl()+'/Home/Photo/uploadArticle',
+                  action: getUrl()+'/Home/Photo/multipleUploadArticle',
                   method: 'post',
                 };
                 form.attr(FormAttrbution);

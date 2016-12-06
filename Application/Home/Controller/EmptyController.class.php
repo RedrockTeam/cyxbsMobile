@@ -17,6 +17,7 @@ class EmptyController extends Controller {
     }
 
     public function _empty() {
+    	//print_r(debug_backtrace());exit;
     	header( "HTTP/1.1 404 Not Found" );       
     	$this->display('Empty/index');
     }

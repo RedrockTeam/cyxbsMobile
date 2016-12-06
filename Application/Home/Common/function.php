@@ -19,7 +19,6 @@ function getMillisecond()
  */
 function returnJson($status, $info="", $data = array()) 
 {
-    // print_r(debug_backtrace());exit;
     switch ($status) {
         case 404: 
             $report = array('status'=> 404, 'info'=>'请求参数错误');
@@ -75,3 +74,51 @@ function decrypt($data, $salt='')
     return base64_decode($data);
 }
 
+//时间转换
+function timeFormate($time='', $format="Y-m-d H:i:s")
+{
+    if (empty($time)) {
+        return date($format);
+    }
+    if (is_numeric($startTime)) {
+        if (strlen($startTime) > 10) {
+            $startTime = substr($startTime, 0, 10);
+        }
+        $startTime = '@'.$startTime;
+    }
+    $startTime = new DateTime($startTime);
+    return $startTime->format($format);
+}
+
+ /**
+ * 判断是否为管理员
+ * @param  string  $stunum 学号
+ * @return boolean         是否为管理员
+ */
+function is_admin($stunum) 
+{
+    if (empty($stunum)) {
+        if (!session('admin')) {
+            return false;
+        }
+        $stunum = session('admin.stunum');
+    }
+    $stu = D('users')->where('stunum="%s"', $stunum)->find();
+    if (empty($stu)) {
+        return false;
+    }
+    $id = $stu['id'];
+    $is_admin = false;
+    $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
+    if($is_admin) {
+        return true;
+    } else {
+        $is_admin = M('administrators')->where('user_id='.$id)->find();
+        if (is_admin) {
+            return true;
+        }
+    }
+
+    return false;
+    
+}

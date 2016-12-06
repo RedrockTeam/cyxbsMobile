@@ -81,25 +81,25 @@ class PhotoController extends Controller {
     public function uploadArticle()
     {
         if (!$stunum = $this->getUploader()) {
-            returnJson(404, 'failed', array('status'=> 404, 'data'=>array()));
+            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
         }
         
         if (!$info = $this->pictrueUpload()) {
-            returnJson(404, 'failed', array('status'=> 404, 'data'=>array()));
+            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
         }
        
         $content = array_pop($info);
         $content['stunum'] = $stunum;                                 
-        returnJson(200, '', array('status'=> 200, 'data'=>$content));
+        returnJson(200, '', array('state'=> 200, 'data'=>$content));
     }
     //多文件上传
     public function multipleUploadArticle()
     {
         if (!$stunum = $this->getUploader()) {
-            returnJson(404, 'failed', array('status'=> 404, 'data'=>array()));
+            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
         }
         
-        if (!$info = $this->pictrueUpload(array(), $error)) {
+        if (!$info = $this->pictrueUpload(array(), $error, true)) {
             returnJson(404, 'failed', array('error'=> $error));
         }
 
@@ -108,17 +108,22 @@ class PhotoController extends Controller {
             "thumbnail_src" => 'thumbnailUrl',        
         );
         //更改信息
-        foreach ($info as  $file) {
+        foreach ($info as &$file) {
             foreach ($file as $key => $value) {
                 if (isset($trans[$key])) {
                     $file[$trans[$key]] = $value;
                     unset($file[$key]);
                 }
             }
+            $file['deleteType'] = "GET";
+            $file['deleteUrl'] = $this->getDeleteUrl($file['savename']);
+            unset($file['savename']);
         }
+        echo json_encode(array('files'=>$info));exit;
+
     }
 
-    public function pictrueUpload($files=array(), &$error='')
+    public function pictrueUpload($files=array(), &$error='', $is_detaild = false)
     {
         $upload = new \Think\Upload();
         $upload->maxSize = 4194304;
@@ -128,14 +133,22 @@ class PhotoController extends Controller {
         $upload->autoSub = false;
         $files = $upload->upload();
         if(($error = $upload->getError()) != null){
-           return false;
+            return false;
         }else{
-           $info = $this->processPhoto($files);
+           $info = $this->processPhoto($files, $is_detaild);
+           $stunum = $this->getUploader();
            $result = $this->consoleUpload($stunum, $info);
         }
         return $result ? $info : false;
     }
 
+    protected function getDeleteUrl($filename)
+    {
+        $site = $_SERVER["SERVER_NAME"];
+        $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
+        $deleteUrl =  "http://".$site.'/'.$folder_name[1].'/index.php/Home/Photo/deleteFile?fold='.$filename;
+        return $deleteUrl;
+    }
     public function upload(){
         header("Content-type: application/json");
         $photo = M('photo');
@@ -147,11 +160,11 @@ class PhotoController extends Controller {
             $result = M('admin')->where('stunum=\'%s\'', session('admin.stunum'))->find();
            
             if (!$result)
-                returnJson(404, 'failed', array('status'=> 404, 'data'=>array()));
+                returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
     
             $stunum = session('admin.stunum');
         } else {
-            returnJson(404, 'failed', array('status'=> 404, 'data'=>array()));
+            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
         }
         $condition = array(
             "stunum" => $stunum
@@ -259,6 +272,7 @@ class PhotoController extends Controller {
                     'name' => $file['name'],
                     'size' => $file['size'],
                     'type' => $file['type'],
+                    'savename' => $file['savename'],
                 ), $content);
             }
             $thumbnail->open('./Public/photo/'.$file['savename']);
@@ -282,15 +296,16 @@ class PhotoController extends Controller {
      */
     protected function consoleUpload($stunum, $files)
     {
+        
         if (empty($stunum) || empty($files)) {
             return false;
         }
         
         $photo = M('articlephoto');
         
-        foreach ($files as $key => $value) {
-            $value['stunum'] = $stunum;
-            $result = $photo->add($value);
+        foreach ($files as $key => $file) {
+            $file['stunum'] = $stunum;
+            $result = $photo->add($file);
             if (!$result) {
                 return false;
             }
@@ -298,11 +313,11 @@ class PhotoController extends Controller {
         return true;
     }
 
-    public function deleteFile($filename = '')
+    public function deleteFile($filename='')
     {
         if (empty($filename)) {
             $filename = I('fold');
-            if (empty($file)) {
+            if (empty($filename)) {
                 returnJson(404, 'error', array('error' => '没找到该文件'));
             } 
         }
@@ -315,6 +330,204 @@ class PhotoController extends Controller {
         } else {
             returnJson(404);
         }
+    }
+
+    //上传
+    public function uploadPictrue()
+    {
+        
+        if (!$this->verifyRole()) {
+            returnJson(403);
+        }
+        $info = I('post.');
+        $start = timeFormate($info['start']);
+
+        $created_time = timeFormate();
+        
+        $stunm = empty($info['stuNum']) ? session('admin.stunum') : $info['stuNum'];
+        $photo_src = $info['photo_src'];
+        //显示区域
+        $column = $info['column'];
+        if (empty($column) || empty($photo_src)) {
+            returnJson(404);
+        }
+        $target_url = $info['target_url'];
+        $user = M('users')->where('stunum=\'%s\'', $stunm)->find();
+        if (empty($user)) {
+            returnJson(404);
+        }
+        $user_id = $user['id'];
+        $annotation = $info['annotation'];
+        $data = compact('start', 'created_time', 'stunum', 'photo_src', 'column', 'user_id', 'target_url', 'annotation');
+        $result = M('displaypicture')->add($data);
+        if ($result) {
+            returnJson(200);
+        } else {
+            returnJson(404);
+        }
+    }
+
+    //显示
+    public function showPicture()
+    {
+        $column = I('column');
+        
+        if (empty($column)) {
+            returnJson(801);
+        }
+        $display = S('displayPicture');
+        if (false ===$cache || empty($display[$column])) {
+            $current_time = timeFormate();
+            $pos = array(
+                'state' => 1,
+                'start' => array('ELT', $current_time)
+            );
+            $field = array('target_url', 'photo_src', 'max(`start`)'=>'start', 'column', 'id');
+            $data = M('displaypicture')->where($pos)->field($field)->group('`column`')->select();
+            if (!$data) {
+                returnJson(404);
+            }
+            $display = array();
+            foreach ($data as $key => $picture) {
+                $display[$picture['column']] = array(
+                    'target_url' => $picture['target_url'], 
+                    'photo_src'=>$picture['photo_src'], 
+                    'start'=>$picture['start'], 
+                    'id'=>$picture['id']
+                    );
+            }
+            S('displayColumn', $display, 1200);
+        }
+        if (empty($display[$column])) {
+            returnJson(404, '错误关键词');
+        }
+        returnJson(200, '', array('data' => $display[$column]));
+    }
+
+    //重置缓存
+    public function refresh()
+    {
+        if (!$this->verifyRole()) {
+            returnJson(403);
+        }
+        S('displayPicture', null);
+        returnJson(200);
+    }
+
+    protected function verifyRole()
+    {
+        $stuNum = I('post.stuNum');
+        $baseConfirm = new BaseController;
+        return is_admin($stuNum);
+    }
+    /**
+     * 上传记录
+     */
+    public function uploadPictureList()
+    {
+        if (!$this->verifyRole()) {
+            returnJson(403);
+        }
+
+        $info = I('post.');
+        
+        $page = empty($info['page']) ? 0 : $info['page'];
+        $size = empty($info['size']) ? 10: $info['size'];
+        $pos = array('displaypicture.state'=> 1);
+        
+        if (!empty($info['column'])) {
+            $pos['column'] = $info['column'];
+        }
+
+        if (!empty($info['stuNum'])) {
+            $user = M('users')->where('stunum=\'%s\'', $info['stuNum'])->find();
+            if (!$user) {
+                returnJson(404, 'error stunum');
+            }
+            $pos['user_id'] = $user['id'];
+        }
+
+        $field = array(
+                'displaypicture.id' => 'id', 
+                'column',
+                'stunum' => 'uploaderStunum',
+                'username' => 'uploaderName',
+                "displaypicture.photo_src",
+                'displaypicture.`start`',
+                'target_url',
+                'displaypicture.created_time',
+                'annotation',
+                );
+        //查询
+        $data = M('displaypicture')
+                    ->alias('displaypicture')
+                    ->join('join __USERS__ ON __USERS__.id = displaypicture.user_id')
+                    ->where($pos)
+                    ->field($field)
+                    ->order('displaypicture.created_time desc')
+                    ->limit($page*$size, $size)
+                    ->select();
+        returnJson(200, '', array('data'=> $data));
+    }
+
+    //修改
+    protected function editDb($object, $change, $primarykeyName = 'id')
+    {
+        if (empty($object))
+            return false;
+        
+        elseif (is_array($object)) {    
+            if (!in_array($primarykeyName, $object)) {
+                return false;
+            }
+            $pk = $object[$primarykeyName];
+        } else {
+            $pk = $object;
+        }
+        $tableColumns = M('displaypicture')->getDbFields();
+        foreach ($change as $key => $value) {
+            if (!in_array($key, $tableColumns)) {
+                return false;
+            } 
+        }
+        $change[$primarykeyName] = $pk;
+        $change['created_time'] =  timeFormate();
+        $result = M('displaypicture')->save($change);
+        return $result ? true : false;
+    }
+
+    public function delete()
+    {
+        if (!$this->verifyRole()) {
+            returnJson(403);
+        }
+        $id = I('post.id');
+        if ($this->editDb($id, array('state' => 0))) {
+            returnJson(200);
+        } else {
+            returnJson(404);
+        }
+    }
+
+    public function edit()
+    {
+        if (!$this->verifyRole()) {
+            returnJson(403);
+        }
+        $info = I('post.');
+        $stunum = empty($info['stuNum']) ? session('admin.stunum') : $info['stuNum'];
+        $user = M('users')->where('stunum=\'%s\'', $stunum)->find();
+        if (!$user) {
+            returnJson(404, 'error stunum');
+        }
+        
+        unset($info['stuNum']);
+        unset($info['idNum']);
+        $info['user_id'] = $user['id'];
+        if ($this->editDb($info['id'], $info))
+            returnJson(200);
+        else
+            returnJson(404);
     }
 
 }
