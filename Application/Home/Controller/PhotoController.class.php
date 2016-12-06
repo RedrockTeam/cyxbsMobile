@@ -344,7 +344,7 @@ class PhotoController extends Controller {
 
         $created_time = timeFormate();
         
-        $stunm = empty($info['stuNum']) ? session('admin.stunum') : $info['stuNum'];
+        $stunum = empty($info['stuNum']) ? session('admin.stunum') : $info['stuNum'];
         $photo_src = $info['photo_src'];
         //显示区域
         $column = $info['column'];
@@ -352,7 +352,8 @@ class PhotoController extends Controller {
             returnJson(404);
         }
         $target_url = $info['target_url'];
-        $user = M('users')->where('stunum=\'%s\'', $stunm)->find();
+        $user = M('users')->where('stunum=\'%s\'', $stunum)->find();
+
         if (empty($user)) {
             returnJson(404);
         }
@@ -372,11 +373,11 @@ class PhotoController extends Controller {
     {
         $column = I('column');
         
-        if (empty($column)) {
-            returnJson(801);
-        }
-        $display = S('displayPicture');
-        if (false ===$cache || empty($display[$column])) {
+        $display = S('displayPicture'); 
+        if (!empty($column)) {
+            $display = $display[$column];
+        } 
+        if (false ===$cache || empty($display)) {
             $current_time = timeFormate();
             $pos = array(
                 'state' => 1,
@@ -397,11 +398,15 @@ class PhotoController extends Controller {
                     );
             }
             S('displayColumn', $display, 1200);
+            if (!empty($column)) {
+                $display = $display[$column];
+            } 
         }
-        if (empty($display[$column])) {
+    
+        if (empty($display)) {
             returnJson(404, '错误关键词');
         }
-        returnJson(200, '', array('data' => $display[$column]));
+        returnJson(200, '', array('data' => $display));
     }
 
     //重置缓存
@@ -523,6 +528,7 @@ class PhotoController extends Controller {
         
         unset($info['stuNum']);
         unset($info['idNum']);
+        unset($info['state']);
         $info['user_id'] = $user['id'];
         if ($this->editDb($info['id'], $info))
             returnJson(200);

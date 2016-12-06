@@ -17,7 +17,7 @@ class BaseController extends Controller {
         if (isset($admin)) {
             $admin = M('admin')->find($admin);
             if ($admin) {
-                return ;
+                return;
             }
         }
         header("Content-type: application/json");

@@ -18,7 +18,8 @@ function getMillisecond()
  * @return [type]         [description]
  */
 function returnJson($status, $info="", $data = array()) 
-{
+{   
+    // print_r(debug_backtrace());exit;
     switch ($status) {
         case 404: 
             $report = array('status'=> 404, 'info'=>'请求参数错误');
@@ -121,4 +122,9 @@ function is_admin($stunum)
 
     return false;
     
+}
+
+function forbidwordCheck($value, $field)
+{
+    return $value;
 }

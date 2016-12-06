@@ -1,5 +1,6 @@
 <?php
 namespace Home\Controller;
+
 use Think\Controller;
 
 class ArticleController extends BaseController {
@@ -138,6 +139,7 @@ class ArticleController extends BaseController {
         $user_condition = array(
             "stunum" =>$data['stuNum']
         );
+        var_dump($data);
         // $thumbnail_src_array = I('post.thumbnail_src');
         // $photo_src_array = I('post.photo_src_array');
         // $thumbnail_src_array=explode(",",$thumbnail_src_array);
@@ -151,6 +153,9 @@ class ArticleController extends BaseController {
         //     $data['photo_src'] = $$photo_src_string;
         // }
         $user_id = $user->where($user_condition)->find();
+        if (!$user_id) {
+            returnJson(404, 'error stuNum');
+        }
         switch ($data['type_id']) {
             case 5:        
                 $article  = D('articles');
@@ -160,7 +165,7 @@ class ArticleController extends BaseController {
                 if(empty($data['keyword'])) {
                     returnJson(801);
                 }
-                $result = M('topic')->where('keyword' => $data['keyword'])->find();
+                $result = M('topic')->where(array('keyword' => $data['keyword']))->find();
                 if (!$result) {
                     returnJson(801, 'this topic isn\'t exist');
                 }
@@ -181,6 +186,9 @@ class ArticleController extends BaseController {
         $data['user_id'] = $user_id['id'];
         $data['created_time'] = date("Y-m-d H:i:s", time());
         $data['updated_time'] = date("Y-m-d H:i:s", time());
+        $data['read_num'] = 0;
+        $data['like_num'] = 0;
+        $data['remark_num'] = 0;
         $article_check = $article->add($data);
         $hotarticles = M('hotarticles');
         $content = $data;
@@ -612,7 +620,7 @@ class ArticleController extends BaseController {
                 case 'keyword':            
                 case 'content':
                 case 'title':
-                    if(empty($value) || !Forbidword::check($value, $field)) {
+                    if(empty($value) || !forbidwordCheck($value, $field)) {
                         $error = $field."'s value is error";    
                         return false;
                     }
@@ -625,8 +633,9 @@ class ArticleController extends BaseController {
                     }
                     break;
 
-                case 'state'
-                unset($information[$field]);
+                case 'state':
+                    unset($information[$field]);
+                    break;
                 break; 
             }
         }
@@ -648,36 +657,40 @@ class ArticleController extends BaseController {
             return false;
         }
 
-        foreach ($information as $field => $value) {
-            case 'title':
-            case 'content':
-                 if(empty($value) || !Forbidword::check($value, $field)) {
-                        $error = $field."'s value is error";    
+        foreach ($information as $field => &$value) {
+            switch ($field) {
+
+                case 'title':
+                case 'content':
+                     if(empty($value) || !forbidwordCheck($value, $field)) {
+                            $error = $field."'s value is error";    
+                            return false;
+                        }
+                    break;
+                
+                case 'type_id':
+                    if ($value < 5 || $value ==6 ){
+                        $error = "this type is not allowed";
                         return false;
                     }
-                break;
-            
-            case 'type_id':
-                if ($value < 5 || $value ==6 ){
-                    $error = "this type is not allowed";
-                    return false;
-                }
-            case 'article_id':
-                if (!is_numeric($value) && !$is_add) {
-                    $error = $field."'s value is error";
-                    return false;
-                }
-                break;
+                case 'article_id':
+                    if (!is_numeric($value) && !$is_add) {
+                        $error = $field."'s value is error";
+                        return false;
+                    }
+                    break;
 
-            case 'stuNum':
-                if (strlen($value) !== 10) {
-                    $error = 'errpr student number';
-                    return false;
-                }
-            
-            case 'state'
-                unset($information[$field]);
-                break; 
+                case 'stuNum':
+                    if (strlen($value) !== 10) {
+                        $error = 'errpr student number';
+                        return false;
+                    }
+                    break;
+                
+                case 'state':
+                    unset($information[$field]);
+                    break;
+            } 
         }
         if (empty($information['type_id']) || empty($information['stuNum'])) {
             $error = 'Don\'t match the type_id in the information';
