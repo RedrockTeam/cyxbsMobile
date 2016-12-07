@@ -106,14 +106,13 @@ class NewArticleController extends Controller
                 $praise  = M('articlepraises');
                 $articlePhoto  = M('articlephoto');
                 $articles = $article->where($condiion_articles)->relation(true)->find();
-                $praise_condition = array(
-                    "articletypes_id" => $data[$key]['articletypes_id'],
-                    "article_id"      => $data[$key]['article_id'],
-                    "stunum"          => I('post.stuNum')
-                );
-                
+                // $praise_condition = array(
+                //     "articletypes_id" => $data[$key]['articletypes_id'],
+                //     "article_id"      => $data[$key]['article_id'],
+                //     "stunum"          => I('post.stuNum')
+                // );    
                 $stuNum = I('post.stuNum');
-                $value['is_my_like'] = $this->is_my_like($value['id'], $value['articletype_id'], $stuNum);
+                $exist = $this->is_my_like($value['article_id'], $value['articletype_id'], $stuNum);
                 $photo_content = $articlePhoto->where($photo_condition)->select();
                 $now_info = array(
                     'status' => 200,
@@ -307,7 +306,7 @@ class NewArticleController extends Controller
                     $articletable.'.type_id',
                     $articletable.'.updated_time',
                     $articletable.'.created_time',
-                    $user.'.photo_src' => 'user_photo'
+                    $articletable.'.photo_src' => 'user_photo'
                 );
                 $content = $article
                             ->alias($articletable)
