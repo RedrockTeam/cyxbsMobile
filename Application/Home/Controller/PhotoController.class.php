@@ -445,7 +445,7 @@ class PhotoController extends Controller {
         }
 
         if (!empty($info['uploadStuNum'])) {
-            $user = M('users')->where('stunum=\'%s\'', $info['stuNum'])->find();
+            $user = M('users')->where('stunum=\'%s\'', $info['uploadStuNum'])->find();
             if (!$user) {
                 returnJson(404, 'error stunum');
             }
