@@ -23,7 +23,7 @@ class Forbidword
 
 	public function check(&$string, $IsIgnoreCase=false)
 	{
-		$len = strlen($string);
+		$len = $this->strlen($string);
 		$has_forbid = false;
 
 		if ($len===0) {
@@ -51,7 +51,7 @@ class Forbidword
 				//$q 为string的字符，$p对应该字符对应的数组
 				$q = $i;
 				$p = $this->forbidwordList[$string[$q]];
-				$length;
+				$length = '';
 				while(empty($p)) {
 					if(isset($p['length'])) {
 						$length = $p['length'];
@@ -173,6 +173,37 @@ class Forbidword
 	public function getLastError()
 	{
 		return $this->error;
+	}
+
+	
+	//字符串截取
+	public function substr($str, $offset = 0, $length='', $charset= 'utf-8')
+	{
+	    if (empty($str)) {
+	        return false;
+	    }
+	    if($length === '') {
+	    	$length = $this->strlen($str);
+	    }
+	    return iconv_substr($str, $offset, $length, $charset);
+	}
+	//字符串长度
+	public function strlen($str, $charset= 'utf-8')
+	{
+	    if (empty($str)) {
+	        return 0;
+	    }
+	    return iconv_substr($str, $charset);
+	}
+	//字符串长度
+	public function strpos($str, $needle, $offset=0, $charset='utf-8')
+	{
+		return iconv_strpos($str, $needle, $offset=0, $charset='utf-8');
+	}
+
+	public function strrpos($str, $needle, $charset='utf-8')
+	{
+		return iconv_strpos($str, $needle, $charset='utf-8');
 	} 
 }
 
