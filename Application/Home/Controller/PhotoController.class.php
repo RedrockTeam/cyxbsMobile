@@ -333,7 +333,7 @@ class PhotoController extends Controller {
     }
 
     //上传
-    public function uploadPictrue()
+    public function uploadPicture()
     {
         
         if (!$this->verifyRole()) {
