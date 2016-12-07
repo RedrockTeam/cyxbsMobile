@@ -126,7 +126,7 @@ class ArticleController extends BaseController {
     public function addArticle()
     {
         $data = I('post.');
-        if($this->produceArticleInformation($data, $true, $error)){
+        if(!$this->produceArticleInformation($data, true, $error)){
             $info = array(
                     'state' => 801,
                     'status' => 801,
@@ -139,7 +139,6 @@ class ArticleController extends BaseController {
         $user_condition = array(
             "stunum" =>$data['stuNum']
         );
-        var_dump($data);
         // $thumbnail_src_array = I('post.thumbnail_src');
         // $photo_src_array = I('post.photo_src_array');
         // $thumbnail_src_array=explode(",",$thumbnail_src_array);
@@ -183,6 +182,7 @@ class ArticleController extends BaseController {
                 unset($data[$key]);
             }
         }
+        
         $data['user_id'] = $user_id['id'];
         $data['created_time'] = date("Y-m-d H:i:s", time());
         $data['updated_time'] = date("Y-m-d H:i:s", time());
@@ -632,7 +632,7 @@ class ArticleController extends BaseController {
                         return false;
                     }
                     break;
-
+                case 'id':
                 case 'state':
                     unset($information[$field]);
                     break;
@@ -656,7 +656,6 @@ class ArticleController extends BaseController {
             $error = "empty information";
             return false;
         }
-
         foreach ($information as $field => &$value) {
             switch ($field) {
 
@@ -673,6 +672,8 @@ class ArticleController extends BaseController {
                         $error = "this type is not allowed";
                         return false;
                     }
+                    break;
+
                 case 'article_id':
                     if (!is_numeric($value) && !$is_add) {
                         $error = $field."'s value is error";
@@ -686,7 +687,7 @@ class ArticleController extends BaseController {
                         return false;
                     }
                     break;
-                
+                case 'id':
                 case 'state':
                     unset($information[$field]);
                     break;
