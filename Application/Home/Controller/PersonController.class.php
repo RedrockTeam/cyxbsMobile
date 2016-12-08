@@ -511,9 +511,12 @@ class PersonController extends BaseController {
             switch($field) {
                 case 'date' :
                     if (is_string($value)) {
+                        print_r($value.'<br/>');
                         $value =  $_POST[$field];
+                        print_r($value.'<br/>');
                         $value = json_decode($value, true);
-                        if (!$value) {
+                        print_r($value);
+                        if ($value === null) {
                             $this->error = "error json string";
                             return false;
                         }
