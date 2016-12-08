@@ -383,7 +383,7 @@ class PhotoController extends Controller {
                 'state' => 1,
                 'start' => array('ELT', $current_time)
             );
-            $field = array('target_url', 'photo_src', 'max(`start`)'=>'start', 'column', 'id');
+            $field = array('target_url', 'photo_src', 'max(`start`)'=>'start', 'column', 'id', 'annotation');
             $data = M('displaypicture')->where($pos)->field($field)->group('`column`')->select();
             if (!$data) {
                 returnJson(404);
@@ -394,10 +394,11 @@ class PhotoController extends Controller {
                     'target_url' => $picture['target_url'], 
                     'photo_src'=>$picture['photo_src'], 
                     'start'=>$picture['start'], 
-                    'id'=>$picture['id']
+                    'id'=>$picture['id'],
+                    'annotation' => $picture['annotation'],
                     );
             }
-            S('displayColumn', $display, 1200);
+            S('displayColumn', $display, 60*60*24);
             if (!empty($column)) {
                 $display = $display[$column];
             } 
