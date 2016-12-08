@@ -512,6 +512,9 @@ class PersonController extends BaseController {
                 case 'date' :
                     if (is_string($value)) {
                         $value = I('post.'.$field,'','');
+                        if(ini_get("magic_quotes_gpc")=="1") {  
+                            $json_string=stripslashes($json_string);  
+                        }  
                         $value = json_decode($value, true);
                         if ($value === null) {
                             $this->error = "error json string";
