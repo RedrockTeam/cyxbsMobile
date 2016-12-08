@@ -344,14 +344,16 @@ class PersonController extends BaseController {
     {
         $pos = array("transaction_id"=>$id);
         $before_dates = M('transaction_time')->where($pos)->select();
-        $before_count = count($before_dates);
+        $before_count = count($before_dates); 
         $after_count = count($dates);
         $max = $before_count > $after_count ? $before_count : $after_count;
         $result = true;
         for($i=0; $i<$before_count||$i<$after_count ; $i++) {
             if ($i >= $after_count) {
-                $before_dates[$i]['state'] = 0;
-                $result = M('transaction_time')->data($before_dates[$i])->save();
+                // $before_dates[$i]['state'] = 0;
+                $pram = array('id' =>  $before_dates[$i]['id'], 'state'=>0);
+                $result = M('transaction_time')->data($pram)->save();
+                var_dump($result);
             } elseif ($i >= $before_count) {
                 $date = $dates[$i];
                 $date['transaction_id'] = $id;
@@ -363,7 +365,7 @@ class PersonController extends BaseController {
                 $date['updated_time'] = date('Y-m-d H:i:s');
                 $result = M('transaction_time')->data($date)->save();
             }
-            if (!$result) {
+            if (false === $result) {
                 $this->error = "edit Time false";
                 return false;
             }
@@ -579,6 +581,13 @@ class PersonController extends BaseController {
                     $len = strlen($value);
                     if ($len !== 17 || !is_numeric($value)) {
                         return false;
+                    }
+                    if (!$is_edit) {
+                       $result =  M('transaction')->find($value);
+                       if($result) {
+                        $this->error = "the id already exist!";
+                       }
+                       return false;
                     }
                     break;
                 
