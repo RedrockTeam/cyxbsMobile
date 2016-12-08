@@ -509,8 +509,7 @@ class PersonController extends BaseController {
             switch($field) {
                 case 'date' :
                     if (!is_array($value)) {
-                        $value = htmlspecialchars_decode($value);
-                        $value = stripslashes($value);
+                        $value =  $_POST[$field];
                         $value = json_decode($value, true);
                     }
                     $stack = array();
