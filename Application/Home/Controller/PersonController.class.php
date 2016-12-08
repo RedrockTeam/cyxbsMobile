@@ -348,7 +348,7 @@ class PersonController extends BaseController {
         $after_count = count($dates);
         $max = $before_count > $after_count ? $before_count : $after_count;
         $result = true;
-        for($i=0; $i<$before_count; $i++) {
+        for($i=0; $i<$before_count||$i<$after_count ; $i++) {
             if ($i >= $after_count) {
                 $before_dates[$i]['state'] = 0;
                 $result = M('transaction_time')->data($before_dates[$i])->save();
