@@ -513,7 +513,7 @@ class PersonController extends BaseController {
                     if (is_string($value)) {
                         $value = I('post.'.$field,'','');
                         if(ini_get("magic_quotes_gpc")=="1") {  
-                            $json_string=stripslashes($json_string);  
+                            $value = stripslashes($value);  
                         }  
                         $value = json_decode($value, true);
                         if ($value === null) {
