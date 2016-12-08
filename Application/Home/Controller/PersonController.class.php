@@ -9,7 +9,7 @@ class PersonController extends BaseController {
         'delete'=> array('before'=>'1,-1', 'after' => 0, 'function'=>'deleteTransactionTime'),
         'recover' => array('before'=> 0, 'after' => 1, 'function'=> 'recoverTransactionTime'),
     );
-
+    protected $error;
     public function search(){
         $user = M('users');
         $stunum_other = I('post.stunum_other');
@@ -133,7 +133,7 @@ class PersonController extends BaseController {
         $information = I('post.');
 
         if (!$this->produceTransaction($information)) {
-            returnJson(404);
+            returnJson(404, $this->error);
         }
 
         $user = M('users')->where("stunum='%s'", $information['stuNum'])->find();
@@ -141,8 +141,8 @@ class PersonController extends BaseController {
             returnJson(404,'没有完善信息,无法添加事务');
         }
         $user_id = $user['id'];
-        if(!$this->derepeat($user_id, $information, $information['date'], $error)) {
-            returnJson(404, $error);
+        if(!$this->derepeat($user_id, $information, $information['date'], $this->error)) {
+            returnJson(404, $this->error);
         }
 
         $id = empty($information['id']) ? getMillisecond().sprintf("%04.0f",mt_rand(0000,9999)) : $information['id'];
@@ -309,7 +309,7 @@ class PersonController extends BaseController {
         $information = I('post.');
         
         if (!$this->produceTransaction($information, true, $change)) {
-            returnJson(404);
+            returnJson(404, $this->error);
         }
         //未修改
         if (empty($change)) {
@@ -326,7 +326,7 @@ class PersonController extends BaseController {
         $change['updated_time'] = date('Y-m-d H:i:s');
         if (isset($change['date'])) {
             if (!$this->editTransactionTime($change['id'], $change['date']))
-                returnJson(404);
+                returnJson(404, $this->error);
         }
         if (M('transaction')->data($change)->save()) {
             returnJson(200);
@@ -364,6 +364,7 @@ class PersonController extends BaseController {
                 $result = M('transaction_time')->data($date)->save();
             }
             if (!$result) {
+                $this->error = "edit Time false";
                 return false;
             }
         }
@@ -505,12 +506,17 @@ class PersonController extends BaseController {
         }
         foreach ($information as $field => &$value) {
             $inField = true;
+            $this->error = "$field is error";
             //选择类型 
             switch($field) {
                 case 'date' :
-                    if (!is_array($value)) {
+                    if (is_string($value)) {
                         $value =  $_POST[$field];
                         $value = json_decode($value, true);
+                        if (!$value) {
+                            $this->error = "error json string";
+                            return false;
+                        }
                     }
                     $stack = array();
                     foreach($value as $key => &$date) {
