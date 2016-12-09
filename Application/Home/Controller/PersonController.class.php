@@ -585,8 +585,8 @@ class PersonController extends BaseController {
                        $result =  M('transaction')->find($value);
                        if($result) {
                         $this->error = "the id already exist!";
-                       }
-                       return false;
+                        return false;
+                       }      
                     }
                     break;
                 
