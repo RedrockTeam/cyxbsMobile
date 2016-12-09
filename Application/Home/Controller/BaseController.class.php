@@ -24,16 +24,16 @@ class BaseController extends Controller {
         $this->article = D('articles');
         $this->article_types = D('articletypes');
         $this->article_remarks = D('articleremarks');
-        $stunum = I('post.stuNum');
+        $stuNum = I('post.stuNum');
         $idNum = I('post.idNum');
-        if($stunum==null|| $idNum == null){
+        if($stuNum==null|| $idNum == null){
             $info = array(
                 "status" => 801,
                 "info"   => "invalid parameter"
             );
             returnJson(801);
         }else{
-            $this->verify($stunum, $idNum);
+            $this->verify($stuNum, $idNum);
            
                 // $stunum = I('post.stuNum');
                 // $idNum  = I('post.idNum');
@@ -45,14 +45,14 @@ class BaseController extends Controller {
 
 
     }
-    public function verify($stunum, $idnum)
+    public function verify($stuNum, $idNum)
     {
-        if(S($stunum) == $idNum){
+        if(S($stuNum) == $idNum){
         
         }else{
             $condition = array(
-                "stuNum" => $stunum,
-                "idNum"  => $idnum
+                "stuNum" => $stuNum,
+                "idNum"  => $idNum
             );
             $needInfo = $this->curl_init($this->apiUrl,$condition);
             $needInfo = json_decode($needInfo,true);
@@ -60,7 +60,7 @@ class BaseController extends Controller {
                 echo json_encode($needInfo);
                 exit;
             }else{
-                S($stunum, $idNum);
+                S($stuNum, $idNum);
             }
             return true;
         }
