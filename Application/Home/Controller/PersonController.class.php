@@ -274,7 +274,8 @@ class PersonController extends BaseController {
             'id',
             'time',
             'title',
-            'content',       
+            'content',
+            'updated_time',       
         );
         $pos = array(
             'user_id' => $user['id'],   
@@ -284,7 +285,7 @@ class PersonController extends BaseController {
         $data = M('transaction')
                             ->where($pos)
                             ->field($field)
-                            ->order('updated_time')
+                            ->order('updated_time desc')
                             ->select();
         foreach ($data as &$transaction) {
             $transaction['date'] = M('transaction_time')
@@ -314,10 +315,6 @@ class PersonController extends BaseController {
         //未修改
         if (empty($change)) {
             returnJson(801);
-        }
-        $transaction = M('transaction')->where('state!=0')->find($information['id']);
-        if (!$transaction) {
-            returnJson(404, 'transaction not exist');
         }
         //是否有权修改
         if (!$this->isTransactionOwner($information['id'], $information['stuNum'])) {
@@ -388,7 +385,7 @@ class PersonController extends BaseController {
     {
     
         $pos = array('id'=>$id);
-        
+
         if (!$operateForDeleted) {
             $pos['state'] = array('neq', 0);
         }
@@ -516,8 +513,12 @@ class PersonController extends BaseController {
             //选择类型 
             switch($field) {
                 case 'date' :
+                    if (empty($value)) {
+                        unset($information[$field]);
+                    }
                     if (is_string($value)) {
                         $value = I('post.'.$field,'','');
+                        //magic_quotes_gpc 将http传来的字符串""自动转义，这里去转义
                         if(ini_get("magic_quotes_gpc")=="1") {  
                             $value = stripslashes($value);  
                         }  
@@ -586,15 +587,22 @@ class PersonController extends BaseController {
                     if ($len !== 17 || !is_numeric($value)) {
                         return false;
                     }
+                    $result =  M('transaction')->find($value);
                     if (!$is_edit) {
-                       $result =  M('transaction')->find($value);
                        if($result) {
                         $this->error = "the id already exist!";
                         return false;
                        }      
+                    } else {
+                        if(!$result || $result['state']==0) {
+                            $this->error = "the transaction not exist!";
+                        }
                     }
                     break;
-                
+                case 'state':
+                    $inField = false;
+                    unset($information['state']);
+                    break;
                 default:
                     $inField = false;
                }
@@ -603,8 +611,6 @@ class PersonController extends BaseController {
                     $parameter[$field] = $value; 
                }
         }
-        if (isset($information['state'])) 
-            unset($information['state']);
        if (!$is_edit) {
             if (is_null($information['content'])) {
                 $information['content'] = '';
