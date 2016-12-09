@@ -328,7 +328,7 @@ class PersonController extends BaseController {
             if (!$this->editTransactionTime($change['id'], $change['date']))
                 returnJson(404, $this->error);
         }
-        if (M('transaction')->data($change)->save()) {
+        if (false !== M('transaction')->data($change)->save()) {
             returnJson(200);
         } else {
             returnJson(500, 'error');
