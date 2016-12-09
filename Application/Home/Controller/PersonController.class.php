@@ -289,7 +289,7 @@ class PersonController extends BaseController {
                             ->select();
         foreach ($data as &$transaction) {
             $transaction['date'] = M('transaction_time')
-                                ->where(array('transaction_id'=>$transaction['id']))
+                                ->where(array('transaction_id'=>$transaction['id'], 'state'=>1))
                                 ->field('class, day, week')
                                 ->select();
             foreach($transaction['date'] as &$value) {
