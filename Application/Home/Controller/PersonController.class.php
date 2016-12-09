@@ -353,7 +353,6 @@ class PersonController extends BaseController {
                 // $before_dates[$i]['state'] = 0;
                 $pram = array('id' =>  $before_dates[$i]['id'], 'state'=>0);
                 $result = M('transaction_time')->data($pram)->save();
-                var_dump($result);
             } elseif ($i >= $before_count) {
                 $date = $dates[$i];
                 $date['transaction_id'] = $id;
