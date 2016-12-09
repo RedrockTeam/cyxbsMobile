@@ -246,7 +246,7 @@ class PersonController extends BaseController {
         $data['updated_time'] = date('Y-m-d H:i:s');
         $data['state'] = -1;
         $result = M('transaction_time')->where($pos)->data($data)->save();
-        return $result;
+        return false != $result;
     }
     //当事项被恢复时，改变其时间的状态为1
     protected function recoverTransactionTime($information)
@@ -255,7 +255,7 @@ class PersonController extends BaseController {
         $data['updated_time'] = date('Y-m-d H:i:s');
         $data['state'] = 1;
         $result = M('transaction_time')->where($pos)->data($data)->save();
-        return $result;
+        return false != $result;
     }
 
 
@@ -315,6 +315,10 @@ class PersonController extends BaseController {
         if (empty($change)) {
             returnJson(801);
         }
+        $transaction = M('transaction')->where('state!=0')->find($information['id']);
+        if (!$transaction) {
+            returnJson(404, 'transaction not exist');
+        }
         //是否有权修改
         if (!$this->isTransactionOwner($information['id'], $information['stuNum'])) {
             if(!$this->is_admin($information['stuNum'])) {
@@ -324,11 +328,12 @@ class PersonController extends BaseController {
 
         $change['id'] = $information['id'];
         $change['updated_time'] = date('Y-m-d H:i:s');
+        
         if (isset($change['date'])) {
             if (!$this->editTransactionTime($change['id'], $change['date']))
                 returnJson(404, $this->error);
         }
-        if (false !== M('transaction')->data($change)->save()) {
+        if (M('transaction')->data($change)->save()) {
             returnJson(200);
         } else {
             returnJson(500, 'error');
@@ -383,7 +388,7 @@ class PersonController extends BaseController {
     {
     
         $pos = array('id'=>$id);
-
+        
         if (!$operateForDeleted) {
             $pos['state'] = array('neq', 0);
         }
