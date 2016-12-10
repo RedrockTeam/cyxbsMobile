@@ -130,7 +130,7 @@ class ArticleController extends BaseController {
             $info = array(
                     'state' => 801,
                     'status' => 801,
-                    'info'  => 'invalid parameter',
+                    'info'  => $error,
                 );
             echo json_encode($info,true);
             exit;
@@ -668,7 +668,7 @@ class ArticleController extends BaseController {
                     break;
                 
                 case 'type_id':
-                    if ($value < 5 || $value ==6 ){
+                    if ($value < 5 || $value == 6 ){
                         $error = "this type is not allowed";
                         return false;
                     }
@@ -698,12 +698,17 @@ class ArticleController extends BaseController {
             return false;
         }
         //当不为添加的时候，文章的id必须存在
-        if (!$is_add) {
+        if ($is_add) {
+            $information['photo_src'] = isset($information['photo_src']) ? $information['photo_src'] : '';
+            $information['thumbnail_src'] = isset($information['thumbnail_src']) ? $information['thumbnail_src'] : '';
+        } else {
+            //当不为添加的时候，文章的id必须存在
             if(empty($information['article_id'])) {
                 $error = 'Can\'t match the article_id';
                 return false;
             }
-        }   
+        }
+        return true;   
     }
 
 
