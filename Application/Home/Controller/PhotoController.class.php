@@ -4,11 +4,42 @@ use Think\Controller;
 class PhotoController extends Controller {
 
     protected $key = 'fold';
-    protected $rootPath = './Public/photo/';
+    protected $config;
     
     public function index(){
 
     }
+    public function _initialize()
+    {   
+        //域名
+        $site = $_SERVER["SERVER_NAME"];
+        $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
+        $app_path = "http://".$site.'/'.$folder_name[1];
+        
+        $rootPath = "./Public/photo/";
+
+        $thumbnail_rootPath = $rootPath.'thumbnail';
+        
+        $photosrc = $app_path.$folder_name[1].trim($rootPath, '.');
+            //缩略图地址
+        $thunmbnail_src =  $photo.'thumbnail/';
+        
+        $default_config = array(
+            'maxSize'       => 4194304, 
+            'exts'          =>  array('png', 'jpeg',"jpg" , 'PNG','JPEG','JPG'),
+            'thumb_width'   => 150,
+            'thumb_height'  => 150,
+            'autoSub'       => false,
+            'rootPath'      => $rootPath,
+            'photo_fullpath'   =>  $fullpath,
+            'thunmbnail_filepath' => $thunmbnail_filepath,
+            'app_path'      => $app_path.'/',
+            'thumbnail_rootPath' => $thumbnail_rootPath,
+        );
+        $this->config = $default_config;
+    }
+
+
 
     public function search(){
         header("Content-type: application/json");
@@ -80,18 +111,17 @@ class PhotoController extends Controller {
     
     public function uploadArticle()
     {
-        if (!$stunum = $this->getUploader()) {
-            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
-        }
+
+        if (!$stunum = $this->getUploader())
+            returnJson(404, 'error stunum', array('state'=> 404, 'data'=>array()));
         
-        if (!$info = $this->pictrueUpload()) {
-            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
-        }
-       
+        if (!($info = $this->pictrueUpload()) || !($result = $this->consoleUpload($stunum, $info)))
+            returnJson(404, 'upload error', array('state'=> 404, 'data'=>array()));
         $content = array_pop($info);
-        $content['stunum'] = $stunum;                                 
+        $content['stunum'] = $stunum;                              
         returnJson(200, '', array('state'=> 200, 'data'=>$content));
     }
+    
     //多文件上传
     public function multipleUploadArticle()
     {
@@ -99,7 +129,9 @@ class PhotoController extends Controller {
             returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
         }
         
-        if (!$info = $this->pictrueUpload(array(), $error, true)) {
+        if ((!$info = $this->pictrueUpload(array(), $error, true)) 
+            || !($result = $this->consoleUpload($stunum, $info))) 
+        {
             returnJson(404, 'failed', array('error'=> $error));
         }
 
@@ -122,24 +154,69 @@ class PhotoController extends Controller {
         echo json_encode(array('files'=>$info));exit;
 
     }
-
-    public function pictrueUpload($files=array(), &$error='', $is_detaild = false)
+    //上传头像
+    public function upload()
     {
+       
+        $photo = M('photo');
+        
+        if (!$stunum = $this->getUploader()) {
+            returnJson(404,'error stunum',  array('state'=>404));
+        }
+        
+        
+        if (!$info = $this->pictrueUpload()) {
+            returnJson(404, 'upload error', array('state'=>404));
+        }
+      
+        $content = array_pop($info);
+        
+        $content['date'] = date("Y-m-d H:i:s", time());
+        //记录
+        $content['stunum'] = $stunum;
+        $goal = $photo->add($content);
+        $condition = array('stunum' => $stunum);
+        
+        //用户更新数据
+        $user = M('users');
+        $checkUser = $user->where($condition)->find();
+        if($checkUser != NULL){
+            $user_content = array(
+                "photo_src" => $content['photosrc'],
+                "photo_thumbnail_src" => $content['thumbnail_src'],
+                "updated_time"  => date("Y-m-d H:i:s", time())
+            );
+            $goal_2 = $user->where($condition)->data($user_content)->save();
+        }else{
+            $user_content = array(
+                "stunum"   => $stunum,
+                "photo_src" => $content['photosrc'],
+                "photo_thumbnail_src" => $content['thumbnail_src'],
+                "created_time" => date("Y-m-d H:i:s", time()),
+                "updated_time"  => date("Y-m-d H:i:s", time())
+            );
+            $goal_2 = $user->add($user_content);
+        }
+        ($goal&& $goal_2) ? returnJson(200) : returnJson(404, 'edit user error', array('state'=>404));
+        
+    }
+
+    public function pictrueUpload($files=array(), &$error='', $is_detaild = false, $config = array())
+    {
+        $config = array_merge($this->config, $config);
         $upload = new \Think\Upload();
-        $upload->maxSize = 4194304;
-        $upload->exts = array('png', 'jpeg',"jpg" , 'PNG','JPEG','JPG');
-        $upload->rootPath  =  $this->rootPath;
+        $upload->maxSize = $config['maxSize'];
+        $upload->exts = $config['exts'];
+        $upload->rootPath  =  $config['rootPath'];
         $upload->saveName = time().'_'.mt_rand();
-        $upload->autoSub = false;
+        $upload->autoSub = $config['autoSub'];
         $files = $upload->upload();
         if(($error = $upload->getError()) != null){
             return false;
         }else{
-           $info = $this->processPhoto($files, $is_detaild);
-           $stunum = $this->getUploader();
-           $result = $this->consoleUpload($stunum, $info);
+           $info = $this->processPhoto($files, $config, $is_detaild);
         }
-        return $result ? $info : false;
+        return $info;
     }
 
     protected function getDeleteUrl($filename)
@@ -149,106 +226,17 @@ class PhotoController extends Controller {
         $deleteUrl =  "http://".$site.'/'.$folder_name[1].'/index.php/Home/Photo/deleteFile?fold='.$filename;
         return $deleteUrl;
     }
-    public function upload(){
-        header("Content-type: application/json");
-        $photo = M('photo');
-        if(I('post.stunum') != null){
-            $stunum = I('post.stunum');
-        
-        } elseif(session('admin.stunum')) {
-           
-            $result = M('admin')->where('stunum=\'%s\'', session('admin.stunum'))->find();
-           
-            if (!$result)
-                returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
-    
-            $stunum = session('admin.stunum');
-        } else {
-            returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
-        }
-        $condition = array(
-            "stunum" => $stunum
-        );
-        $checkExist = $photo->where($condition)->find();
-        $upload = new \Think\Upload();
-        $upload->maxSize = 4194304;
-        $upload->exts = array('png', 'jpeg',"jpg" , 'PNG','JPEG','JPG');
-        $upload->rootPath  =  "./Public/photo/";
-        $upload->saveName = time().'_'.mt_rand();
-        $upload->autoSub = false;
-        $a = $upload->upload();
-        if($upload->getError() != null){
-            $info = array(
-                'state' => 404,
-                'status' => 404,
-                'info'  => 'failed',
-                'data'  => array(),
-            );
-        }else{
-            $site = $_SERVER["SERVER_NAME"];
-            $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
-            $thunmbnail_src =  "http://".$site.'/'.$folder_name[1].'/Public/photo/thumbnail/'.$upload->saveName.".".$a['fold']['ext'];
-            $content = array(
-                "stunum"   => $stunum,
-                "date"     => date("Y-m-d H:i:s", time()),
-                "photosrc" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
-                "thumbnail_src" => $thunmbnail_src,
-                'state'    => 1,
-            );
-            $thumbnail = new \Think\Image();
-            $thumbnail->open('./Public/photo/'.$upload->saveName.".".$a['fold']['ext']);
-            $thumbnail->thumb(150, 150,\Think\Image::IMAGE_THUMB_FILLED)->save('./Public/photo/thumbnail/'.$upload->saveName.".".$a['fold']['ext']);
-            if($checkExist != NULL){
-                $goal = $photo->where($condition)->data($content)->save();
-            }else{
-                $goal = $photo->add($content);
-            }
-            $user = M('users');
-            $checkUser = $user->where($condition)->find();
-            if($checkUser != NULL){
-                $user_content = array(
-                    "photo_src" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
-                    "photo_thumbnail_src" => $thunmbnail_src,
-                    "updated_time"  => date("Y-m-d H:i:s", time())
-                );
-                $goal_2 = $user->where($condition)->data($user_content)->save();
-            }else{
-                $user_content = array(
-                    "stunum"   => $stunum,
-                    "photo_src" => "http://".$site.'/'.$folder_name[1]."/Public/photo/".$upload->saveName.".".$a['fold']['ext'],
-                    "photo_thumbnail_src" => $thunmbnail_src,
-                    "created_time" => date("Y-m-d H:i:s", time()),
-                    "updated_time"  => date("Y-m-d H:i:s", time())
-                );
-                $goal_2 = $user->add($user_content);
-            }
-            if($goal){
-                $info = array(
-                    'state' => 200,
-                    'status' => 200,
-                    'info'  => 'success',
-                );
-            }else{
-                $info = array(
-                    'state' => 404,
-                    'status' => 404,
-                    'info'  => 'failed',
-                    'data'  => array(),
-                );
-            }
-        }
-        echo json_encode($info,true);
-    }
+   
     /**
      * 将上传的图片进行压缩处理
      * @param  array $files 由 upload类返回的数组
      * @param  bool  $is_detaild 是否详细信息
      * @return bool|array       返回信息集
      */
-    protected function processPhoto($files, $is_detaild = false)
-    {
-        $site = $_SERVER["SERVER_NAME"];
-        $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
+    protected function processPhoto($files, $config, $is_detaild = false)
+    {   
+        $config = array_merge($this->config, $config);
+
         $thumbnail = new \Think\Image();
         
         $info = array();
@@ -257,9 +245,9 @@ class PhotoController extends Controller {
             if ($file['key'] != $this->key)
                 continue;
             //原图地址
-            $photosrc = "http://".$site.'/'.$folder_name[1]."/Public/photo/".$file['savename'];
+            $photosrc = $config['photo_fullpath'].$file['savename'];
             //缩略图地址
-            $thunmbnail_src =  "http://".$site.'/'.$folder_name[1].'/Public/photo/thumbnail/'.$file['savename'];
+            $thunmbnail_src =  $config['thunmbnail_fullpath'].$file['savename'];
             $content = array(
                 "date"     => date("Y-m-d H:i:s", time()),
                 "photosrc" => $photosrc,
@@ -275,8 +263,8 @@ class PhotoController extends Controller {
                     'savename' => $file['savename'],
                 ), $content);
             }
-            $thumbnail->open('./Public/photo/'.$file['savename']);
-            $thumbnail->thumb(150, 150)->save('./Public/photo/thumbnail/'.$file['savename']);
+            $thumbnail->open($config['rootPath'].$file['savename']);
+            $thumbnail->thumb($config['thumb_width'], $config['thumb_height'])->save($config['thumbnail_rootPath'].$file['savename']);
            
             $info[$key] = $content;
         }
@@ -322,8 +310,8 @@ class PhotoController extends Controller {
             } 
         }
 
-        $filepath = $this->rootPath.$filename;
-        $thumbnailPath = $this->rootPath.'thumbnail/'.$filename;
+        $filepath = $this->config['rootPath'].$filename;
+        $thumbnailPath = $this->config['thumbnail_rootPath'].$filename;
         $success = is_file($filepath) && $filename[0] !== '.' && unlink($filepath) && unlink($thumbnailPath);
         if ($success) {
             returnJson(200);
@@ -332,6 +320,16 @@ class PhotoController extends Controller {
         }
     }
 
+  
+
+
+
+     
+  
+
+
+/*********************** 下面启动页代码 ********************/
+    
     //上传
     public function uploadPicture()
     {
@@ -367,6 +365,7 @@ class PhotoController extends Controller {
             returnJson(404);
         }
     }
+
 
     //显示
     public function showPicture()
@@ -535,7 +534,7 @@ class PhotoController extends Controller {
             returnJson(200);
         else
             returnJson(404);
-    }
+    }  
 
 }
 
