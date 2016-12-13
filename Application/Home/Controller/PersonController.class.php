@@ -616,6 +616,7 @@ class PersonController extends BaseController {
                 $information['content'] = '';
             } 
             if (empty($information['title']) || empty($information['date']))
+                $this->error = 'empty title or date';
                 return false;
        }
        return true;
