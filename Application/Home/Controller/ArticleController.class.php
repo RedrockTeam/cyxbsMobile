@@ -649,13 +649,20 @@ class ArticleController extends BaseController {
         return true;
     }
 
-
+    /**
+     * 对上传文章和给改文章的信息进行处理
+     * @param  array  &$information post过来的信息
+     * @param  boolean $is_add      是否是添加文章
+     * @param  string  &$error      错误信息
+     * @return bool                信息是否正确
+     */
     public function produceArticleInformation(&$information, $is_add=false, &$error='')
     {
         if(empty($information)) {
             $error = "empty information";
             return false;
         }
+        //对各个字段进行处理
         foreach ($information as $field => &$value) {
             switch ($field) {
 
