@@ -18,11 +18,11 @@ class PhotoController extends Controller {
         
         $rootPath = "./Public/photo/";
 
-        $thumbnail_rootPath = $rootPath.'thumbnail';
+        $thumbnail_rootPath = $rootPath.'thumbnail/';
         
         $photosrc = $app_path.$folder_name[1].trim($rootPath, '.');
             //缩略图地址
-        $thunmbnail_src =  $photo.'thumbnail/';
+        $thunmbnail_src =  $photosrc.'thumbnail/';
         
         $default_config = array(
             'maxSize'       => 4194304, 
@@ -31,8 +31,8 @@ class PhotoController extends Controller {
             'thumb_height'  => 150,
             'autoSub'       => false,
             'rootPath'      => $rootPath,
-            'photo_fullpath'   =>  $fullpath,
-            'thunmbnail_filepath' => $thunmbnail_filepath,
+            'photo_fullpath'   =>  $photosrc,
+            'thumbnail_fullpath' => $thunmbnail_src,
             'app_path'      => $app_path.'/',
             'thumbnail_rootPath' => $thumbnail_rootPath,
         );
@@ -176,7 +176,7 @@ class PhotoController extends Controller {
         $content['stunum'] = $stunum;
         $goal = $photo->add($content);
         $condition = array('stunum' => $stunum);
-        
+        var_dump($content);
         //用户更新数据
         $user = M('users');
         $checkUser = $user->where($condition)->find();
@@ -233,6 +233,7 @@ class PhotoController extends Controller {
     protected function processPhoto($files, $config, $is_detaild = false)
     {   
         $config = array_merge($this->config, $config);
+        var_dump($config);
 
         $thumbnail = new \Think\Image();
         
@@ -244,7 +245,7 @@ class PhotoController extends Controller {
             //原图地址
             $photosrc = $config['photo_fullpath'].$file['savename'];
             //缩略图地址
-            $thunmbnail_src =  $config['thunmbnail_fullpath'].$file['savename'];
+            $thunmbnail_src =  $config['thumbnail_fullpath'].$file['savename'];
             $content = array(
                 "date"     => date("Y-m-d H:i:s", time()),
                 "photosrc" => $photosrc,
