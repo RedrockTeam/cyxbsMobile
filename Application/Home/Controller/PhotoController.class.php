@@ -20,7 +20,7 @@ class PhotoController extends Controller {
         $rootPath = "./Public/photo/";
         $thumbnail_rootPath = $rootPath.'thumbnail/';
         
-        $photosrc = $app_path.$folder_name[1].trim($rootPath, '.');
+        $photosrc = $app_path.trim($rootPath, '.');
             //缩略图地址
         $thunmbnail_src =  $photosrc.'thumbnail/';
         
