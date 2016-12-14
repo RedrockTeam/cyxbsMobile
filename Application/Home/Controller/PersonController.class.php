@@ -131,7 +131,7 @@ class PersonController extends BaseController {
     public function addTransaction()
     {
         $information = I('post.');
-        var_dump($this->produceTransaction($information));
+
         if (!$this->produceTransaction($information)) {
             returnJson(404, $this->error);
         }
@@ -206,20 +206,9 @@ class PersonController extends BaseController {
         //是否对已删除的事项进行操作
         $operateForDeleted = in_array(0, $operate['before']);
        
-        if (!$transaction = $this->isTransactionOwner($information['id'], $information['stuNum'], $operateForDeleted)) {
-             if(!$this->is_admin($information['stuNum'])) {
-               returnJson(403);
-            }
-
-            $transaction = M('transaction')->find($information['id']);
-        }
-
-        if (isset($operate['function'])) {
-            $result = call_user_func(array($this, $operate['function']), $information);
-            if (!$result) {
-                returnJson(500);
-            }
-        }
+        if (!$is_allow = $this->isTransactionOwner($information['id'], $information['stuNum'], $operateForDeleted)) 
+            returnJson(403, 'you don\'t allow do it');
+        
          
         //state为0 为删除
         $time = date("Y-m-d H:i:s");
@@ -228,14 +217,22 @@ class PersonController extends BaseController {
             'state' => $operate['after'],
             'updated_time' => $time
         );
-    
+        $transaction = M('transaction')->find($information['id']);
+        
         if (!in_array($transaction['state'] ,$operate['before'])) {
-            returnJson(404);
+            returnJson(404, '错误操作状态');
+        }
+
+        if (isset($operate['function'])) {
+            $result = call_user_func(array($this, $operate['function']), $information);
+            if (!$result) {
+                returnJson(500, 'editTime error');
+            }
         } 
         if (M('transaction')->data($data)->save())
             returnJson(200);
         else {
-            returnJson(500, 'error');
+            returnJson(500, 'edit error');
         }
         
     }
@@ -317,11 +314,8 @@ class PersonController extends BaseController {
             returnJson(801);
         }
         //是否有权修改
-        if (!$this->isTransactionOwner($information['id'], $information['stuNum'])) {
-            if(!$this->is_admin($information['stuNum'])) {
-               returnJson(403);
-            }
-        }
+        if (!$this->isTransactionOwner($information['id'], $information['stuNum'])) 
+               returnJson(403, 'you don\'t allow do it');
 
         $change['id'] = $information['id'];
         $change['updated_time'] = date('Y-m-d H:i:s');
@@ -396,7 +390,7 @@ class PersonController extends BaseController {
         $user = M('users')->where('stunum="%s"', $stunum)->find();
         if (!$user)
             returnJson(403);
-      return ($user['id'] == $transaction['user_id']) ? $transaction : false; 
+      return ($user['id'] == $transaction['user_id']) ? true : is_admin($stunum); 
         
     }
 
@@ -570,7 +564,7 @@ class PersonController extends BaseController {
                   break;
 
                 case 'time':
-                    if (empty($value)) {
+                    if (empty($value) && $value !== 0) {
                         $value=NULL;
                     } elseif (!is_numeric($value)) 
                         return false;
