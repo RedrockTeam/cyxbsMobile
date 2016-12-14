@@ -132,7 +132,7 @@ class PhotoController extends Controller {
         if ((!$info = $this->pictrueUpload(array(), $error, true)) 
             || !($result = $this->consoleUpload($stunum, $info))) 
         {
-            returnJson(404, 'failed', array('error'=> $error));
+            returnJson(404, 'upload error:'.$error, array('state'=>404));
         }
 
         $trans = array(
@@ -165,7 +165,7 @@ class PhotoController extends Controller {
         }
         
         
-        if (!$info = $this->pictrueUpload(array(), $error)) {
+        if (!$info = $this->pictrueUpload('', $error)) {
             returnJson(404, 'upload error:'.$error, array('state'=>404));
         }
       
@@ -201,16 +201,14 @@ class PhotoController extends Controller {
         
     }
 
-    public function pictrueUpload($files=array(), &$error='', $is_detaild = false, $config = array())
+    public function pictrueUpload($files='', &$error='', $is_detaild = false, $config = array())
     {
         $config = array_merge($this->config, $config);
-        $upload = new \Think\Upload();
-        $upload->maxSize = $config['maxSize'];
-        $upload->exts = $config['exts'];
-        $upload->rootPath  =  $config['rootPath'];
+        $upload = new \Think\Upload($config);
+       
         $upload->saveName = time().'_'.mt_rand();
         $upload->autoSub = $config['autoSub'];
-        $files = $upload->upload();
+        $files = $upload->upload($files);
         if(($error = $upload->getError()) != null){
             return false;
         }else{
