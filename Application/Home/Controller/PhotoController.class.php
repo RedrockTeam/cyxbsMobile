@@ -176,7 +176,6 @@ class PhotoController extends Controller {
         $content['stunum'] = $stunum;
         $goal = $photo->add($content);
         $condition = array('stunum' => $stunum);
-        var_dump($content);
         //用户更新数据
         $user = M('users');
         $checkUser = $user->where($condition)->find();
@@ -233,7 +232,6 @@ class PhotoController extends Controller {
     protected function processPhoto($files, $config, $is_detaild = false)
     {   
         $config = array_merge($this->config, $config);
-        var_dump($config);
 
         $thumbnail = new \Think\Image();
         
