@@ -203,10 +203,6 @@ class PhotoController extends Controller {
     protected function pictrueUpload($files='', &$error='', $is_detaild = false, $config = array())
     {
         $config = array_merge($this->config, $config);
-        echo $config['rootPath'];
-        echo realpath($config['rootPath']);
-        var_dump(is_dir($config['rootPath']));
-        var_dump(is_writable($config['rootPath']));exit;
         $upload = new \Think\Upload($config);
         
         $upload->saveName = time().'_'.mt_rand();
