@@ -208,7 +208,9 @@ class PhotoController extends Controller {
        
         $upload->saveName = time().'_'.mt_rand();
         $upload->autoSub = $config['autoSub'];
+        var_dump($_FILES);
         $files = $upload->upload($files);
+        var_dump($files);
         if(($error = $upload->getError()) != null){
             return false;
         }else{
