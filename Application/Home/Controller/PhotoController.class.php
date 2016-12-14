@@ -165,8 +165,8 @@ class PhotoController extends Controller {
         }
         
         
-        if (!$info = $this->pictrueUpload()) {
-            returnJson(404, 'upload error', array('state'=>404));
+        if (!$info = $this->pictrueUpload(array(), $error)) {
+            returnJson(404, 'upload error:'.$error, array('state'=>404));
         }
       
         $content = array_pop($info);
