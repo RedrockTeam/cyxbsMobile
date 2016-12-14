@@ -131,7 +131,7 @@ class PersonController extends BaseController {
     public function addTransaction()
     {
         $information = I('post.');
-
+        var_dump($this->produceTransaction($information));
         if (!$this->produceTransaction($information)) {
             returnJson(404, $this->error);
         }
@@ -611,13 +611,15 @@ class PersonController extends BaseController {
                     $parameter[$field] = $value; 
                }
         }
+
        if (!$is_edit) {
             if (is_null($information['content'])) {
                 $information['content'] = '';
             } 
-            if (empty($information['title']) || empty($information['date']))
+            if (empty($information['title']) || empty($information['date'])) {
                 $this->error = 'empty title or date';
                 return false;
+            }
        }
        return true;
 
