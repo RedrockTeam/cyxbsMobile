@@ -18,8 +18,8 @@ class PhotoController extends Controller {
         $app_path = "http://".$site.'/'.$folder_name[1];
         
         $rootPath = "./Public/photo/";
-        echo  realpath($rootPath);exit;
-        var_dump(is_dir($rootPath));
+        echo  realpath($rootPath);
+        var_dump(is_dir($rootPath));exit;
         $thumbnail_rootPath = $rootPath.'thumbnail/';
         
         $photosrc = $app_path.$folder_name[1].trim($rootPath, '.');
