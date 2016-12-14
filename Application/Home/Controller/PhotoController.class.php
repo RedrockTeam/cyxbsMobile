@@ -115,8 +115,8 @@ class PhotoController extends Controller {
         if (!$stunum = $this->getUploader())
             returnJson(404, 'error stunum', array('state'=> 404, 'data'=>array()));
         
-        if (!($info = $this->pictrueUpload()) || !($result = $this->consoleUpload($stunum, $info)))
-            returnJson(404, 'upload error', array('state'=> 404, 'data'=>array()));
+        if (!($info = $this->pictrueUpload('', $error)) || !($result = $this->consoleUpload($stunum, $info)))
+            returnJson(404, 'upload error:'.$error, array('state'=> 404, 'data'=>array()));
         $content = array_pop($info);
         $content['stunum'] = $stunum;                              
         returnJson(200, '', array('state'=> 200, 'data'=>$content));
@@ -129,7 +129,7 @@ class PhotoController extends Controller {
             returnJson(404, 'failed', array('state'=> 404, 'data'=>array()));
         }
         
-        if ((!$info = $this->pictrueUpload(array(), $error, true)) 
+        if ((!$info = $this->pictrueUpload('', $error, true)) 
             || !($result = $this->consoleUpload($stunum, $info))) 
         {
             returnJson(404, 'upload error:'.$error, array('state'=>404));
@@ -207,10 +207,7 @@ class PhotoController extends Controller {
         $upload = new \Think\Upload($config);
        
         $upload->saveName = time().'_'.mt_rand();
-        $upload->autoSub = $config['autoSub'];
-        var_dump($_FILES);
         $files = $upload->upload($files);
-        var_dump($files);
         if(($error = $upload->getError()) != null){
             return false;
         }else{
