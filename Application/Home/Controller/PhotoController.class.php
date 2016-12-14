@@ -12,12 +12,13 @@ class PhotoController extends Controller {
     public function _initialize()
     {   
         //域名
+        
         $site = $_SERVER["SERVER_NAME"];
         $folder_name = explode('/',$_SERVER["SCRIPT_NAME"]);
         $app_path = "http://".$site.'/'.$folder_name[1];
         
         $rootPath = "./Public/photo/";
-
+        echo  realpath($rootPath);exit;
         $thumbnail_rootPath = $rootPath.'thumbnail/';
         
         $photosrc = $app_path.$folder_name[1].trim($rootPath, '.');
