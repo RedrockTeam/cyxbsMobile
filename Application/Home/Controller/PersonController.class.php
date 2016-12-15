@@ -343,7 +343,8 @@ class PersonController extends BaseController {
         $result = true;
         while (!empty($before_dates)||!empty($dates)) {
             if (empty($dates)) {
-                $pram = array('id' =>  array_pop($before_dates)['id'], 'state'=>0);
+                $before_date = array_pop($before_dates);
+                $pram = array('id' =>  $before_date['id'], 'state'=>0);
                 $result = M('transaction_time')->data($pram)->save();
             } elseif (empty($before_dates)) {
                 $date = array_pop($dates);
@@ -352,7 +353,8 @@ class PersonController extends BaseController {
                 $result = M('transaction_time')->data($date)->add();
             } else {
                 $date = array_pop($dates);
-                $date['id'] = array_pop($before_dates)['id'];
+                $before_date = array_pop($before_dates);
+                $date['id'] = $before_date['id'];
                 $date['updated_time'] = date('Y-m-d H:i:s');
                 $result = M('transaction_time')->data($date)->save();
             }
