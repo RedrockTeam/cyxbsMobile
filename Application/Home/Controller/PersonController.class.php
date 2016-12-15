@@ -340,23 +340,19 @@ class PersonController extends BaseController {
     {
         $pos = array("transaction_id"=>$id);
         $before_dates = M('transaction_time')->where($pos)->select();
-        $before_count = count($before_dates); 
-        $after_count = count($dates);
-        $max = $before_count > $after_count ? $before_count : $after_count;
         $result = true;
-        for($i=0; $i<$before_count||$i<$after_count ; $i++) {
-            if ($i >= $after_count) {
-                // $before_dates[$i]['state'] = 0;
-                $pram = array('id' =>  $before_dates[$i]['id'], 'state'=>0);
+        while (!empty($before_dates)||!empty($dates)) {
+            if (empty($dates)) {
+                $pram = array('id' =>  array_pop($before_dates)['id'], 'state'=>0);
                 $result = M('transaction_time')->data($pram)->save();
-            } elseif ($i >= $before_count) {
-                $date = $dates[$i];
+            } elseif (empty($before_dates)) {
+                $date = array_pop($dates);
                 $date['transaction_id'] = $id;
                 $date['updated_time'] = date('Y-m-d H:i:s');
                 $result = M('transaction_time')->data($date)->add();
             } else {
-                $date = $dates[$i];
-                $date['id'] = $before_dates[$i]['id'];
+                $date = array_pop($dates);
+                $date['id'] = array_pop($before_dates)['id'];
                 $date['updated_time'] = date('Y-m-d H:i:s');
                 $result = M('transaction_time')->data($date)->save();
             }
@@ -545,23 +541,27 @@ class PersonController extends BaseController {
                             $date['week'] = explode(',',$date['week']);
                         }
                         //反转去重
+                        
+                        sort($date['week']);
                         $date['week'] = array_flip($date['week']);
                         $date['week'] = array_flip($date['week']);
-                        sort($date['week']); 
+                        
                         foreach ($date['week'] as $week) {
                             if(!is_numeric($week) || $week <= 0 || $week > 21) 
                                 return false;
                         }
-
                         $date['week'] = implode(',', $date['week']);
+                       
                         //三元组去重复
                         if(!empty($stack[$date['day']][$date['class']])) {
                             unset($value[$key]);
                             continue;
                         }
-                       $stack[$date['day']][$date['class']] = $date['week'];
-                    }  
-                  break;
+                        
+                        $stack[$date['day']][$date['class']] = $date['week'];
+                    };
+                    unset($stack);
+                    break;
 
                 case 'time':
                     if (empty($value) && $value !== 0) {
