@@ -13,8 +13,8 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
-        // G('base');
-        // echo 'base init'.G('start', 'base').'s  ';
+        G('base');
+        echo 'base init'.G('start', 'base').'s  ';
         $admin = session('admin.id');
         if (isset($admin)) {
             $admin = M('admin')->find($admin);
@@ -22,12 +22,14 @@ class BaseController extends Controller {
                 return;
             }
         }
-        // G('verify');
-        // echo 'verify:'.G('base', 'verify').'s  ';
+        G('verify session');
+        echo 'verify session:'.G('base', 'verify').'s<br/>';
         header("Content-type: application/json");
-        $this->article = D('articles');
-        $this->article_types = D('articletypes');
-        $this->article_remarks = D('articleremarks');
+        // $this->article = D('articles');
+        // $this->article_types = D('articletypes');
+        // $this->article_remarks = D('articleremarks');
+        G('init database');
+        echo 'init database:'.G('base', 'database').'s<br/>';
         $stuNum = I('post.stuNum');
         $idNum = I('post.idNum');
         if(empty($stuNum) || empty($idNum))
@@ -36,10 +38,8 @@ class BaseController extends Controller {
             if (!$this->verify($stuNum, $idNum)) {
                 returnJson(404, '错误信息');
             }
-            // G('verify1');
-            // echo G('start', 'verify1').'s   ';
-                // $stunum = I('post.stuNum');
-                // $idNum  = I('post.idNum');
+            G('verify1');
+            echo '$this->verify:'.G('start', 'verify1').'s<br/> ';
         }
     }
     public function index(){
