@@ -462,7 +462,7 @@ class PhotoController extends Controller {
         //查询
         $data = M('displaypicture')
                     ->alias('displaypicture')
-                    ->join('join displaypicture.user_id = __USERS__ ON __USERS__.id')
+                    ->join('join __USERS__ ON displaypicture.user_id = __USERS__.id')
                     ->where($pos)
                     ->field($field)
                     ->order('displaypicture.created_time desc')
