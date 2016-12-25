@@ -26,19 +26,14 @@ class BaseController extends Controller {
         $this->article_remarks = D('articleremarks');
         $stuNum = I('post.stuNum');
         $idNum = I('post.idNum');
-        if($stuNum==null|| $idNum == null){
-            $info = array(
-                "status" => 801,
-                "info"   => "invalid parameter"
-            );
+        if(empty($stuNum) || empty($idNum))
             returnJson(801);
-        }else{
-            $this->verify($stuNum, $idNum);
-           
+        else{
+            if (!$this->verify($stuNum, $idNum)) {
+                returnJson(404, '错误信息');
+            }
                 // $stunum = I('post.stuNum');
                 // $idNum  = I('post.idNum');
-                
-            
         }
     }
     public function index(){
@@ -46,24 +41,24 @@ class BaseController extends Controller {
 
     }
     public function verify($stuNum, $idNum)
-    {
-        if(S($stuNum) == $idNum){
-        
+    {   
+        $idnum = S($stuNum);
+        if (isset($idnum))
+            return $idNum == $idnum;
+     
+        $condition = array(
+            "stuNum" => $stuNum,
+            "idNum"  => $idNum
+        );
+        $needInfo = $this->curl_init($this->apiUrl,$condition);
+        $needInfo = json_decode($needInfo,true);
+        if($needInfo['status'] != 200){
+            echo json_encode($needInfo);
+            exit;
         }else{
-            $condition = array(
-                "stuNum" => $stuNum,
-                "idNum"  => $idNum
-            );
-            $needInfo = $this->curl_init($this->apiUrl,$condition);
-            $needInfo = json_decode($needInfo,true);
-            if($needInfo['status'] != 200){
-                echo json_encode($needInfo);
-                exit;
-            }else{
-                S($stuNum, $idNum);
-            }
-            return true;
+            S($stuNum, $idNum);
         }
+        return true;
     }
     protected function curl_init($url,$data){//初始化目标网站
         $ch = curl_init();
