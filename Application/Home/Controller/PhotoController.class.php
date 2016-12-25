@@ -434,10 +434,10 @@ class PhotoController extends Controller {
         G('base');
         $is_admin = is_admin($stuNum);
         G('end');
-        $time = G('start', 'base');
+        $time = 'new basecontroller:'.G('start', 'base');
         echo $time.'s    ';
         $time = G('base', 'end');
-        echo $time.'s';
+        echo 'is_admin:'.$time.'s';
         exit;
         return $is_admin;
     }
