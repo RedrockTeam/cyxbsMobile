@@ -20,6 +20,8 @@ class BaseController extends Controller {
                 return;
             }
         }
+        G('verify');
+        echo G('start', 'verify');
         header("Content-type: application/json");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
@@ -32,6 +34,8 @@ class BaseController extends Controller {
             if (!$this->verify($stuNum, $idNum)) {
                 returnJson(404, '错误信息');
             }
+            G('verify1');
+            echo G('start', 'verify1');
                 // $stunum = I('post.stuNum');
                 // $idNum  = I('post.idNum');
         }
