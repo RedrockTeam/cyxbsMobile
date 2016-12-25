@@ -13,6 +13,8 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
+        G('base');
+        echo 'base init'.G('start', 'base').'s  ';
         $admin = session('admin.id');
         if (isset($admin)) {
             $admin = M('admin')->find($admin);
@@ -21,7 +23,7 @@ class BaseController extends Controller {
             }
         }
         G('verify');
-        echo G('start', 'verify').'s  ';
+        echo 'verify:'.G('base', 'verify').'s  ';
         header("Content-type: application/json");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
