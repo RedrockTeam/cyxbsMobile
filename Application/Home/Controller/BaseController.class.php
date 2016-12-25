@@ -43,7 +43,7 @@ class BaseController extends Controller {
     public function verify($stuNum, $idNum)
     {   
         $idnum = S($stuNum);
-        if (isset($idnum))
+        if (!empty($idnum))
             return $idNum == $idnum;
      
         $condition = array(
