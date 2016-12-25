@@ -366,19 +366,22 @@ class PhotoController extends Controller {
     //显示
     public function showPicture()
     {
+        //关键词
         $column = I('column');
         
         $display = S('displayPicture'); 
         if (!empty($column)) {
             $display = $display[$column];
-        } 
-        if (false ===$cache || empty($display)) {
+        }
+        //根据 $display 是否过期 $display[$column]是否存在判断是否要更新缓存的数据
+        if (false === $display || (!empty($column) &&  isset($display[$column]))) {
             $current_time = timeFormate();
             $pos = array(
                 'state' => 1,
                 'start' => array('ELT', $current_time)
             );
             $field = array('target_url', 'photo_src', 'max(`start`)'=>'start', 'column', 'id', 'annotation');
+            //搜索的内存
             $data = M('displaypicture')->where($pos)->field($field)->group('`column`')->select();
             if (!$data) {
                 returnJson(404);
@@ -393,16 +396,25 @@ class PhotoController extends Controller {
                     'annotation' => $picture['annotation'],
                     );
             }
-            S('displayColumn', $display, 60*60*24);
-            if (!empty($column)) {
-                $display = $display[$column];
-            } 
+            //释放内存
+            unset($data);
+            S('displayColumn', $display, 60*60*24*30);
         }
-    
-        if (empty($display)) {
+        //返回的数据
+        $data = array();
+        
+        if (!empty($column))            $data = $display[$column];
+        
+        else {
+            foreach ($display as $key => $value) {
+                $value['column'] = $key;
+                $data[] = $value;
+            }
+        }
+        if (empty($data)) {
             returnJson(404, '错误关键词');
         }
-        returnJson(200, '', array('data' => $display));
+        returnJson(200, '', array('data' => $data));
     }
 
     //重置缓存
