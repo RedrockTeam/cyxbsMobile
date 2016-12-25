@@ -13,8 +13,8 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
-        G('base');
-        echo 'base init'.G('start', 'base').'s  ';
+        // G('base');
+        // echo 'base init'.G('start', 'base').'s  ';
         $admin = session('admin.id');
         if (isset($admin)) {
             $admin = M('admin')->find($admin);
@@ -22,8 +22,8 @@ class BaseController extends Controller {
                 return;
             }
         }
-        G('verify');
-        echo 'verify:'.G('base', 'verify').'s  ';
+        // G('verify');
+        // echo 'verify:'.G('base', 'verify').'s  ';
         header("Content-type: application/json");
         $this->article = D('articles');
         $this->article_types = D('articletypes');
@@ -36,8 +36,8 @@ class BaseController extends Controller {
             if (!$this->verify($stuNum, $idNum)) {
                 returnJson(404, '错误信息');
             }
-            G('verify1');
-            echo G('start', 'verify1').'s   ';
+            // G('verify1');
+            // echo G('start', 'verify1').'s   ';
                 // $stunum = I('post.stuNum');
                 // $idNum  = I('post.idNum');
         }
