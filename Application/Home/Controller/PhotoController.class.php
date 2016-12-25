@@ -370,11 +370,9 @@ class PhotoController extends Controller {
         $column = I('column');
         
         $display = S('displayPicture'); 
-        if (!empty($column)) {
-            $display = $display[$column];
-        }
+        
         //根据 $display 是否过期 $display[$column]是否存在判断是否要更新缓存的数据
-        if (false === $display || (!empty($column) &&  isset($display[$column]))) {
+        if (false === $display || (!empty($column) &&  empty($display[$column]))) {
             $current_time = timeFormate();
             $pos = array(
                 'state' => 1,
@@ -398,7 +396,7 @@ class PhotoController extends Controller {
             }
             //释放内存
             unset($data);
-            S('displayColumn', $display, 60*60*24*30);
+            S('displayPicture', $display, 60*60*24*30);
         }
         //返回的数据
         $data = array();
@@ -431,6 +429,7 @@ class PhotoController extends Controller {
     {
         $stuNum = I('post.stuNum');
         $baseConfirm = new BaseController;
+        unset($baseConfirm);
         return is_admin($stuNum);
     }
     /**
