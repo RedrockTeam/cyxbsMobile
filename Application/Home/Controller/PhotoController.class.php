@@ -430,7 +430,8 @@ class PhotoController extends Controller {
         $stuNum = I('post.stuNum');
         $baseConfirm = new BaseController;
         unset($baseConfirm);
-        return is_admin($stuNum);
+        $is_admin = is_admin($stuNum);
+        return $is_admin;
     }
     /**
      * 上传记录
