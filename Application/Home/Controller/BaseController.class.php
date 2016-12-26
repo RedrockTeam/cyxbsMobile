@@ -49,8 +49,13 @@ class BaseController extends Controller {
     public function verify($stuNum, $idNum)
     {   
         $idnum = S($stuNum);
-        if (!empty($idnum))
+        echo 'idNum'.$idNum.' '.$idnum;
+        echo '  stuNum'.$stuNum.'<br/>';
+        if (!empty($idnum)) {
+        	G('redis');
+        	echo 'redis'.G('base', 'redis').'s<br/>';
             return $idNum == $idnum;
+        }
      
         $condition = array(
             "stuNum" => $stuNum,
@@ -62,6 +67,7 @@ class BaseController extends Controller {
             echo json_encode($needInfo);
             exit;
         }else{
+        	G('curl');
             S($stuNum, $idNum);
         }
         return true;
