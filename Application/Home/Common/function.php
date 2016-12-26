@@ -88,7 +88,8 @@ function timeFormate($time='', $format="Y-m-d H:i:s")
         $startTime = '@'.$startTime;
     }
     $startTime = new DateTime($startTime);
-    return $startTime->format($format);
+    $time =  $startTime->format($format);
+    return $time;
 }
 
  /**
@@ -109,7 +110,6 @@ function is_admin($stunum)
         return false;
     }
     $id = $stu['id'];
-    $is_admin = false;
     $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
     if($is_admin) {
         return true;
