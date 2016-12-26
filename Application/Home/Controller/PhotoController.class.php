@@ -427,18 +427,10 @@ class PhotoController extends Controller {
 
     protected function verifyRole()
     {
-        G('start');
         $stuNum = I('post.stuNum');
         $baseConfirm = new BaseController;
         unset($baseConfirm);
-        G('base');
         $is_admin = is_admin($stuNum);
-        G('end');
-        $time = 'new basecontroller:'.G('start', 'base');
-        echo $time.'s    ';
-        $time = G('base', 'end');
-        echo 'is_admin:'.$time.'s';
-        exit;
         return $is_admin;
     }
     /**
