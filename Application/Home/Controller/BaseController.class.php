@@ -13,8 +13,8 @@ class BaseController extends Controller {
     }
 
     function _initialize(){
-        G('base');
-        echo 'base init'.G('start', 'base').'s  <br/>';
+        // G('base');
+        // echo 'base init'.G('start', 'base').'s  <br/>';
         $admin = session('admin.id');
         if (isset($admin)) {
             $admin = M('admin')->find($admin);
@@ -22,14 +22,14 @@ class BaseController extends Controller {
                 return;
             }
         }
-        G('verify session');
-        echo 'verify session:'.G('base', 'verify').'s<br/>';
+        // G('verify session');
+        // echo 'verify session:'.G('base', 'verify').'s<br/>';
         header("Content-type: application/json");
         // $this->article = D('articles');
         // $this->article_types = D('articletypes');
         // $this->article_remarks = D('articleremarks');
-        G('init database');
-        echo 'init database:'.G('base', 'database').'s<br/>';
+        // G('init database');
+        // echo 'init database:'.G('base', 'database').'s<br/>';
         $stuNum = I('post.stuNum');
         $idNum = I('post.idNum');
         if(empty($stuNum) || empty($idNum))
@@ -38,8 +38,8 @@ class BaseController extends Controller {
             if (!$this->verify($stuNum, $idNum)) {
                 returnJson(404, '错误信息');
             }
-            G('verify1');
-            echo '$this->verify:'.G('start', 'verify1').'s<br/> ';
+            // G('verify1');
+            // echo '$this->verify:'.G('start', 'verify1').'s<br/> ';
         }
     }
     public function index(){
@@ -49,11 +49,11 @@ class BaseController extends Controller {
     public function verify($stuNum, $idNum)
     {   
         $idnum = S($stuNum);
-        echo 'idNum'.$idNum.' '.$idnum;
-        echo '  stuNum'.$stuNum.'<br/>';
+        // echo 'idNum'.$idNum.' '.$idnum;
+        // echo '  stuNum'.$stuNum.'<br/>';
         if (!empty($idnum)) {
-        	G('redis');
-        	echo 'redis'.G('base', 'redis').'s<br/>';
+        	// G('redis');
+        	// echo 'redis'.G('base', 'redis').'s<br/>';
             return $idNum == $idnum;
         }
      
@@ -67,8 +67,8 @@ class BaseController extends Controller {
             echo json_encode($needInfo);
             exit;
         }else{
-        	G('curl');
-        	echo 'curl'.G('base', 'curl');
+        	// G('curl');
+        	// echo 'curl'.G('base', 'curl');
             S($stuNum, $idNum);
         }
         return true;
