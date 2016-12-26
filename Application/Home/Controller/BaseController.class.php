@@ -68,6 +68,7 @@ class BaseController extends Controller {
             exit;
         }else{
         	G('curl');
+        	echo 'curl'.G('base', 'curl');
             S($stuNum, $idNum);
         }
         return true;
@@ -81,7 +82,7 @@ class BaseController extends Controller {
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         $output = curl_exec($ch);
-        curl_close ( $ch );
+        curl_close ($ch);
         return $output;
     }
 
