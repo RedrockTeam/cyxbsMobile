@@ -78,11 +78,7 @@ class CourseController extends Controller
             $this->assign(array('jsonData' => $jsonData));
             $this->display('FreeTable/index');
         } else {
-            // 增加api接口
-            if (isset($_GET['w_ak']) && $_GET['w_ak'] == C('WKY_API_KEY'))
-                return $jsonData;
-            else
-                return $this->download(json_decode($jsonData));
+            return $this->download(json_decode($jsonData));
         }
     }
 
@@ -138,7 +134,27 @@ class CourseController extends Controller
     {
         if ($this->isPost()) {
             // 解析POST参数
-            $post = file_get_contents('php://input', 'r');
+            $post =  file_get_contents('php://input', 'r') ?: I('post.');
+
+            if (is_string($post)) $post = @json_decode($post) ?: [];
+
+            // 增加api接口
+            if (isset($_GET['w_ak']) && I('get.w_ak') == C('WKY_API_KEY')) {
+
+                /**
+                 * 形如 ['stuNum' => [], 'week' => '']
+                 * */
+                if (array_key_exists('stuNum', $post)) {
+                    $stuNums = $this->_parse($post['stuNum']);
+
+                    if (array_key_exists('week', $post)) {
+                        $week = $post['week'];
+                    }
+                }
+
+                header('Content-Type:application/json; charset=utf-8');
+                echo json_encode((object) $this->compareTable($stuNums, $week));
+            }
 
             $detect = new MobileDetectController;
 
