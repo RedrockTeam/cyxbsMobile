@@ -78,7 +78,11 @@ class CourseController extends Controller
             $this->assign(array('jsonData' => $jsonData));
             $this->display('FreeTable/index');
         } else {
-            return $this->download(json_decode($jsonData));
+            // 增加api接口
+            if (isset($_GET['w_ak']) && $_GET['w_ak'] == C('WKY_API_KEY'))
+                return $jsonData;
+            else
+                return $this->download(json_decode($jsonData));
         }
     }
 
