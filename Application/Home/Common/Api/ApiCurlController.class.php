@@ -120,7 +120,8 @@ class ApiCurlController extends CurlController
         $response = curl_exec(self::$_curl);
 
         $errorCode = curl_errno(self::$_curl);
-        $errorMsg = curl_strerror($errorCode);
+        // php 5.5
+        $errorMsg = version_compare(PHP_VERSION, '5.5.0') >= 0 ? curl_strerror($errorCode) : 'unknown error';
 
         if($errorCode) {
             die($errorCode . ' : ' . $errorMsg);
