@@ -136,7 +136,7 @@ class CourseController extends Controller
             // 解析POST参数
             $post =  file_get_contents('php://input', 'r') ?: I('post.');
 
-            if (is_string($post)) $post = @json_decode($post) ?: [];
+            if (is_string($post)) $post = @json_decode($post) ?: array();
 
             // 增加api接口
             if (isset($_GET['w_ak']) && I('get.w_ak') == C('WKY_API_KEY')) {
