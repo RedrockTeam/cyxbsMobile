@@ -254,7 +254,7 @@ class DataController extends Controller
                 $loginListField  = array(
                         'admin_id',
                         'max(login_time)' => 'last_login_time',
-                        'login_ip'                => 'last_login_ip',
+                        'login_ip'        => 'last_login_ip',
                 );
                 $loginListField = $this->displayField($loginListField, 'loginlist');
                 //得到子查询的sql
@@ -377,9 +377,9 @@ class DataController extends Controller
                         'CONCAT("1")'   => 'state'
                 ), 'news');
                 $joinSql = M('news')
-                                        ->field($newsDisplayField)
-                                        ->union($joinArticles)
-                                        ->buildSql();
+                            ->field($newsDisplayField)
+                            ->union($joinArticles)
+                            ->buildSql();
                 //echo $joinSql;
                 //公告
                 $noticeDisplayField = $this->displayField(array(
@@ -402,10 +402,10 @@ class DataController extends Controller
                                 ->select(false);
                  //获得所有文章的字查询表
                 $allArticle = M($table)
-                                                ->join(" JOIN ".$joinSql." article ON article.id=__HOTARTICLES__.article_id and article.type_id = __HOTARTICLES__.articletype_id")
-                                                ->field($displayField)
-                                                ->union($joinNotice)
-                                                ->buildSql();
+                                ->join(" JOIN ".$joinSql." article ON article.id=__HOTARTICLES__.article_id and article.type_id = __HOTARTICLES__.articletype_id")
+                                ->field($displayField)
+                                ->union($joinNotice)
+                                ->buildSql();
 
                 $parameter = $this->parameter($parameter);
 
@@ -497,7 +497,7 @@ class DataController extends Controller
                 }
                 $articleRemarksField = array(
                         'user_id'       => 'user_id',
-                        'max(__ARTICLES__.updated_time)'                => 'last_article_time',
+                        'max(__ARTICLES__.updated_time)'        => 'last_article_time',
                         'max(__ARTICLEREMARKS__.created_time)'  => 'last_remark_time',
                 );
 

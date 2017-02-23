@@ -74,8 +74,8 @@ class EditController extends BaseController
 
 	/**
 	 * 进行文章的删除工作
-	 * @param  [type] $article_id [description]
-	 * @param  [type] $type_id    [description]
+	 * @param  [type] $article_id 文章id
+	 * @param  [type] $type_id    文章类别
 	 * @return [type]             [description]
 	 */
 	public function delete($article_id, $type_id)
