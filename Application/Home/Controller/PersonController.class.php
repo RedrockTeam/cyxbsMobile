@@ -125,6 +125,8 @@ class PersonController extends BaseController {
         echo json_encode($info,true);
     }
 
+
+/*---------------------------------事项代码 -------------------------------------/
     /**
      * 创建事务
      */
@@ -193,8 +195,11 @@ class PersonController extends BaseController {
         $this->display('Empty/index');
     }
      /**
-     * 改变事务状态
-     */
+      * [changeTransactionState description]
+      * @param  [type] $information [description]
+      * @param  [type] $operate     [description]
+      * @return [type]              [description]
+      */
     protected function changeTransactionState($information, $operate)
     {    
         $term = $information['term'];
@@ -341,7 +346,7 @@ class PersonController extends BaseController {
         $pos = array("transaction_id"=>$id);
         $before_dates = M('transaction_time')->where($pos)->select();
         $result = true;
-        while (!empty($before_dates)||!empty($dates)) {
+        while (!empty($before_dates) || !empty($dates)) {
             if (empty($dates)) {
                 $before_date = array_pop($before_dates);
                 $pram = array('id' =>  $before_date['id'], 'state'=>0);
@@ -477,7 +482,7 @@ class PersonController extends BaseController {
         }
         $year = date('Y', $timestamp);
         $month = date('m', $timestamp);
-        if ($month < 3) {
+        if ($month < 2) {
             $term = ($year-1).$year.'1';
         } else if($month >= 9) {
             $term = $year.($year+1).'1';
