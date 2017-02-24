@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 /**
  * Created by PhpStorm.
@@ -134,7 +135,27 @@ class CourseController extends Controller
     {
         if ($this->isPost()) {
             // 解析POST参数
-            $post = file_get_contents('php://input', 'r');
+            $post =  file_get_contents('php://input', 'r') ?: I('post.');
+
+            if (is_string($post)) $post = (array) @json_decode($post, true) ?: array();
+
+            // 增加api接口
+            if (isset($_GET['w_ak']) && I('get.w_ak') == C('WKY_API_KEY')) {
+
+                /**
+                 * 形如 ['stuNum' => [], 'week' => '']
+                 * */
+                if (array_key_exists('stuNum', $post)) {
+                    $stuNums = $this->_parse($post['stuNum']);
+
+                    if (array_key_exists('week', $post)) {
+                        $week = $post['week'];
+                    }
+                }
+
+                header('Content-Type:application/json; charset=utf-8');
+                echo json_encode((object) $this->compareTable($stuNums, $week));
+            }
 
             $detect = new MobileDetectController;
 
@@ -421,4 +442,5 @@ class CourseController extends Controller
 
         return $clear;
     }
+>>>>>>> aa2fd0570fb2db681aba5763212882534dbe7ee9
 }
