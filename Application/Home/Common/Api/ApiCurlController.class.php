@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 /**
  * Created by PhpStorm.
@@ -154,5 +153,4 @@ class ApiCurlController extends CurlController
     {
         // TODO: Implement body() method.
     }
->>>>>>> aa2fd0570fb2db681aba5763212882534dbe7ee9
 }

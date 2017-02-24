@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 /**
  * Created by PhpStorm.
@@ -442,5 +441,4 @@ class CourseController extends Controller
 
         return $clear;
     }
->>>>>>> aa2fd0570fb2db681aba5763212882534dbe7ee9
 }
