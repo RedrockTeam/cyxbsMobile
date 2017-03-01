@@ -434,10 +434,10 @@ class CourseController extends Controller
     function processClass($table)
     {
         $whitelist = array('hash_day', 'hash_lesson');
+        $clear = array();
 
-        $clear = array_filter($table, function ($k) use ($whitelist) {
-            return in_array($k, $whitelist);
-        }, ARRAY_FILTER_USE_KEY);
+        foreach ($whitelist as $key)
+            array_push($clear, $whitelist[$key]);
 
         return $clear;
     }
