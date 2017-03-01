@@ -364,28 +364,21 @@ class CourseController extends Controller
             foreach ($stuGroup as $stu) {
                 // 获得过滤后的课表数据,并放入待对比的课表集合中
                 $tempTable = $this->getTable($stu, $week);
-                $_lesson = -1;
-                $_day = -1;
+
                 foreach ($tempTable as $class) {
                     $clz = $this->processClass($class);
                     // 先获取当前天数
                     $day = $clz['hash_day'];
                     // 获取当前这节课是第几课
                     $lesson = $clz['hash_lesson'];
-                    // 如果已经存在当前有课的同学
-                    if (array_key_exists($day, $tables)) {
-                        if (array_key_exists($lesson, $tables[$day])) {
-                            $_lesson = $lesson;
-                            $_day = $day;
-                            $tables[$day][$lesson]['names'][] = $stu;
-                            continue;
-                        }
-                        $clz['names'][] = $stu;
-                        $tables[$day][$lesson] = $clz;
-                    } else {
-                        $tables[++$_day][++$_lesson] = array();
+                    // 如果当日当前的课程区域未初始化
+                    if (!array_key_exists($day, $tables)) {
+                        $tables[$day] = array();
+                        if (!array_key_exists($lesson, $tables[$day]))
+                            $tables[$day][$lesson] = array('stuNum' => array());
                     }
-
+                    // 放置学生数据
+                    array_push($tables[$day][$lesson]['stuNums'], $stu);
                 }
 
                 // 销毁临时数据
