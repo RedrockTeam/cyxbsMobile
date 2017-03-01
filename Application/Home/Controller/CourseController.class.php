@@ -134,7 +134,7 @@ class CourseController extends Controller
     {
         if ($this->isPost()) {
             // 解析POST参数
-            $post =  file_get_contents('php://input', 'r') ?: I('post.');
+            $post =  file_get_contents('php://input', 'r') ?: I('post.');Ap
 
             if (is_string($post)) $post = (array) @json_decode($post, true) ?: array();
 
@@ -329,7 +329,7 @@ class CourseController extends Controller
          * @example "张三,李四,王麻子"
          * @return  ["张三", "李四", "王麻子"]
          * */
-        if (strpos($param, ',') !== false)
+        if (strpos($param, ',') > 0)
             return explode(',', $param);
         /**
          * @example ["王二", "李狗蛋", "张大山"]
