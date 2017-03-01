@@ -437,7 +437,7 @@ class CourseController extends Controller
         $clear = array();
 
         foreach ($whitelist as $key)
-            array_push($clear, $whitelist[$key]);
+            array_push($clear, $table[$whitelist[$key]]);
 
         return $clear;
     }
