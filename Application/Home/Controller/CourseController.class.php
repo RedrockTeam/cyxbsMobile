@@ -368,15 +368,14 @@ class CourseController extends Controller
                 foreach ($tempTable as $class) {
                     $clz = $this->processClass($class);
                     // 先获取当前天数
-                    $day = $clz['hash_day'];
+                    $day = $clz['hash_day'] + 1;
                     // 获取当前这节课是第几课
-                    $lesson = $clz['hash_lesson'];
+                    $lesson = $clz['hash_lesson'] + 1;
                     // 如果当日当前的课程区域未初始化
-                    if (!array_key_exists($day, $tables)) {
+                    if (!array_key_exists($day, $tables))
                         $tables[$day] = array();
-                        if (!array_key_exists($lesson, $tables[$day]))
-                            $tables[$day][$lesson] = array('stuNums' => array());
-                    }
+                    if (!array_key_exists($lesson, $tables[$day]))
+                        $tables[$day][$lesson] = array('stuNums' => array());
                     // 放置学生数据
                     array_push($tables[$day][$lesson]['stuNums'], $stu);
                 }
