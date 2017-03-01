@@ -436,8 +436,8 @@ class CourseController extends Controller
         $whitelist = array('hash_day', 'hash_lesson');
         $clear = array();
 
-        foreach ($whitelist as $key)
-            array_push($clear, $table[$whitelist[$key]]);
+        foreach ($whitelist as $value)
+            array_push($clear, $table[$value]);
 
         return $clear;
     }
