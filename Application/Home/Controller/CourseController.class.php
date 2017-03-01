@@ -134,7 +134,7 @@ class CourseController extends Controller
     {
         if ($this->isPost()) {
             // 解析POST参数
-            $post =  file_get_contents('php://input', 'r') ?: I('post.');Ap
+            $post =  file_get_contents('php://input', 'r') ?: I('post.');
 
             if (is_string($post)) $post = (array) @json_decode($post, true) ?: array();
 
