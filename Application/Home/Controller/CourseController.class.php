@@ -375,7 +375,7 @@ class CourseController extends Controller
                     if (!array_key_exists($day, $tables)) {
                         $tables[$day] = array();
                         if (!array_key_exists($lesson, $tables[$day]))
-                            $tables[$day][$lesson] = array('stuNum' => array());
+                            $tables[$day][$lesson] = array('stuNums' => array());
                     }
                     // 放置学生数据
                     array_push($tables[$day][$lesson]['stuNums'], $stu);
