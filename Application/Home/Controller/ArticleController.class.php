@@ -2,7 +2,6 @@
 namespace Home\Controller;
 
 use Home\Common\Article;
-use Home\Common\ForbidWord;
 use Think\Controller;
 
 class ArticleController extends BaseController {

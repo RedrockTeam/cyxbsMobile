@@ -2,7 +2,7 @@
 
 namespace Home\Common;
 use Think\Exception;
-class ForbidWord
+class Forbidword
 {
     protected $error;
     protected $forbidWordList;			//敏感词列表

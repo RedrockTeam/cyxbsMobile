@@ -48,7 +48,7 @@ class Article
         $this->fields = D($table)->getDbFields();
         $this->operator = $user;
         $this->type_id = isset($article['type_id']) ? $article['type_id'] : $article['article_type_id'];
-        $this->forbidWord = new ForbidWord('articles');
+        $this->forbidWord = new Forbidword('articles');
 
         if (empty($article['id']) && isset($article['article_id'])) {
             $article['id'] = $article['article_id'];

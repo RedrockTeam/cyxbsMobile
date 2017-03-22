@@ -10,7 +10,7 @@ namespace Home\Controller;
 
 
 use Home\Common\Article;
-use Home\Common\ForbidWord;
+use Home\Common\Forbidword;
 use Think\Controller;
 
 class TopicController extends Controller
@@ -312,7 +312,7 @@ class TopicController extends Controller
         if(empty($information)) {
             return $information;
         }
-        $forbidWord = new ForbidWord('topics');
+        $forbidWord = new Forbidword('topics');
         foreach ($information as $field => $value) {
 
             switch ($field) {
