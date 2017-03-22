@@ -1,6 +1,8 @@
 <?php
 namespace Home\Controller;
 
+use Home\Common\Article;
+use Home\Common\ForbidWord;
 use Think\Controller;
 
 class ArticleController extends BaseController {
@@ -48,7 +50,7 @@ class ArticleController extends BaseController {
         $page = empty($page) ? 0 : $page;
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
-        if($stunum_other == null){
+        if($stunum_other === null){
             $stunum = I('post.stuNum');
         }else{
             $stunum = $stunum_other;
@@ -93,7 +95,7 @@ class ArticleController extends BaseController {
         $user_id = $user->where("stunum = '$stunum'")->find();
         $user_id = $user_id['id'];
         $sql = " SELECT 'remark' as type,cyxbsmobile_articleremarks.content as content,cyxbsmobile_articles.content as article_content ,cyxbsmobile_articles.thumbnail_src as article_photo_src ,cyxbsmobile_articleremarks.created_time,cyxbsmobile_articleremarks.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
-                FROM (cyxbsmobile_articleremarks JOIN cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id)JOIN cyxbsmobile_articles
+              FROM (cyxbsmobile_articleremarks JOIN cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id)JOIN cyxbsmobile_articles
         ON  cyxbsmobile_articleremarks.article_id = cyxbsmobile_articles.id
          WHERE 
             cyxbsmobile_users.stunum != '$stunum' AND
@@ -120,99 +122,7 @@ class ArticleController extends BaseController {
         echo json_encode($info);
     }
 
-    /**
-     * 添加文章
-     */
-    public function addArticle()
-    {
-        $data = I('post.');
-        if(!$this->produceArticleInformation($data, true, $error)){
-            $info = array(
-                    'state' => 801,
-                    'status' => 801,
-                    'info'  => $error,
-                );
-            echo json_encode($info,true);
-            exit;
-        }
-        $user = M('users');
-        $user_condition = array(
-            "stunum" =>$data['stuNum']
-        );
-        // $thumbnail_src_array = I('post.thumbnail_src');
-        // $photo_src_array = I('post.photo_src_array');
-        // $thumbnail_src_array=explode(",",$thumbnail_src_array);
-        // if(sizeof($thumbnail_src_array) > 10){
-        //     $photo_src_array=explode(",",$photo_src_array);
-        //     $photo_src_array=array_slice($photo_src_array,0,9);
-        //     $photo_src_string = implode(',',$photo_src_array).",";
-        //     $thumbnail_src_array=array_slice($thumbnail_src_array,0,9);
-        //     $thumbnail_src_string = implode(',',$thumbnail_src_array).",";
-        //     $data['thumbnail_src'] = $thumbnail_src_string;
-        //     $data['photo_src'] = $$photo_src_string;
-        // }
-        $user_id = $user->where($user_condition)->find();
-        if (!$user_id) {
-            returnJson(404, 'error stuNum');
-        }
-        switch ($data['type_id']) {
-            case 5:        
-                $article  = D('articles');
-                break;
-            
-            case 7:
-                if(empty($data['keyword'])) {
-                    returnJson(801);
-                }
-                $result = M('topic')->where(array('keyword' => $data['keyword']))->find();
-                if (!$result) {
-                    returnJson(801, 'this topic isn\'t exist');
-                }
-                $data['topic_id'] = $result['id'];
-                $article = D('topicarticles');
-                break;
-            
-            default:
-            returnJson(801, 'error type_id');
-        }
-        $article_field = $article->getDbFields();
-        
-        foreach ($data as $key => $value) {
-            if(!in_array($key, $article_field)){
-                unset($data[$key]);
-            }
-        }
-        
-        $data['user_id'] = $user_id['id'];
-        $data['created_time'] = date("Y-m-d H:i:s", time());
-        $data['updated_time'] = date("Y-m-d H:i:s", time());
-        $data['read_num'] = 0;
-        $data['like_num'] = 0;
-        $data['remark_num'] = 0;
-        $article_check = $article->add($data);
-        $hotarticles = M('hotarticles');
-        $content = $data;
-        $content['articletype_id'] = $data['type_id'];
-        $content['article_id'] = $article_check;
-        $hotarticles->add($content);
-        if($article_check){
-            $info = array(
-                    'state' => 200,
-                    'status' => 200,
-                    'info'  => 'success',
-                );
-            echo json_encode($info,true);
-            exit;
-        }else{
-            $info = array(
-                    'state' => 801,
-                    'status' => 801,
-                    'info'  => 'invalid parameter',
-                );
-            echo json_encode($info,true);
-            exit;
-        }
-    }
+
 
     public function listNews(){
         $type = I('post.type_id');
@@ -228,7 +138,7 @@ class ArticleController extends BaseController {
         //     'articletype_id' => $type
         // );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->limit($start,$size)->order('id DESC')->select();
+        $content = $article->limit($start,$size)->order('id DESC')->select();
 
         $praise  = M('articlepraises');
         $result = array();
@@ -254,6 +164,23 @@ class ArticleController extends BaseController {
                 'data'   => $result
         );
         echo json_encode($info);
+    }
+
+    /**
+     * 添加文章
+     */
+    public  function addArticle() {
+        $data = I('post.');
+
+        if ($data['type_id'] != 5) {
+            returnJson(801, 'error articleType');
+        }
+        $article = Article::setArticle($data, $data['stuNum']);
+        if ($article->add())
+            returnJson(200);
+        else
+            returnJson(404, $article->getError());
+
     }
 
     public function listArticle(){
@@ -570,153 +497,9 @@ class ArticleController extends BaseController {
     }
 
 
-    /**
-     * 添加话题
-     */
-    public function addTopic()
-    {
-        $infomation = I('post.');
-  
-        if ($this->produceTopicInformation($information, true, $error)) {
-            returnJson(404, $error);
-        }
-
-        if ($information['official'] == 'redrock') {
-            //官方发起话题
-            if (!$this->is_admin($information['stuNum'])) {
-                returnJson(403, '你还不是管理员哟');
-            }
-            $information['user_id'] = 0;            //以红岩网校工作站名义创建的话题
-        } else {
-            //个人发起话题
-            $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();
-            if(!$user) {
-                returnJson(403, '你还不是掌邮的用户');
-            }
-            $information['user_id'] = $user['id'];
-        }
-        $information['created_time'] = date("Y-m-d H:i:s");
-        $information['updated_time'] = date("Y-m-d H:i:s");
-        $result = M('topics')->add($information);
-        if ($result) {
-            returnJson(200);
-        } else {
-            returnJson(404);
-        }
-
-    }
 
 
-    public function produceTopicInformation(&$information, $is_add=false, &$error='')
-    {
-        if(empty($information)) {
-            return $information;
-        }
-        
-        foreach ($information as $field => $value) {
-        
-            switch ($field) {
-                
-                case 'keyword':            
-                case 'content':
-                case 'title':
-                    if(empty($value) || !forbidwordCheck($value, $field)) {
-                        $error = $field."'s value is error";    
-                        return false;
-                    }
-                    break;
-                
-                case 'topic_id':
-                    if (!is_numeric($value) && !$is_add) {
-                        $error = $field."'s value is error";
-                        return false;
-                    }
-                    break;
-                case 'id':
-                case 'state':
-                    unset($information[$field]);
-                    break;
-                break; 
-            }
-        }
 
-      
-        if(empty($keyword)) {
-            $error = "keyword is not matched";
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * 对上传文章和给改文章的信息进行处理
-     * @param  array  &$information post过来的信息
-     * @param  boolean $is_add      是否是添加文章
-     * @param  string  &$error      错误信息
-     * @return bool                信息是否正确
-     */
-    public function produceArticleInformation(&$information, $is_add=false, &$error='')
-    {
-        if(empty($information)) {
-            $error = "empty information";
-            return false;
-        }
-        //对各个字段进行处理
-        foreach ($information as $field => &$value) {
-            switch ($field) {
-
-                case 'title':
-                case 'content':
-                     if(empty($value) || !forbidwordCheck($value, $field)) {
-                            $error = $field."'s value is error";    
-                            return false;
-                        }
-                    break;
-                
-                case 'type_id':
-                    if ($value < 5 || $value == 6 ){
-                        $error = "this type is not allowed";
-                        return false;
-                    }
-                    break;
-
-                case 'article_id':
-                    if (!is_numeric($value) && !$is_add) {
-                        $error = $field."'s value is error";
-                        return false;
-                    }
-                    break;
-
-                case 'stuNum':
-                    if (strlen($value) !== 10) {
-                        $error = 'errpr student number';
-                        return false;
-                    }
-                    break;
-                case 'id':
-                case 'state':
-                    unset($information[$field]);
-                    break;
-            } 
-        }
-        if (empty($information['type_id']) || empty($information['stuNum'])) {
-            $error = 'Don\'t match the type_id in the information';
-            return false;
-        }
-        //当不为添加的时候，文章的id必须存在
-        if ($is_add) {
-            $information['photo_src'] = isset($information['photo_src']) ? $information['photo_src'] : '';
-            $information['thumbnail_src'] = isset($information['thumbnail_src']) ? $information['thumbnail_src'] : '';
-        } else {
-            //当不为添加的时候，文章的id必须存在
-            if(empty($information['article_id'])) {
-                $error = 'Can\'t match the article_id';
-                return false;
-            }
-        }
-        return true;   
-    }
 
 
 }

@@ -2,6 +2,7 @@
 
 namespace Home\Controller;
 
+use Home\Common\Article;
 use Think\Controller;
 
 class NewArticleController extends Controller
@@ -65,7 +66,12 @@ class NewArticleController extends Controller
             }
         }
         $info = array_reverse($info);
-        $data = $hotArticle->where("created_time > '$now_date'")->order('((remark_num-self_remark_num)*2+like_num) DESC,updated_time DESC')->limit($start,$size)->relation(true)->select();
+        $data = $hotArticle
+                        ->where("created_time > '$now_date'")
+                        ->order('((remark_num-self_remark_num)*2+like_num) DESC,updated_time DESC')
+                        ->limit($start,$size)
+                        ->relation(true)
+                        ->select();
         foreach ($data as $key => $value) {
             $condiion_articles = array(
                 "id" => $data[$key]['article_id'],
@@ -113,7 +119,7 @@ class NewArticleController extends Controller
                 // );    
                 $stuNum = I('post.stuNum');
                 $exist = $this->is_my_like($value['article_id'], $value['articletype_id'], $stuNum);
-                $photo_content = $articlePhoto->where($photo_condition)->select();
+//                $photo_content = $articlePhoto->where($photo_condition)->select();
                 $now_info = array(
                     'status' => 200,
                     'page'   => $page,
@@ -197,11 +203,11 @@ class NewArticleController extends Controller
 
         $articleType = D('articletypes');
         $article     = D('news');
-        // $condition = array(
-        //     'articletype_id' => $type
-        // );
+//         $condition = array(
+//             'articletype_id' => $type
+//         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->limit($start,$size)->order('id DESC')->select();
+        $content = $article->limit($start,$size)->order('id DESC')->select();
 
         $praise  = M('articlepraises');
         $result = array();
@@ -246,7 +252,7 @@ class NewArticleController extends Controller
             $article = D('articles');
             $condition_article = array(
                     'user_id' =>$user['id'],
-                    'state'   => array('neq', 0),
+                    'state'   => 1,
 
                 );
             $contents = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
@@ -265,86 +271,16 @@ class NewArticleController extends Controller
         }
     }
 
+
     public function searchContent() {
-        $type_id = I('post.type_id');
-        $stunum = I('post.stuNum');
-        $article_id = I('post.article_id');
+        $information = I('post.');
 
-        if ( $article_id == null || $type_id == null) {
-            $info = array(
-                "status" => 801,
-                "info"   => "invalid parameter"
-            );
-            echo json_encode($info);exit;
-        } else {
-            $condition_user = array(
-                "stunum" => $stunum
-            );
-            if($type_id >= 5) {
-                $articletable = EditController::$table_type[$type_id];
-                
-                if (empty($articletable)) {
-                    returnJson(404, 'error type_id');
-                }
+        if(false === $article = Article::setArticle($information, $information['stuNum']))
+            returnJson(404, 'error article');
+        $content = $article->getContent();
 
-                $article    = D($articletable);
-                //条件
-                $condition_article = array(
-                        $articletable.'.id'      => $article_id,
-                        $articletable.'.type_id' => $type_id,
-                        $articletable.'.state'   => array('neq', 0),
-                    );
-                //显示的参数
-                $displayField = array(
-                    $articletable.'.id',
-                    'content',
-                    'nickname',
-                    'remark_num',
-                    'like_num',
-                    $articletable.'.photo_src',
-                    $articletable.'.thumbnail_src',
-                    $articletable.'.type_id',
-                    $articletable.'.updated_time',
-                    $articletable.'.created_time',
-                    $articletable.'.photo_src' => 'user_photo'
-                );
-                $content = $article
-                            ->alias($articletable)
-                            ->where($condition_article)
-                            ->join('cyxbsmobile_users users ON '.$articletable.'.user_id = users.id')
-                            ->field($displayField)
-                            ->select();
-            } elseif ($type_id > 0 && $type_id <5) {                  //新闻内容
-                $news = D('news');
-                $condition_news = array(
-                    'id'               => $article_id,
-                    'articletype_id'  => $type_id,
-                    );
-                $field = array(
-                    'title',
-                    'id',
-                    'articletype_id'   => 'type_id',
-                    'content',
-                    'date',
-                    'like_num',
-                    'remark_num',
-                    'read',
-                    );
-                $content = $news->where($condition_news)->field($field)->select();
-            } else {
-                 returnJson(801);
-             }
-
-            foreach ($content as $key => &$value) {
-                $value['is_my_like'] = $this->is_my_like($article_id, $type_id, $stunum);
-            }
-            $info = array(
-                'status' => '200',
-                "info"   => "success",
-                'data'   => $content
-            );
-            echo json_encode($info);
-        }
+        $content['is_my_like'] = is_null($information['stuNum'])? false :$article->getPraise($information['stuNum']);
+        returnJson(200, '', array('data'=>array($content)));
     }
 
     /**
@@ -373,126 +309,7 @@ class NewArticleController extends Controller
         }
     }
 
-    /**
-     * 话题范围
-     * @return [type] [description]
-     */
-    public function  topicList()
-    {
-        $post = I('post.');
-        $get = I('get.');
-        $information = array_merge($get, $post);
-        $information['page'] = isset($information['page']) ? $information['page'] : 0;
-        $information['size'] = isset($information['size']) ? $information['size'] : 3;
-        
-        $displayField = array(
-            "topics.id" => "topic_id",
-            "stunum" => 'user_id',
-            "knickname",
-            "title",
-            'content',
-            'keyword',
-            'topics.photo_src',
-            'topics.thumbnail_src',
-            'join_num',
-            'like_num',
-            'article_num',
-        );
-        $pos = array(
-            "keyword" => array('like', $information['key'].'%'),
-            'created_time' => array('ELT', date('Y-m-d H:i:s')),
-            "state"   => 1,
-            );
-        //话题信息的查询
-        $data = M('topics')
-                    ->alias('topics')
-                    ->join('__USERS__ ON topics.user_id=__USERS__.id', 'LEFT')
-                    ->where($pos)
-                    ->filed($displayField)
-                    ->order('created_time')
-                    ->limit($information['page']*$information['size'], $information['size'])
-                    ->select();
-        
-        foreach ($data as $key => &$value) {
-            $value['img']['img_small_src'] = $value['photo_src'];
-            $value['img']['img_src'] = $value['thumbnail_src'];
-            
-            $value['is_my_like)'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
-            
-            unset($value['photo_src']);
-            unset($value['thumbnail_src']);
-            $value['content'] = array("content" => $value['content']);
-        }
-        returnJson(200, '', compact($data, $vertion));
-    }
 
-    /**
-     * 话题文章列表
-     */
-    public function listTopicArticle()
-    {
-        //兼容post和get请求
-        $post = I('post.');
-        $get = I('get.');
-        $information = array_merge($post, $get);
-        $information['page'] = isset($information['page']) ? $information['page'] : 0;
-        $information['size'] = isset($information['size']) ? $information['size'] : 10;
-        
-        $article_alias = 'article';
-        $user_alias = 'user';
-        
-        $displayField = array(
-            $article_alias.'.id',
-            'type_id',
-            $article_alias.'.photo_src'     => 'article_photo_src',
-            $article_alias.'.thumbnail_src' => 'article_thumbnail_src',
-            'content',
-            'nickname',
-            'stunum',
-            $user_alias.'.photo_src'        => 'photo_src',
-            $user_alias.'.thumbnail_src'    => 'photo_thumbnail_src',
-            'like_num',
-            'remark_num',
-        );
-        //话题
-        $topic = M('topics')->field(true, 'state')->find($information['topic_id']);
-        //user_id为0时使用官方的身份
-        if ($topic['user_id'] == 0) {
-            $topic['nickname'] = "红岩网校工作站";
-            $topic['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
-        } else {
-            $author = M('users')->find($topic['user_id']);
-            $topic['nickname'] = $user['nickname'];
-            $topic['photo_src'] = $user['photo_src'];
-        }
-        unset($topic['user_id']);
-        if (!$topic) {
-            returnJson(404, 'error topic\'s id');
-        }
-        $pos = array('topic_id' => $topic['id'], 'state'=> 1);
-        $articles = M('topicarticles')
-                    ->alias($article_alias)
-                    ->join('__USERS__ '.$user_alias.' ON '.$user_alias.'.id='.$article_alias.'.user_id', "RIGHT")
-                    ->where($pos)
-                    ->field($displayField)
-                    ->order('updated_time DESC')
-                    ->limit($information['page']*$information['size'], $information['size'])
-                    ->select();
-
-        $praise = M('articlepraises');
-        
-        foreach ($data as $key => $value) {
-            if($value['user_id'] == 0) {
-                $value['nickname'] = "红岩网校工作站";
-                $value['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
-                $value['thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
-            }
-            $value['is_my_like)'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
-        }
-
-        $topic['articles'] = $articles;
-        returnJson(200, '',array('data' => $topic));
-    }
 
 
 }

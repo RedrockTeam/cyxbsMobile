@@ -32,7 +32,7 @@ class BaseController extends Controller {
         if(empty($stuNum) || empty($idNum))
             returnJson(801);
         else{
-            if (!$this->verify($stuNum, $idNum)) {
+            if (!authUser($stuNum, $idNum)) {
                 returnJson(404, '错误信息');
             }
         }
@@ -41,39 +41,7 @@ class BaseController extends Controller {
 
 
     }
-    public function verify($stuNum, $idNum)
-    {   
-        $idnum = S($stuNum);
-       
-        if (!empty($idnum))
-            return $idNum == $idnum;
-     
-        $condition = array(
-            "stuNum" => $stuNum,
-            "idNum"  => $idNum
-        );
-        $needInfo = $this->curl_init($this->apiUrl,$condition);
-        $needInfo = json_decode($needInfo,true);
-        if($needInfo['status'] != 200){
-            echo json_encode($needInfo);
-            exit;
-        }else{
-            S($stuNum, $idNum);
-        }
-        return true;
-    }
-    protected function curl_init($url,$data){//初始化目标网站
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-        $output = curl_exec($ch);
-        curl_close ($ch);
-        return $output;
-    }
+
 
     public function destroySession(){
         session(null);
@@ -83,25 +51,25 @@ class BaseController extends Controller {
 
     /**
      * 判断是否为管理员
-     * @param  string  $stunum 学号
+     * @param  string  $user 学号 | 用户id
      * @return boolean         是否为管理员
      */
-    public function is_admin($stunum) 
+    public function is_admin($user)
     {
-        if (empty($stunum)) {
+        if (empty($user)) {
             return false;
         }
-        $stu = D('users')->where('stunum="%s"', $stunum)->find();
+        $stu = D('users')->where('stunum="%s"', $user)->find();
         if (empty($stu)) {
             return false;
         }
         $id = $stu['id'];
-        $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
+        $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$user))->find();
         if($is_admin) {
             return true;
         } else {
             $is_admin = M('administrators')->where('user_id='.$id)->find();
-            if (is_admin) {
+            if ($is_admin) {
                 return true;
             }
         }

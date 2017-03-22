@@ -61,7 +61,7 @@ function returnJson($status, $info="", $data = array())
  */
 function encrypt($data, $salt='')
 {
-
+    return base64_encode($data);
 }
 
 /**
@@ -76,7 +76,7 @@ function decrypt($data, $salt='')
 }
 
 //时间转换
-function timeFormate($time='', $format="Y-m-d H:i:s")
+function timeFormate($startTime='', $format="Y-m-d H:i:s")
 {
     if (empty($time)) {
         return date($format);
@@ -115,7 +115,7 @@ function is_admin($stunum)
         return true;
     } else {
         $is_admin = M('administrators')->where('user_id='.$id)->find();
-        if (is_admin) {
+        if ($is_admin) {
             return true;
         }
     }
@@ -127,4 +127,65 @@ function is_admin($stunum)
 function forbidwordCheck($value, $field)
 {
     return $value;
+}
+
+/**
+ * @param $str  string 字符串
+ * @return int
+ */
+function mystrlen($str) {
+    return mb_strlen($str, 'UTF-8');
+}
+
+/**
+ * @param $stu   string   学号或者user_id
+ * @return mixed    用户信息
+ */
+function getUserInfo($stu) {
+    if (empty($stu)) {
+        return null;
+    }
+
+    if (mystrlen($stu) == 10) {
+        $user = D('users')->where("stunum='%s'", $stu)->find();
+        if ($user)      return $user;
+    }
+    $user = D("users")->find($stu);
+    return $user;
+}
+
+
+function authUser($stuNum, $idNum)
+{
+    if (empty($stuNum) || empty($idNum)) return false;
+    $idnum = S($stuNum);
+
+    if (!empty($idnum))
+        return $idNum == $idnum;
+
+    $condition = array(
+        "stuNum" => $stuNum,
+        "idNum"  => $idNum
+    );
+    $url = "http://hongyan.cqupt.edu.cn/api/verify";
+    $needInfo = $this->curl_init($url,$condition);
+    $needInfo = json_decode($needInfo,true);
+    if($needInfo['status'] != 200){
+        return json_decode($needInfo,true);
+    }else{
+        S($stuNum, $idNum);
+    }
+    return true;
+}
+function curlPost($url,$data){//初始化目标网站
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $output = curl_exec($ch);
+    curl_close ($ch);
+    return $output;
 }
