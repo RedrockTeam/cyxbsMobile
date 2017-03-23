@@ -282,10 +282,12 @@ class TopicController extends Controller
      */
     public function topicArticleContent() {
         $information = I('post.');
+        //topic_id
+        $information['type_id'] = 7;
         if(false === $article = Article::setArticle($information, $information['stuNum']))
             returnJson(404, 'error article');
         $content = $article->getContent();
-
+        if (!$content)  returnJson(404, $article->getError());
         $content['is_my_like'] = is_null($information['stuNum'])? false :$article->getPraise($information['stuNum']);
         returnJson(200, '', array('data'=>array($content)));
 

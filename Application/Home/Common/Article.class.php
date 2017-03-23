@@ -35,6 +35,7 @@ class Article
     //违规字检查
     protected $forbidWord;
 
+
     /**
      * EditController constructor.
      * @param $article  array 文章信息
@@ -72,7 +73,6 @@ class Article
                     );
                 }
             }
-
         }
     }
 
@@ -81,7 +81,7 @@ class Article
      * @param $stu
      * @return bool|Article
      */
-    public  static function setArticle($article, $stu) {
+    public  static function setArticle($article, $stu=null) {
         $table_type = array(
             1 		=> 'news',
             2		=> 'news',
@@ -114,7 +114,6 @@ class Article
         try {
             $obj =  new self($article, $table, $stu);
         } catch(Exception $e) {
-
             return false;
         }
         return $obj;
@@ -214,28 +213,12 @@ class Article
     }
 
     /**
-     * @return mixed
-     */
-    public function getTypeName() {
-
-         $article_type = array(
-            1               => '重邮新闻',
-            2               => '教务在线',
-            3               => '学术讲座',
-            4               => '校务公告',
-            5               => '哔哔叨叨',
-            6               => '公告',
-            7               => '话题',
-        );
-        return $article_type[$this->type_id];
-    }
-    /**
 	 * 删除文章
 	 * @return [type] [description]
 	 */
 	public function delete($forceDelete = false)
 	{
-		if ($this->is_exist()) {
+		if (!$this->is_exist()) {
             $this->error[] =  'don\'t exist';
             return false;
         }
@@ -243,7 +226,7 @@ class Article
 		//是否有权力删除文章
 		if ($this->hasPower()) {
 		        //根据类型和参数是否直接删除
-				if($forceDelete === false || !in_array('state', $this->fields))
+				if($forceDelete || !in_array('state', $this->fields))
 				    $result = $this->forthDelete();
                 else
                     $result =  $this->softDelete();
@@ -272,7 +255,7 @@ class Article
         if (in_array('updated_time', $this->fields)) $data['updated_time'] = date('Y-m-d H:i:s');
         $result = D($this->table)->save($data);
         if ($result)
-            $this->article = $result;
+            $this->article = $data;
         return $result ? true : false;
     }
 
@@ -286,8 +269,10 @@ class Article
             return false;
         }
         //判断是否是软删除s
-        if ($this->article['state'] !== 0)
+        if (!isset($this->article) || $this->article['state'] != 0) {
+            $this->error[] = "this article can't recover";
             return false;
+        }
         $data = $this->article;
         $data['state'] = 1;
         //如果有updated_time 更新时间
@@ -537,7 +522,11 @@ class Article
      * @return bool|mixed
      */
     public function getRemarks() {
-        if (!$this->is_exist())     return false;
+
+        if (!$this->is_exist()) {
+            $this->error[] = "can't find article`";
+            return false;
+        }
 
         if (isset($this->article_remarks))  return $this->article_remarks;
 
@@ -560,6 +549,10 @@ class Article
      * @return bool|int
      */
     public function getPraise($stu = false) {
+        if (!$this->is_exist()) {
+            $this->error[] = "can't find article`";
+            return false;
+        }
         if ($stu === false) {
             if (isset($this->article_praise))
                 return $this->article_remarks;
@@ -655,6 +648,10 @@ class Article
      * @return bool
      */
     public function addReadNum() {
+        if (!$this->is_exist()) {
+            $this->error[] = "can't find article`";
+            return false;
+        }
         $data = $this->article;
         if (is_null($data['read_num']))
             return true;
@@ -671,6 +668,10 @@ class Article
      * @return array;
      */
     public function getContent() {
+        if (!$this->is_exist()) {
+            $this->error[] = "can't find article`";
+            return false;
+        }
         $this->addReadNum();
         $field = $this->getArticleContentField();
         $content = $this->get($field);
@@ -715,6 +716,10 @@ class Article
      * @param $answerToUser  int|string 待回复的人
      */
     public function addRemark($content, $answerToUser = 0) {
+        if (!$this->is_exist()) {
+            $this->error[] = "can't find article`";
+            return false;
+        }
         if (!$this->addRemarkNum())   return false;
         if ($answerToUser == 0) $answerUserId = 0;
         else {
@@ -775,6 +780,38 @@ class Article
             }
         }
         return true;
+    }
+
+    /**
+     * 返回文章类型
+     * @param $type_id int 文章类型
+     * @param $is_brief  boolean 是否简写
+     * @return mixed
+     */
+    public static function getType($type_id, $is_brief = false) {
+        $article_type = array(
+            1     => '重邮新闻',
+            2     => '教务在线',
+            3     => '学术讲座',
+            4     => '校务公告',
+            5     => '哔哔叨叨',
+            6     => '公告',
+            7     => '话题',
+        );
+        $article_type_brief = array(
+            1 => 'cyxw',
+            2 => 'jwzx',
+            3 => 'xsjz',
+            4 => 'xwgg',
+            5 => 'bbdd',
+            6 => 'notice',
+            7 => 'topic',
+        );
+        return $is_brief ? $article_type_brief[$type_id] : $article_type[$type_id];
+    }
+
+    public function articleType($is_brief=false) {
+        return self::getType($this->type_id, $is_brief);
     }
 
 
