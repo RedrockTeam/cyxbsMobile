@@ -47,7 +47,7 @@ class PersonController extends BaseController {
         $test_nickname = trim($all_info['nickname']);
         $test_nickname = str_replace(' ', '', $test_nickname);
         $test_nickname = strtolower($test_nickname);
-
+        $check_exist = false;
         foreach($bank_array as $key => $value){
             if(strpos($test_nickname,$value) === false){
 
@@ -79,7 +79,7 @@ class PersonController extends BaseController {
             "stuNum" => $stunum,
             "idNum"  => $idNum
         );
-        $needInfo = $this->curl_init($this->apiUrl,$search_condition);
+        $needInfo = curlPost($this->apiUrl,$search_condition);
         $needInfo = json_decode($needInfo,true);
         $all_info['username'] = $needInfo['data']['name'];
         $all_info['gender'] = trim($needInfo['data']['gender']);
@@ -89,11 +89,8 @@ class PersonController extends BaseController {
         }else{
             $goal = $user->add($all_info);
         }  
-        $info = array(
-            'status' => '200',
-            "info"   => "success",
-        );
-        echo json_encode($info);
+        if ($goal) returnJson(200);
+        else returnJson(404, 'set info error');
     }
 
     public function setNickname(){
@@ -110,7 +107,7 @@ class PersonController extends BaseController {
             $content = array(
                 "nickname" => I('post.username')
             );
-            $goal = $user->where($condition)->find();
+            $goal = $user->where($condition)->data($content)->find();
             if($goal){
                 $info = array(
                     "status" => 200,
@@ -194,16 +191,18 @@ class PersonController extends BaseController {
         header( "HTTP/1.1 404 Not Found" );       
         $this->display('Empty/index');
     }
-     /**
-      * [changeTransactionState description]
-      * @param  [type] $information [description]
-      * @param  [type] $operate     [description]
-      * @return [type]              [description]
-      */
+
+    /**
+     * [changeTransactionState description]
+     * @param $information
+     * @param $operate
+     * @internal param $ [type] $information [description]
+     * @internal param $ [type] $operate     [description]
+     */
     protected function changeTransactionState($information, $operate)
     {    
-        $term = $information['term'];
-        $term = empty($term) ?  $this->getTerm() : $term;
+//        $term = $information['term'];
+//        $term = empty($term) ?  $this->getTerm() : $term;
 
         if (!is_array($operate['before'])) {
             $operate['before'] = explode(',', $operate['before']);
@@ -284,6 +283,7 @@ class PersonController extends BaseController {
             'cyxbsmobile_transaction.state'=> array('neq', 0), 
             'term' => $term
         );
+        //得到事务id
         $data = M('transaction')
                             ->where($pos)
                             ->field($field)
@@ -337,7 +337,7 @@ class PersonController extends BaseController {
     }
     /**
      * 修改事项的时间
-     * @param  bigint $id   事项的id
+     * @param  int $id   事项的id
      * @param  array $date 事项的时间
      * @return bool       修改是否成功
      */
@@ -345,7 +345,7 @@ class PersonController extends BaseController {
     {
         $pos = array("transaction_id"=>$id);
         $before_dates = M('transaction_time')->where($pos)->select();
-        $result = true;
+
         while (!empty($before_dates) || !empty($dates)) {
             if (empty($dates)) {
                 $before_date = array_pop($before_dates);
@@ -373,12 +373,12 @@ class PersonController extends BaseController {
 
     /**
      * 判断是否为事项的拥有者
-     * @param  bigint  $id     事项id
-     * @param  int     $stunum 学号
+     * @param  int  $id     事项id
+     * @param  int     $stuNum 学号
      * @param  bool  $operateForDeleted   是否对已删除的进行操作
      * @return boolean         true为有权利
      */
-    public function isTransactionOwner($id, $stunum, $operateForDeleted = false)
+    public function isTransactionOwner($id, $stuNum, $operateForDeleted = false)
     {
     
         $pos = array('id'=>$id);
@@ -390,10 +390,10 @@ class PersonController extends BaseController {
         if (!$transaction) {
             return false;
         }
-        $user = M('users')->where('stunum="%s"', $stunum)->find();
+        $user = M('users')->where('stunum="%s"', $stuNum)->find();
         if (!$user)
             returnJson(403);
-      return ($user['id'] == $transaction['user_id']) ? true : is_admin($stunum); 
+      return ($user['id'] == $transaction['user_id']) ? true : is_admin($stuNum);
         
     }
 
@@ -467,7 +467,7 @@ class PersonController extends BaseController {
      * @param  int   $timestamp = time() 
      * @return bool|int 返回学期标示或false           
      */
-    protected function getTerm($timestamp)
+    protected function getTerm($timestamp = null)
     {
         if (empty($timestamp)) {
             $timestamp = time();
