@@ -186,7 +186,6 @@ function curlPost($url,$data){//初始化目标网站
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
     $output = curl_exec($ch);
-    var_dump(curl_error($ch));
     curl_close ($ch);
     return $output;
 }
