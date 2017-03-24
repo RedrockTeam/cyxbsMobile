@@ -17,7 +17,7 @@ function getMillisecond()
  * @param  string $info   重写info信息
  * @return [type]         [description]
  */
-function returnJson($status, $info="", $data = array()) 
+function returnJson($status, $info="", $data = null)
 {   
     // print_r(debug_backtrace());exit;
     switch ($status) {
@@ -40,7 +40,7 @@ function returnJson($status, $info="", $data = array())
     if(!empty($info)) {
         $report['info'] = $info;
     }
-    if(!empty($data)) {
+    if($data !== null) {
         if(array_key_exists('info', $data) || array_key_exists('status', $data)) {
             return false;
         } else {
