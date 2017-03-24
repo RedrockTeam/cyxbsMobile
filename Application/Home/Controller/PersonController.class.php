@@ -26,7 +26,7 @@ class PersonController extends BaseController {
             );
             $data = $user->where($condition)->field('id,stunum,introduction,username,nickname,gender,photo_thumbnail_src,photo_src,updated_time,phone,qq')->find();
 
-            returnJson(200,'', compact($data));
+            returnJson(200,'', compact('data'));
         }
 
     }
