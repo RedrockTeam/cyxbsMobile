@@ -19,22 +19,14 @@ class PersonController extends BaseController {
             $stunum = $stunum_other;
         }
         if($stunum == null){
-            $info = array(
-                "status" => 801,
-                "info"   => "invalid parameter"
-            );
-            echo json_encode($info);exit;
+            returnJson(801);
         }else{
             $condition = array(
                 "stunum" => $stunum
             );
             $data = $user->where($condition)->field('id,stunum,introduction,username,nickname,gender,photo_thumbnail_src,photo_src,updated_time,phone,qq')->find();
-            $info = array(
-                'status' => '200',
-                "info"   => "success",
-                'data'   => $data
-            );
-            echo json_encode($info);
+
+            returnJson(200,'', compact($data));
         }
 
     }
