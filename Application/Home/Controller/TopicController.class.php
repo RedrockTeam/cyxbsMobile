@@ -182,13 +182,17 @@ class TopicController extends Controller
             'created_time' => array('elt', date('Y-m-d H:i:s')),
         );
         $articleIds = D('articleremarks')->where($remarkPos)->group('article_id')->getField('article_id', true);
+
+        $remarkTopicIds = array();
+
         if (!empty($articleIds)) {
             foreach($articleIds as $articleId)
                 $remarkTopicIds[] = M('topicarticles')->where(array('id'=>$articleId))->getField('topic_id');
+            $remarkTopicIds = array_flip($remarkTopicIds);
         }
 
+
         //反转去重
-        $remarkTopicIds = array_flip($remarkTopicIds);
         //获取该用户通过回答写文章参与过话题
         $pos = array(
             'user_id' => $user['id'],
@@ -196,7 +200,8 @@ class TopicController extends Controller
             'created_time' => array('elt', date('Y-m-d H:i:s')),
         );
         $articleTopicIds = D('topicarticles')->where($pos)->group('topic_id')->getField('topic_id', true);
-        $articleTopicIds = empty($articleTopicIds) ? array() : array_flip($articleTopicIds);
+//        $articleTopicIds = empty($articleTopicIds) ? array() : array_flip($articleTopicIds);
+        $articleTopicIds = array();
         //获取该用户发起的话题 参与过话题
         $topicIds = D('topics')->where($pos)->getField('id', true);
         $topicIds = empty($articleTopicIds)? array() : array_flip($topicIds);
