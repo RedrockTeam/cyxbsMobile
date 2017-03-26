@@ -214,6 +214,8 @@ function is_my_join($topic_id, $user) {
     if ($user === false) {
         return false;
     }
+    $pos = D('topics')->where(array('id' => $topic_id, 'user_id' => $user))->find();
+    if ($pos)   return true;
     $pos = array('topic_id' => $topic_id, 'user_id' => $user['id'], 'state' => 1);
     $result = D('topicarticles')->where($pos)->find();
     if($result) return true;
