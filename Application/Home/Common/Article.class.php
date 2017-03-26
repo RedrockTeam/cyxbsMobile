@@ -449,7 +449,8 @@ class Article
         if ($result) {
             $this->article = D($this->table)->find($result);
             $this->tmp = array();
-            if ($this->type_id != 6) {
+            // 提供测试
+            if ($this->type_id != 6 && $this->type_id != 7) {
                 return $this->addHotArticles();
             }
             return true;
