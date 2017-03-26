@@ -12,24 +12,13 @@ class EditController extends BaseController
      */
     public function deleteArticle()
     {
-        $type_id 	= I('post.type_id');
-        $article_id = I('post.article_id');
-        $stuNum		= I('post.stuNum');
-        //确认参数完整
-        if (empty($type_id) || empty($article_id)) {
-            returnJson(801);
-            exit;
-        }
-        $article = compact('type_id', 'article_id');
+        $information = I('post.');
+        $url = U("Home/Article/deleteArticle",'',true,true);
+        $result = curlPost($url, $information);
+        if (!$result)
+            returnJson(404);
 
-        $article =  Article::setArticle($article, $stuNum);
-
-        if ($article === false) returnJson(404, "error article");
-
-        $result = $article->delete(I('post.forceDelete'));
-
-        if($result) returnJson(200);
-        else    returnJson(404, $article->getError());
+        echo $result;
     }
 
 
@@ -38,26 +27,7 @@ class EditController extends BaseController
      */
     public function editTopic()
     {
-        $information = I('post.');
-        $topic = $this->getArticle($information['topic_id'], 'topic');
 
-        if (!$topic) {
-            returnJson(404);
-        }
-
-        if (!$this->hasPower($information['topic_id'], 'topics', $information['stuNum'], $error)) {
-            returnJson(403, $error);
-        }
-        $controller = new ArticleController;
-        if (!$controller->produceTopicInformation($information, false,$error)) {
-            returnJson(404, $error);
-        }
-        $information['updated_time'] = date('Y-m-d H:i:s');
-        $result = $topic->data($information)->save();
-        if ($result)
-            returnJson(200);
-        else
-            returnJson(500, 'unknow error');
 
     }
     public function editArticle()
@@ -65,19 +35,16 @@ class EditController extends BaseController
 
     }
 
-    /**
-     *
-     */
-    public function recoverArticle()
-    {
+    public function recoverArticle() {
         $information = I('post.');
-        $article = Article::setArticle($information, $information['stuNum']);
+        $url = U("Article/recoverArticle", '',true,true);
+        $result = curlPost($url, $information);
+        if (!$result)
+            returnJson(404);
 
-        if ($article === false)
-            returnJson(404, 'error article');
-        $result = $article->recover();
-        if ($result)    returnJson(200);
-        else returnJson(404, $article->getError());
+        echo $result;
     }
+
+
 
 }
