@@ -174,7 +174,6 @@ class TopicController extends Controller
             returnJson(403, "你未登入");
         }
         $user = getUserInfo($information['stuNum']);
-        $topicIds = array();
         //获取该用户通过回答回复参与过话题
         $remarkPos = array(
             'user_id' => $user['id'],
@@ -185,25 +184,24 @@ class TopicController extends Controller
         $articleIds = D('articleremarks')->where($remarkPos)->group('article_id')->getField('article_id', true);
         if (!empty($articleIds)) {
             foreach($articleIds as $articleId)
-                $topicIds[] = M('topicarticles')->where(array('id'=>$articleId))->getField('topic_id');
+                $remarkTopicIds[] = M('topicarticles')->where(array('id'=>$articleId))->getField('topic_id');
         }
 
         //反转去重
-        $topicIds = array_flip($topicIds);
+        $remarkTopicIds = array_flip($remarkTopicIds);
         //获取该用户通过回答写文章参与过话题
-        $articlePos = array(
+        $pos = array(
             'user_id' => $user['id'],
             'state' => 1,
             'created_time' => array('elt', date('Y-m-d H:i:s')),
         );
-        $articleTopicIds = D('topicarticles')->where($articlePos)->group('topic_id')->getField('topic_id', true);
-
-        if (empty($articleTopicIds))
-            $articleTopicIds = array();
-         else
-            $articleTopicIds = array_flip($articleTopicIds);
+        $articleTopicIds = D('topicarticles')->where($pos)->group('topic_id')->getField('topic_id', true);
+        $articleTopicIds = empty($articleTopicIds) ? array() : array_flip($articleTopicIds);
+        //获取该用户发起的话题 参与过话题
+        $topicIds = D('topics')->where($pos)->getField('id', true);
+        $topicIds = empty($articleTopicIds)? array() : array_flip($topicIds);
         //数组合并
-        $topicIds = $articleTopicIds + $topicIds;
+        $topicIds = $articleTopicIds + $remarkTopicIds + $topicIds;
 
         $topicIds = array_flip($topicIds);
         //没找到对应的话题返回空
