@@ -279,9 +279,9 @@ class TopicController extends Controller
             'title',
             'content',
             'nickname',
-            'stunum'          => 'user_id',
-            $user_alias.'.photo_src'        => 'user_photo_src',
-            $user_alias.'.photo_thumbnail_src'    => 'user_thumbnail_src',
+            'stunum'                                => 'user_id',
+            $user_alias.'.photo_src'                => 'user_photo_src',
+            $user_alias.'.photo_thumbnail_src'      => 'user_thumbnail_src',
             'like_num',
             'remark_num',
         );
@@ -331,7 +331,7 @@ class TopicController extends Controller
             ->select();
 
         foreach ($articles as $key => $value) {
-            if((int)$value['user_id'] === 0) {
+            if((int)$value['user_id'] == 0) {
                 $value['nickname'] = "红岩网校工作站";
                 $value['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
                 $value['thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
@@ -347,9 +347,6 @@ class TopicController extends Controller
         $topic['articles'] = $articles;
 
         returnJson(200, '',array('searchTitle' => $information['searchTitle'], 'data' => $topic));
-
-
-
 
     }
 
