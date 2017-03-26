@@ -140,7 +140,7 @@ class TopicController extends Controller
             ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
         foreach ($data as $key => &$value) {
-            $user = $value['user_id'] === 0 ? array(
+            $user = (int)$value['user_id'] === 0 ? array(
                 'nickname' => "红岩网校工作站",
                 'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
                 'user_id' => '0'
@@ -241,7 +241,7 @@ class TopicController extends Controller
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
 
         foreach ($data as $key => &$value) {
-            $user = $value['user_id'] === 0 ? array(
+            $user = (int)$value['user_id'] === 0 ? array(
                 'nickname' => "红岩网校工作站",
                 'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
                 'user_id' => '0'
@@ -331,7 +331,7 @@ class TopicController extends Controller
             ->select();
 
         foreach ($articles as $key => $value) {
-            if($value['user_id'] === 0) {
+            if((int)$value['user_id'] === 0) {
                 $value['nickname'] = "红岩网校工作站";
                 $value['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
                 $value['thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
