@@ -64,7 +64,7 @@ class Article
             } else {
                 //作者信息
                 if (in_array('user_id', $this->fields))
-                    $this->author = D('users')->find($article['user_id']);
+                    $this->author = getUserInfo($this->article['user_id']);
                 elseif ($this->type_id == 6) {
                     $this->author = array(
                         'photo_src' => "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg',
@@ -110,6 +110,7 @@ class Article
         }
 
         $stu = getUserInfo($stu);
+
         if ($stu === false)     $stu=null;
         try {
             $obj =  new self($article, $table, $stu);
@@ -128,7 +129,7 @@ class Article
     /**
      * @param $name array|string
      * @param bool $origin 是否原来的
-     * @return array|mixed|string|void
+     * @return array|mixed|string
      * @throws Exception
      */
     public function get($name, $origin = false) {
@@ -150,7 +151,7 @@ class Article
         //适配 article.title 这种情况
         if (strpos($name, '.') !== false) {
             $names = explode('.', $name);
-            $value = '';
+
             try {
                 $value = $this->get(array_shift($names));
             } catch (\Exception $e) {
@@ -175,7 +176,7 @@ class Article
 
         if (in_array($name, $this->fields))
 
-            return (is_null($this->tmp) || is_null($this->tmp[$name]) || $origin) ? $this->article[$name] : $this->tmp[$name];
+            return is_null($this->tmp) || is_null($this->tmp[$name]) || $origin ? $this->article[$name] : $this->tmp[$name];
 
 
         throw new Exception('error article fields');
@@ -484,7 +485,7 @@ class Article
      * 文章是否存在
      * @return bool
      */
-    protected  function is_exist() {
+    public  function is_exist() {
         if (empty($this->article))    return false;
         if ($this->article['state'] == 0)  return false;
         return true;
@@ -496,9 +497,9 @@ class Article
      */
     protected function hasPower()
     {
+
         if (is_null($this->operator))
             return false;
-
         if (isset($this->operator['hasPower']))
             return $this->operator['hasPower'];
 
@@ -532,7 +533,7 @@ class Article
 
         $pos = array(
             'state' => 1,
-            "articletype" => $this->type_id,
+            "articletypes_id" => $this->type_id,
             "article_id" => $this->article['id']
         );
         $remarks = D('articleremarks')->where($pos)->select();
@@ -555,7 +556,7 @@ class Article
         }
         if ($stu === false) {
             if (isset($this->article_praise))
-                return $this->article_remarks;
+                return $this->article_praise;
             else {
                 $pos = array(
                     'article_id' => $this->article['id'],
@@ -580,10 +581,20 @@ class Article
         }
     }
 
+    /**
+     * 返回错误 内容
+     * @return mixed
+     */
     public function getError() {
          $error = $this->error;
         return end($error);
     }
+
+    /**
+     * @param $field string 字段
+     * @param null $value mixed 字段对应的值
+     * @return array|bool|mixed|null
+     */
 
     protected function produceArticleInformation($field, $value = null)
     {
@@ -714,6 +725,7 @@ class Article
     /**
      * @param $content string 回复内容
      * @param $answerToUser  int|string 待回复的人
+     * @return bool
      */
     public function addRemark($content, $answerToUser = 0) {
         if (!$this->is_exist()) {

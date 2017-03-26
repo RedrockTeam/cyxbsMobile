@@ -23,7 +23,7 @@ class Forbidword
         else $this->forbidWordList = $forbidWordList;
     }
     /**
-     * 检查
+     * 检查是否有违法字符
      * @param $string
      * @param bool $IsIgnoreCase
      * @return bool

@@ -21,11 +21,16 @@ class TopicController extends Controller
     public function addTopic()
     {
         $information = I('post.');
+        if (true !== authUser(I('post.stuNum'), I('post.idNum'))) {
+            returnJson('403', '未登录不允许');
+        }
+
+
         if (!$this->produceTopicInformation($information,$error)) {
             returnJson(404, $error);
         }
 
-        if ($information['official'] == true) {
+        if ($information['official'] == 'true') {
             //官方发起话题
             if (!is_admin($information['stuNum'])) {
                 returnJson(403, '你还不是管理员哟');
@@ -42,6 +47,7 @@ class TopicController extends Controller
         if (is_null($information['keyword']) || isset($information['id']) || is_null($information['user_id'])) {
             returnJson(404, 'error pram');
         }
+
         $default = array(
             'content' => '',
             'photo_src'=>'',
@@ -75,18 +81,19 @@ class TopicController extends Controller
         $information['type_id'] = 7;
 
         if (isset($information['article_id']) || isset($information['id'])) {
-            returnJson(404);
+            returnJson(801);
         }
-        $article = Article::setArticle($information, $information['stuNum']);
+        $user = !empty($information['official']) ? 0 : $information['stuNum'];
+        $article = Article::setArticle($information,  $user);
         if ($article === false)
             returnJson(404);
 
         $result = $article->add();
         if ($result) {
             D('topics')->where('id=%d', $article->get('topic_id'))->setInc('article_num');
-            returnJson(200);
+            returnJson(200, '', array('state'=>200));
         } else {
-            returnJson(404, 'fatal add article ');
+            returnJson(404, $article->getError());
         }
     }
 
@@ -118,9 +125,10 @@ class TopicController extends Controller
             "state"   => 1,
         );
 
-        if (isset($information['keyword']))
-            $pos['keyword'] =  array('like', $information['keyword'].'%');
-
+        if (!empty($information['searchKeyword']))
+            $pos['keyword'] =  array('like', $information['searchKeyword'].'%');
+        else
+            $information['searchKeyword'] = '';
 
         //话题信息的查询
         $data = M('topics')
@@ -132,24 +140,24 @@ class TopicController extends Controller
             ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
         foreach ($data as $key => &$value) {
-            $user = D('users')->field($userField)->find($value['user_id']);
+            $user = $value['user_id'] === 0 ? array(
+                'nickname' => "红岩网校工作站",
+                'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+                'user_id' => '0'
+            ) : D('users')->field($userField)->find($value['user_id']);
             $value = array_merge($value, $user);
             $value['img']['img_small_src'] = $value['photo_src'];
             $value['img']['img_src'] = $value['thumbnail_src'];
 
-            $value['is_my_join'] = $this->is_my_join($value['id'], $information['stuNum']);
+            $value['is_my_join'] = is_my_join($value['topic_id'], $information['stuNum']);
             unset($value['photo_src']);
             unset($value['thumbnail_src']);
             $value['content'] = array("content" => $value['content']);
         }
-        returnJson(200, '', compact('data'));
+        returnJson(200, '', array('searchKeyword' => $information['searchKeyword'] ,'data'=>$data));
     }
 
-    /**
-     * @param $topic_id int 话题id
-     * @param $user mixed 用户标示
-     * @return bool
-     */
+
 
     /**
      * 我参与过的topic
@@ -157,24 +165,60 @@ class TopicController extends Controller
     public function myJoinedTopic() {
         $post = I('post.');
         $get = I('get.');
-        $information = array_merge($get, $post);
+        $information = $get + $post;
+
         $information['page'] = isset($information['page']) ? $information['page'] : 0;
         $information['size'] = isset($information['size']) ? $information['size'] : 10;
-        if (authUser($information['stuNum'], $information['idNum'])) {
+        //idNum 和 stuNum 必须post 传值
+        if (true !== authUser(I('post.stuNum'), I('post.idNum'))) {
             returnJson(403, "你未登入");
         }
         $user = getUserInfo($information['stuNum']);
-        $pos = array('user_id' => $user['id'], 'state' => 1, 'created_time' => array('elt', date('Y-m-d H:i:s')));
-        $result = D('topicarticles')->field('topic_id')->where($pos)->group('topic_id')->select();
-        if ($result === false)
-            returnJson(404);
+        $topicIds = array();
+        //获取该用户通过回答回复参与过话题
+        $remarkPos = array(
+            'user_id' => $user['id'],
+            'state' => 1,
+            'articletypes_id' => 7,
+            'created_time' => array('elt', date('Y-m-d H:i:s')),
+        );
+        $articleIds = D('articleremarks')->where($remarkPos)->group('article_id')->getField('article_id', true);
+        if (!empty($articleIds)) {
+            foreach($articleIds as $articleId)
+                $topicIds[] = M('topicarticles')->where(array('id'=>$articleId))->getField('topic_id');
+        }
 
-        $topic_ids = array();
-        foreach ($result as $topic)
-            $topic_ids = $topic['topic_id'];
-        $condition = array('id'=>array('in', $topic_ids), 'state'=>1, 'created_time' => array('elt', date('Y-m-d H:i:s')));
+        //反转去重
+        $topicIds = array_flip($topicIds);
+        //获取该用户通过回答写文章参与过话题
+        $articlePos = array(
+            'user_id' => $user['id'],
+            'state' => 1,
+            'created_time' => array('elt', date('Y-m-d H:i:s')),
+        );
+        $articleTopicIds = D('topicarticles')->where($articlePos)->group('topic_id')->getField('topic_id', true);
+
+        if (empty($articleTopicIds))
+            $articleTopicIds = array();
+         else
+            $articleTopicIds = array_flip($articleTopicIds);
+        //数组合并
+        $topicIds = $articleTopicIds + $topicIds;
+
+        $topicIds = array_flip($topicIds);
+        //没找到对应的话题返回空
+        if(empty($topicIds))    returnJson(200, '', array('data' => array()));
+
+        $topicIds = implode(',', $topicIds);
+
+        $condition = array(
+            'state'=>1,
+            'created_time' => array('elt', date('Y-m-d H:i:s')),
+            'id'=>array('in', $topicIds),
+        );
+
         if (isset($information['keyword'])) {
-            $condition['keyword'] = array("like", $information['key'].'%');
+            $condition['keyword'] = array("like", $information['keyword'].'%');
         }
         $displayField = array(
             "id" => "topic_id",
@@ -193,8 +237,13 @@ class TopicController extends Controller
                     ->limit($information['page']*$information['size'], $information['size'])
                     ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
+
         foreach ($data as $key => &$value) {
-            $user = D('users')->field($userField)->find($value['user_id']);
+            $user = $value['user_id'] === 0 ? array(
+                'nickname' => "红岩网校工作站",
+                'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+                'user_id' => '0'
+            ) : D('users')->field($userField)->find($value['user_id']);
             $value = array_merge($value, $user);
             $value['img']['img_small_src'] = $value['photo_src'];
             $value['img']['img_src'] = $value['thumbnail_src'];
@@ -221,21 +270,36 @@ class TopicController extends Controller
         $user_alias = 'user';
 
         $displayField = array(
-            $article_alias.'.id',
+            $article_alias.'.id' => 'article_id',
             'type_id',
             $article_alias.'.photo_src'     => 'article_photo_src',
             $article_alias.'.thumbnail_src' => 'article_thumbnail_src',
+            'title',
             'content',
             'nickname',
-            'stunum',
-            $user_alias.'.photo_src'        => 'photo_src',
-            $user_alias.'.photo_thumbnail_src'    => 'photo_thumbnail_src',
+            'stunum'          => 'user_id',
+            $user_alias.'.photo_src'        => 'user_photo_src',
+            $user_alias.'.photo_thumbnail_src'    => 'user_thumbnail_src',
             'like_num',
             'remark_num',
         );
         $site = $_SERVER["SERVER_NAME"];
         //话题
-        $topic = M('topics')->field(true, 'state')->find($information['topic_id']);
+        if (isset($information['topic_id'])) {
+            $pos = array('state'=>1, 'id' => $information['topic_id']);
+            $topic = M('topics')->field(true, 'state')->where($pos)->find();
+        }
+        else if(isset($information['keyword'])) {
+            $pos = array('state'=>1, 'keyword' => $information['keyword']);
+            $topic = M('topics')->field(true, 'state')->where($pos)->find();
+        }
+        else
+            returnJson(404, 'can\'t find this topic');
+
+        if (!$topic)    returnJson(404, 'can\'t find this topic');
+
+        $topic["topic_id"] = $topic['id'];
+        unset($topic['id']);
         //user_id为0时使用官方的身份
         if ($topic['user_id'] == 0) {
             $topic['nickname'] = "红岩网校工作站";
@@ -243,16 +307,21 @@ class TopicController extends Controller
         } else {
             $user = M('users')->find($topic['user_id']);
             $topic['nickname'] = $user['nickname'];
-            $topic['photo_src'] = $user['photo_src'];
+            $topic['user_photo_src'] = $user['photo_src'];
+            $topic['user_thumbnail_src'] = $user['photo_thumbnail_src'];
         }
         unset($topic['user_id']);
-        if (!$topic) {
-            returnJson(404, 'error topic\'s id');
-        }
-        $pos = array('topic_id' => $topic['id'], $article_alias.'.state'=> 1);
+
+        $pos = array('topic_id' => $topic['topic_id'], $article_alias.'.state'=> 1);
+        //搜索文章
+        if (!empty($information['searchTitle']))
+            $pos['title'] = array('like', $information['searchTitle'].'%');
+        else
+            $information['searchTitle'] = '';
+
         $articles = M('topicarticles')
             ->alias($article_alias)
-            ->join('__USERS__ '.$user_alias.' ON '.$user_alias.'.id='.$article_alias.'.user_id', "RIGHT")
+            ->join('__USERS__ '.$user_alias.' ON '.$user_alias.'.id='.$article_alias.'.user_id', "LEFT")
             ->where($pos)
             ->field($displayField)
             ->order($article_alias.'.updated_time DESC')
@@ -260,17 +329,22 @@ class TopicController extends Controller
             ->select();
 
         foreach ($articles as $key => $value) {
-            if($value['user_id'] == 0) {
+            if($value['user_id'] === 0) {
                 $value['nickname'] = "红岩网校工作站";
                 $value['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
                 $value['thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
             }
-            $value['is_my_like)'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
+            if (!isset($information['stuNum'])) {
+                $value['is_my_like)'] = false;
+            }
+            else {
+                $value['is_my_like)'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
+            }
         }
-
+        $topic['is_my_join'] = empty($information['stuNum']) ? false : is_my_join($topic['id'], $information['stuNum']);
         $topic['articles'] = $articles;
 
-        returnJson(200, '',array('data' => $topic));
+        returnJson(200, '',array('searchTitle' => $information['searchTitle'], 'data' => $topic));
 
 
 
@@ -293,15 +367,6 @@ class TopicController extends Controller
 
     }
 
-    protected function is_my_join($topic_id, $user) {
-        $user = getUserInfo($user);
-        if ($user === false) {
-            return false;
-        }
-        $pos = array('topic_id' => $topic_id, 'user_id' => $user['id']);
-        $result = D('topicarticles')->where($pos)->find();
-        return empty($result) ? false : true;
-    }
 
     /**
      * 处理话题的数据
@@ -358,15 +423,15 @@ class TopicController extends Controller
      * @param  string  $stunum     学号
      * @return boolean             是否喜欢
      */
-    protected function is_my_like($article_id, $type_id, $stunum)
+    protected function is_my_like($article_id, $type_id, $stuNum)
     {
-        if(empty($stunum)) {
+        if(empty($stuNum)) {
             return false;
         }
         $praise_condition = array(
             'article_id'    => $article_id,
-            'articletype_id'=> $type_id,
-            'stunum'        => $stunum
+            'articletypes_id'=> $type_id,
+            'stunum'        => $stuNum
         );
         $praise = M('articlepraises');
         $praise_exist = $praise->where($praise_condition)->find();

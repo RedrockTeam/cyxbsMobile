@@ -4,6 +4,7 @@ namespace Home\Controller;
 
 use Home\Common\Article;
 use Think\Controller;
+use Think\Exception;
 
 class NewArticleController extends Controller
 {
@@ -13,17 +14,19 @@ class NewArticleController extends Controller
         $article = D("hotarticles");
         $articles = $article->relation(true)->select();
     }
-	public function searchHotArticle() {
+
+    /**
+     * 热门动态
+     */
+    public function searchHotArticle() {
 		
         $hotArticle = D("hotarticles");
-		$article = D("articles");
-        $praise  = M('articlepraises');
-        $user = D('users');
         $page = I('post.page');
         $size = I('post.size');
         $page = empty($page) ? 0 : $page;
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
+        $stuNum = I('stuNum');
         $info = array();
         $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
         
@@ -42,7 +45,7 @@ class NewArticleController extends Controller
                     'status' => 200,
                     'page'   => $page,
                     'data'   =>array(
-                                'id'        => $data_notice[$key]['id'],
+                                'id'        => $value['id'],
                                 'type'      => "notice",
                                 'type_id'   => "6",
                                 'article_id'=> $value['id'],
@@ -70,84 +73,48 @@ class NewArticleController extends Controller
                         ->where("created_time > '$now_date'")
                         ->order('((remark_num-self_remark_num)*2+like_num) DESC,updated_time DESC')
                         ->limit($start,$size)
-                        ->relation(true)
                         ->select();
         foreach ($data as $key => $value) {
-            $condiion_articles = array(
-                "id" => $data[$key]['article_id'],
-                );
-            if($data[$key]['Articletypes']['typename'] == null){
-
-            } elseif ($data[$key]['articletype_id'] < 5) {
-                $article = M("news");
-                $praise  = M('articlepraises');
-                $stuNum = I('post.stuNum');
-                $exist = $this->is_my_like($value['article_id'], $value['articletype_id'], $stuNum);
-                $articles = $article->where($condiion_articles)->find();
-                $now_info = array(
-                    'status' => 200,
-                    'page'   => $page,
-                    'data'   =>array(
-                                'id'        => $data[$key]['id'],
-                                'type'      => $data[$key]['Articletypes']['typename'],
-                                'type_id'   => $data[$key]['articletype_id'],
-                                'article_id'   => $data[$key]['article_id'],
-                                'user_id'   => "",
-                                'user_name' => "",
-                                'user_head' => "",
-                                'time'      => $articles['date'],
-                                'content'   => $articles,
-                                'img'       => array(
-                                                'img_small_src' => "",
-                                                'img_src' => "",
-                                            ),
-                                'like_num'  => $value['like_num'],
-                                'remark_num'=> $value['remark_num'],
-                                "is_my_Like"=> $exist,
-                            ),
-                );
-                array_push($info,$now_info);
-            } else {
-                $article = D('articles');
-                $praise  = M('articlepraises');
-                $articlePhoto  = M('articlephoto');
-                $articles = $article->where($condiion_articles)->relation(true)->find();
-                // $praise_condition = array(
-                //     "articletypes_id" => $data[$key]['articletypes_id'],
-                //     "article_id"      => $data[$key]['article_id'],
-                //     "stunum"          => I('post.stuNum')
-                // );    
-                $stuNum = I('post.stuNum');
-                $exist = $this->is_my_like($value['article_id'], $value['articletype_id'], $stuNum);
-//                $photo_content = $articlePhoto->where($photo_condition)->select();
-                $now_info = array(
-                    'status' => 200,
-                    'page'   => $page,
-                    'data'   =>array(
-                                'id'        => $data[$key]['id'],
-                                'type'      => $data[$key]['Articletypes']['typename'],
-                                'type_id'   => $data[$key]['articletype_id'],
-                                'article_id'=>$data[$key]['article_id'],
-                                'user_id'   => $articles['Users']['stunum'],
-                                'nick_name' => $articles['Users']['nickname'],
-                                'user_head' => $articles['Users']['photo_src'],
-                                'time'      => $articles['created_time'],
-                                'content'   => array(
-                                                    "content" => $articles['content'],
-                                                ),
-                                'img'       => array(
-                                                'img_small_src' => $articles['thumbnail_src'],
-                                                'img_src' => $articles['photo_src'],
-                                            ),
-                                'like_num'  => $value['like_num'],
-                                'remark_num'=> $value['remark_num'],
-                                "is_my_Like"=> $exist,
-                            ),
-                );
-                array_push($info,$now_info);
+            $article = array(
+                'article_id'=>$value['article_id'],
+                'type_id'   => $value['articletype_id']
+            );
+            $article = Article::setArticle($article);
+            //不存在的字段throw exception
+            if($article->is_exist() === false)  continue;
+            try {
+                $time = $article->get('date');
+            }catch (Exception $e) {
+                $time = $article->get('created_time');
             }
+            $photo_src = $article->get("photo_src");
+            $small_src = $article->get("thumbnail_src");
+            $author = $article->get('author');
+            //兼容格式
+            $now_info = array(
+                'status' => 200,
+                'page'   => $page,
+                'data'   =>array(
+                            'id'        => $value['id'],
+                            'type'      => $article->articleType(true),
+                            'type_id'   => $value['articletype_id'],
+                            'article_id'=> $value['article_id'],
+                            'user_id'   => $author ? $author['id'] : '',
+                            'user_name' => $author ? $author['nickname'] : '',
+                            'user_head' => $author ? $author['photo_src'] : '',
+                            'time'      => $time,
+                            'content'   => array('content' => $article->get('content')),
+                            'img'       => array(
+                                            'img_small_src' => $small_src ? $small_src : '',
+                                            'img_src' => $photo_src ? $photo_src : '',
+                                        ),
+                            'like_num'  => $value['like_num'],
+                            'remark_num'=> $value['remark_num'],
+                            "is_my_Like"=> $stuNum ? $article->getPraise($stuNum) : false,
+                        ),
+            );
+            array_push($info,$now_info);
         }
-
         echo json_encode($info);
     }
 
@@ -168,15 +135,21 @@ class NewArticleController extends Controller
             echo json_encode($info,true);
             exit;
         }
-        $articleType = D('articletypes');
+//        $articleType = D('articletypes');
         $article     = D('articles');
         $condition = array(
             'type_id' => $type,
             'cyxbsmobile_articles.state'   => array('neq', 0),
         );
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article->where($condition)->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')->limit($start,$size)->order('updated_time DESC')->select();
-        $praise  = M('articlepraises');
+        $content = $article
+                    ->where($condition)
+                    ->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')
+                    ->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')
+                    ->limit($start,$size)
+                    ->order('updated_time DESC')
+                    ->select();
+
         $result = array();
         foreach($content as $key => $value){
             $stuNum = I('post.stuNum');
@@ -209,7 +182,6 @@ class NewArticleController extends Controller
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
         $content = $article->limit($start,$size)->order('id DESC')->select();
 
-        $praise  = M('articlepraises');
         $result = array();
         foreach($content as $key => $value) {
             $stuNum = I('post.stuNum');

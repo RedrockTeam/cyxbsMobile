@@ -94,33 +94,27 @@ function timeFormate($startTime='', $format="Y-m-d H:i:s")
 
  /**
  * 判断是否为管理员
- * @param  string  $stunum 学号
+ * @param  string  $user   身份标示
  * @return boolean         是否为管理员
  */
-function is_admin($stunum) 
+function is_admin($user)
 {
-    if (empty($stunum)) {
-        if (!session('admin')) {
+    if (empty($user))
+        return !session('admin') ? false : true;
+
+    $user = getUserInfo($user);
+    $user_id = $user['id'];
+
+
+    $is_admin  = M('admin')->where(array('state'=>1,'user_id'=>$user_id))->find();
+    if(!$is_admin) {
+        $is_admin = M('administrators')->where('user_id='.$user_id)->find();
+        if (!$is_admin) {
             return false;
         }
-        $stunum = session('admin.stunum');
     }
-    $stu = D('users')->where('stunum="%s"', $stunum)->find();
-    if (empty($stu)) {
-        return false;
-    }
-    $id = $stu['id'];
-    $is_admin  = M('admin')->where(array('state'=>1,'stunum'=>$stunum))->find();
-    if($is_admin) {
-        return true;
-    } else {
-        $is_admin = M('administrators')->where('user_id='.$id)->find();
-        if ($is_admin) {
-            return true;
-        }
-    }
+    return true;
 
-    return false;
     
 }
 
@@ -142,7 +136,7 @@ function mystrlen($str) {
  * @return mixed    用户信息
  */
 function getUserInfo($stu) {
-    if (empty($stu)) {
+    if (is_null($stu)) {
         return null;
     }
 
@@ -150,14 +144,27 @@ function getUserInfo($stu) {
         $user = D('users')->where("stunum='%s'", $stu)->find();
         if ($user)      return $user;
     }
-    $user = D("users")->find($stu);
+    $user = (int)$stu === 0 ? array(
+        'nickname' => "红岩网校工作站",
+        'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+        'photo_thumbnail_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+        'stunum' => 0,
+        'id'    => 0,
+    ) : D("users")->find($stu);
+
     return $user;
 }
 
-
+/**
+ * 验证身份信息
+ * @param $stuNum   string 学号
+ * @param $idNum    string 身份证号
+ * @return bool|mixed
+ */
 function authUser($stuNum, $idNum)
 {
     if (empty($stuNum) || empty($idNum)) return false;
+
     $idnum = S($stuNum);
 
     if (!empty($idnum))
@@ -171,12 +178,18 @@ function authUser($stuNum, $idNum)
     $needInfo = curlPost($url,$condition);
     $needInfo = json_decode($needInfo,true);
     if($needInfo['status'] != 200){
-        return json_decode($needInfo,true);
+        return json_encode($needInfo);
     }else{
         S($stuNum, $idNum);
     }
     return true;
 }
+
+/**
+ * @param $url string 请求地址
+ * @param $data array post 请求参数
+ * @return mixed
+ */
 function curlPost($url,$data){//初始化目标网站
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -188,4 +201,30 @@ function curlPost($url,$data){//初始化目标网站
     $output = curl_exec($ch);
     curl_close ($ch);
     return $output;
+}
+
+/**
+ * 是否加入这个话题
+ * @param $topic_id  int 话题标号
+ * @param $user     int|string 用户标示
+ * @return bool
+ */
+function is_my_join($topic_id, $user) {
+    $user = getUserInfo($user);
+    if ($user === false) {
+        return false;
+    }
+    $pos = array('topic_id' => $topic_id, 'user_id' => $user['id'], 'state' => 1);
+    $result = D('topicarticles')->where($pos)->find();
+    if($result) return true;
+
+    $article_ids = D('topicarticles')->field('id')->where(array('topic_id' => $topic_id, 'state'=>1))->select(false);
+
+    $pos['articletype_id'] = 7;
+    //in 子句
+    $pos['article_id'] = array('exp', 'IN('.$article_ids.')');
+
+    $result = D('articleremarks')->where($pos)->count();
+    return $result ? true : false;
+
 }
