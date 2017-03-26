@@ -200,11 +200,10 @@ class TopicController extends Controller
             'created_time' => array('elt', date('Y-m-d H:i:s')),
         );
         $articleTopicIds = D('topicarticles')->where($pos)->group('topic_id')->getField('topic_id', true);
-//        $articleTopicIds = empty($articleTopicIds) ? array() : array_flip($articleTopicIds);
-        $articleTopicIds = array();
+        $articleTopicIds = empty($articleTopicIds) ? array() : array_flip($articleTopicIds);
         //获取该用户发起的话题 参与过话题
         $topicIds = D('topics')->where($pos)->getField('id', true);
-        $topicIds = empty($articleTopicIds)? array() : array_flip($topicIds);
+        $topicIds = empty($topicIds)? array() : array_flip($topicIds);
         //数组合并
         $topicIds = $articleTopicIds + $remarkTopicIds + $topicIds;
 
