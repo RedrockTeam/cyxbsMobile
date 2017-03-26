@@ -100,7 +100,7 @@ class NewArticleController extends Controller
                             'type_id'   => $value['articletype_id'],
                             'article_id'=> $value['article_id'],
                             'user_id'   => $author ? $author['id'] : '',
-                            'user_name' => $author ? $author['nickname'] : '',
+                            'nickname' => $author ? $author['nickname'] : '',
                             'user_head' => $author ? $author['photo_src'] : '',
                             'time'      => $time,
                             'content'   => array('content' => $article->get('content')),
