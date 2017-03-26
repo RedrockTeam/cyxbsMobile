@@ -334,8 +334,9 @@ class TopicController extends Controller
 
             if($value['user_id'] == false) {
                 $value['nickname'] = "红岩网校工作站";
-                $value['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
-                $value['thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
+                $value['user_id'] = 0;
+                $value['user_photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
+                $value['user_thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
             }
             if (!isset($information['stuNum'])) {
                 $value['is_my_like)'] = false;
