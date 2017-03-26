@@ -330,8 +330,9 @@ class TopicController extends Controller
             ->limit($information['page']*$information['size'], $information['size'])
             ->select();
 
-        foreach ($articles as $key => $value) {
-            if((int)$value['user_id'] == 0) {
+        foreach ($articles as $key => &$value) {
+
+            if($value['user_id'] == false) {
                 $value['nickname'] = "红岩网校工作站";
                 $value['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
                 $value['thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
