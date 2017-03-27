@@ -427,13 +427,14 @@ class PersonController extends BaseController {
         foreach($transactionDate as $key => $date) {
             $data = array('date'=>$date);
 
-            //验证格式正确
-            if (!$this->produceTransaction($data, true)) {
-                $error .= $key.'parameter is error, ';
-                unset($transactionDate[$key]);
-                continue;
-            } 
-            $data = $data['date'];
+            //验证格式正确 if (!$this->produceTransaction($data, true)) {
+//                var_dump($data);exit;
+//                $error .= $key.'parameter is error, ';
+//                var_dump($date);
+//                unset($transactionDate[$key]);
+//                continue;
+//            }
+//
             $data['state'] = array('neq', 0);
             //查找重复的
             foreach ($transaction_ids as $transaction_id) {
@@ -446,6 +447,7 @@ class PersonController extends BaseController {
                }
             }
         }
+
         if(empty($transactionDate)) {
             $error = "all parameter is exist";
             return false;
@@ -558,6 +560,7 @@ class PersonController extends BaseController {
                         }
                         
                         $stack[$date['day']][$date['class']] = $date['week'];
+
                     };
                     unset($stack);
                     break;
