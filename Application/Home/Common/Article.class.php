@@ -578,7 +578,7 @@ class Article
                 'user_id'       => $user['id'],
             );
             $result = D('articlepraises')->where($pos)->find();
-            return $result === false ? false : true;
+            return $result  ? true : false;
         }
     }
 
