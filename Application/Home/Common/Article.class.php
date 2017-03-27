@@ -574,8 +574,8 @@ class Article
             $user = getUserInfo($stu);
             $pos = array(
                 'article_id' => $this->article['id'],
+                'stunum'       => $user['stunum'],
                 'articletype_id' => $this->type_id,
-                'user_id'       => $user['id'],
             );
             $result = D('articlepraises')->where($pos)->find();
             return $result  ? true : false;
