@@ -196,7 +196,7 @@ class PhotoController extends Controller {
             );
             $goal_2 = $user->add($user_content);
         }
-        ($goal&& $goal_2) ? returnJson(200) : returnJson(404, 'edit user error', array('state'=>404));
+        ($goal&& $goal_2) ? returnJson(200, '', array('state'=>200)) : returnJson(404, 'edit user error', array('state'=>404));
         
     }
 
@@ -310,9 +310,9 @@ class PhotoController extends Controller {
         $thumbnailPath = $this->config['thumbnail_rootPath'].$filename;
         $success = is_file($filepath) && $filename[0] !== '.' && unlink($filepath) && unlink($thumbnailPath);
         if ($success) {
-            returnJson(200);
+            returnJson(200, '', array('state' => 200));
         } else {
-            returnJson(404);
+            returnJson(404, '', array('state' => 404));
         }
     }
 
