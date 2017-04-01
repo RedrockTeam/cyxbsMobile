@@ -114,6 +114,47 @@ class PersonController extends BaseController {
         echo json_encode($info,true);
     }
 
+    public function bindDormitory(){
+//        if (true !== authUser(I('post.stuNum'), I('post.idNum'))) {
+//            returnJson('403', '没有登陆');
+//        }
+        $room = I('post.room');
+        if (strpos($room, '-') === false) {
+            returnJson(404, 'parameter `room` is error');
+        }
+        $dormitoryId = explode('-', $room);
+        $user = getUserInfo(I('post.stuNum'));
+        $dormitory = D('dormitory')->where(array('user_id'=>$user['id'],'state'=>1))->find();
+        //删除记录
+        if ($dormitory) {
+            $dormitory['state'] = 0;
+            $dormitory['updated_time'] = date('Y-m-d H:i:s');
+            $result = ('dormitory')->save($dormitory);
+            if (!$result)       returnJson(500, '操作错误');
+        }
+        $data = array(
+            'user_id' => $user['id'],
+            'building' => $dormitoryId[0],
+            'room'  => $dormitoryId[1],
+            'updated_time' => date('Y-m-d H:i:s'),
+            'created_time' => date('Y-m-d H:i:s'),
+        );
+        $result = D('dormitory')->data($data)->add();
+        $result ? returnJson(200) : returnJson(500, 'fatal bind');
+    }
+
+    public function deBindDormitory() {
+        $user = getUserInfo(I('post.stuNum'));
+        $dormitory = D('dormitory')->where(array('user_id'=>$user['id'],'state'=>1))->find();
+        if ($dormitory) {
+            $dormitory['state'] = 0;
+            $dormitory['updated_time'] = date('Y-m-d H:i:s');
+            $result =  D('dormitory')->save($dormitory);
+            $result ? returnJson(200) : returnJson(500, '解绑失败');
+        }
+        returnJson(403, '你先前未绑定寝室号');
+    }
+
 
 /*---------------------------------事项代码 -------------------------------------/
     /**
