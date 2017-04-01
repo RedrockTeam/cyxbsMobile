@@ -129,7 +129,7 @@ class PersonController extends BaseController {
         if ($dormitory) {
             $dormitory['state'] = 0;
             $dormitory['updated_time'] = date('Y-m-d H:i:s');
-            $result = ('dormitory')->save($dormitory);
+            $result = D('dormitory')->save($dormitory);
             if (!$result)       returnJson(500, '操作错误');
         }
         $data = array(
