@@ -38,7 +38,7 @@ class ExtentController
         $current = $electric[0];
         unset($electric[0]);
         foreach ($electric as $value) {
-            $elec['time'] = $value['elec_month'];
+            $elec['time'] = mb_substr($value['record_time'],0,2,'utf-8');
             $elec['spend'] = $value['elec_spend'];
             $elec['elec_start'] = $value['elec_start'];
             $elec['elec_end'] = $value['elec_end'];
