@@ -23,7 +23,7 @@ class DataController extends Controller
 
         public function _empty()
         {
-                returnJson(404);
+            returnJson(404);
         }
 
         /**
@@ -68,7 +68,7 @@ class DataController extends Controller
                         $data['isedit'] = false;
                         $this->assign($data);
                 }
-                $output = $this->fetch('index/'.$part);
+                $output = $this->fetch('Index/'.$part);
                 echo $output;
         }
 
@@ -90,6 +90,7 @@ class DataController extends Controller
                         'users.id' =>'id',
                         'users.username' => 'username',
                         'users.stunum'  => 'stunum',
+//                        'role', 'role_id',
                         "IF(status, IFNULL(role, '用户'), '用户')" => 'role',
                         "IF(status, IFNULL(role_id, '-1'), '-1')"   => 'role_id'
                 );
@@ -127,11 +128,11 @@ class DataController extends Controller
                 $parameter = $this->parameter($parameter, 'users');
 
                 $users = M('users')
-                                        ->alias('users')
-                                        ->join('LEFT JOIN'.$joinSql.' admin ON users.stunum = admin.stunum')
-                                        ->where($parameter)
-                                        ->field($displayField)
-                                        ->select();
+                                ->alias('users')
+                                ->join('LEFT JOIN'.$joinSql.' admin ON users.stunum = admin.stunum')
+                                ->where($parameter)
+                                ->field($displayField)
+                                ->select();
 
                 if (!$users) {
                         returnJson(404, '未找到该用户');
@@ -141,7 +142,7 @@ class DataController extends Controller
                         if ($user['state'] === 0) {
                                 $user['role'] = "黑名单";
                         } else {
-                                if ($admin['status'] === 0) {
+                                if ($user['admin.status'] === 0) {
                                         $user['role'] = "用户";
                                 }
                         }
@@ -162,7 +163,6 @@ class DataController extends Controller
                 $draw = I('post.draw');
                 if(empty($draw)) {
                         returnJson(801);
-
                 }
                 $start = I('post.start');
 
@@ -219,13 +219,13 @@ class DataController extends Controller
                                 $parameter[$field] = $value;
                         }
                 }
-                $searchvalue = $information['search']['value'];
+                $searchValue = $information['search']['value'];
                 //搜索的值需匹配的字段
                 $searchField = array();
 
                 $columns = $information['columns'];
 
-                if (!empty($searchvalue)) {
+                if (!empty($searchValue)) {
 
                         foreach ($columns as $column) {
                                 //判断是否需要搜索的
@@ -235,7 +235,7 @@ class DataController extends Controller
                                 }
                         }
 
-                        $parameter['*'] = array($searchvalue, $searchField);
+                        $parameter['*'] = array($searchValue, $searchField);
                 }
 
                 $parameter = $this->parameter($parameter, $table);
@@ -259,6 +259,7 @@ class DataController extends Controller
                 $loginListField = $this->displayField($loginListField, 'loginlist');
                 //得到子查询的sql
                 $loginList = M('loginlist')->group('admin_id')->field($loginListField)->buildSql();
+                echo $loginList;
 
                 //结果返回带一些详细信息
                 $data = M('admin')
@@ -268,6 +269,8 @@ class DataController extends Controller
                                 ->field($displayField)
                                 ->order($order)
                                 ->select();
+
+//            var_dump($data);
                 return $data;
 
         }
@@ -521,6 +524,7 @@ class DataController extends Controller
                                 ->field($displayField)
                                 ->order($order)
                                 ->select();
+
 
                 $recordsFiltered = count($data);
                 if ($start > $recordsFiltered) {
