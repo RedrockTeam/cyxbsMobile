@@ -226,3 +226,11 @@ function message_decrypt($string)
 	$data  = json_decode($string, true);
 	return $data;
 }
+
+/**
+ * @param $str  string 字符串
+ * @return int
+ */
+function mystrlen($str) {
+    return mb_strlen($str, 'UTF-8');
+}

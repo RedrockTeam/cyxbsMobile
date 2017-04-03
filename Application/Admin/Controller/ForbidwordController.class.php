@@ -88,8 +88,9 @@ class ForbidwordController extends Controller
                 }
                 $word['value'] = $forbidword;
                 $word['created_time'] = date('Y-m-d H:i:s');
+                $word['updated_time'] = date('Y-m-d H:i:s');
                 //创建字段
-                $id = M('forbidword')->data($word)->add();
+                $id = M('forbidwords')->data($word)->add();
                 return $id;
         }
 

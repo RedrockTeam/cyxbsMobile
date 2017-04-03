@@ -92,7 +92,7 @@ class DataController extends Controller
                         'users.stunum'  => 'stunum',
 //                      'role', 'role_id', 'status,'
                         "IF(status, IFNULL(role, '用户'), '用户')" => 'role',
-//                        "IF(status, IFNULL(role_id, '-1'), '-1')"   => 'role_id'
+                        "IF(status, IFNULL(role_id, '-1'), '-1')"   => 'role_id'
                 );
                 //处理
                 $displayField = $this->displayField($displayField, 'users');
@@ -351,7 +351,7 @@ class DataController extends Controller
                 $articlesDisplayField = $this->displayField(array(
                         'username' => 'author',
                         'title',
-                        'CONCAT(SUBSTR(content, 0, 3), "...")' => 'content',
+                        'content',
                         'type_id',
                         'id',
                         'state'
@@ -374,10 +374,10 @@ class DataController extends Controller
                 $newsDisplayField = $this->displayField(array(
                         $caseSql => 'author',
                         'title',
-                        'CONCAT(SUBSTR(content, 0, 3), "...")' => 'content',
+                        'content',
                         'articletype_id' =>'type_id',
                         'id',
-                        'CONCAT("1")'   => 'state'
+                        "'1'"   => 'state'
                 ), 'news');
                 $joinSql = M('news')
                             ->field($newsDisplayField)
@@ -389,9 +389,9 @@ class DataController extends Controller
                         'id',
                         'username' => 'author',
                         'title',
-                        'CONCAT(6)' => 'type_id',
-                        'CONCAT("公告")' => 'type',
-                        'CONCAT(SUBSTR(content, 0, 3), "...")' => 'content',
+                        "'6'" => 'type_id',
+                        "'公告'" => 'type',
+                        'content',
                         'like_num',
                         'remark_num',
                         'created_time',
@@ -424,6 +424,13 @@ class DataController extends Controller
                 } else {
                         $length = ($recordsFiltered-$start)>$length ? $length : ($recordsFiltered-$start);
                         $data = array_slice($result, $start, $length);
+
+                }
+                foreach($data as &$value) {
+                    if (mystrlen($value['content']) > 30)
+                        $value['content'] = mb_substr($value['content'], 0, 30, 'UTF-8').'...';
+                    if (mystrlen($value['content']) > 15)
+                        $value['title'] = mb_substr($value['title'], 0, 15, 'UTF-8').'...';
                 }
                 $info = compact('data', 'recordsFiltered', 'recordsTotal', 'draw');
                 returnJson('datatable','', $info);
@@ -536,11 +543,11 @@ class DataController extends Controller
                             unset($value['created_time']);
                             $interval = date_diff($currentTime, $createTime);
                             if ($year = $interval->format('%y'))
-                                $value['jscy_age'] = $year.'年';
+                                $value['jscy_age'] = $year.'个年';
                             elseif ($month = $interval->format('%m'))
-                                $value['jscy_age'] = $month.'月';
+                                $value['jscy_age'] = $month.'个月';
                             else
-                                $value['jscy_age'] = $interval->format('%d')."天";
+                                $value['jscy_age'] = $interval->format('%d')."个天";
                         }
                 }
                 $recordsTotal = M('users')->count();
@@ -657,7 +664,7 @@ class DataController extends Controller
                 $parameter = $this->parameter($parameter, $table);
 
                 $data = M($table)
-                                ->join('LEFT JOIN '.$typeTable.' type ON __FORBIDWORD__.id = type.w_id')
+                                ->join('LEFT JOIN '.$typeTable.' type ON __FORBIDWORDS__.id = type.w_id')
                                 ->where($parameter)
                                 ->field($displayField)
                                 ->order($order)

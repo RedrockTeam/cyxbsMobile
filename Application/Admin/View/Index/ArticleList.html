@@ -14,15 +14,37 @@
     <div class="table-toolbar"> 
      <div class="row" target-table="articleListTable" > 
       <div class="col-md-6" >
-       <div class="btn-group"> 
-        <button data-state="all" class="btn sbold blue-madison"> 全部文章 <i class="fa fa-calendar"></i></button> 
-       </div> 
-       <div class="btn-group"> 
-        <button data-state="normal" class="btn sbold green-meadow"> 正常的文章 <i class="fa fa-calendar-check-o"></i></button> 
-       </div> 
-       <div class="btn-group"> 
-        <button  class="btn sbold blue-hoki" data-state="black"> 禁用的文章 <i class="fa fa-calendar-times-o"></i></button> 
-       </div> 
+          <div class="margin-bottom-10">
+              <div class="col-md-5">
+              类型：
+                  <select class="bs-select form-control input-small" data-style="btn-primary" name="articleType" data-column="type">
+                      <option value="all">全部</option>
+                      <option value="公告">公告</option>
+                      <option value="新闻">新闻</option>
+                      <option value="哔哔叨叨">哔哔叨叨</option>
+                      <option value="话题">话题</option>
+                  </select>
+              </div>
+              <div class="col-md-5">
+              状态：
+                  <select class="bs-select form-control input-small" data-style="btn-primary" name="articleState" data-column="state">
+                      <option value="all">全部</option>
+                      <option value="normal">正常的文章</option>
+                      <option value="black">禁用的文章</option>
+                  </select>
+              </div>
+          </div>
+
+
+       <!--<div class="btn-group">-->
+        <!--<button data-state="all" class="btn sbold blue-madison"> 全部文章 <i class="fa fa-calendar"></i></button> -->
+       <!--</div> -->
+       <!--<div class="btn-group"> -->
+        <!--<button data-state="normal" class="btn sbold green-meadow"> 正常的文章 <i class="fa fa-calendar-check-o"></i></button> -->
+       <!--</div> -->
+       <!--<div class="btn-group"> -->
+        <!--<button  class="btn sbold blue-hoki" data-state="black"> 禁用的文章 <i class="fa fa-calendar-times-o"></i></button> -->
+       <!--</div> -->
       </div> 
       <div class="col-md-6"> 
        <div class="btn-group pull-right btn-group-circle" > 
@@ -90,7 +112,8 @@
     </div>
   </div>
   <script type="text/javascript">
-    jQuery(document).ready(function(){
+      var ComponentsBootstrapSelect=function(){var n=function(){$(".bs-select").selectpicker({iconBase:"fa",tickIcon:"fa-check"})};return{init:function(){n()}}}();App.isAngularJsApp()===!1&&jQuery(document).ready(function(){ComponentsBootstrapSelect.init()});
+      jQuery(document).ready(function(){
         initTable('articleListTable', '{:U("Data/articleList")}', '{:U("Article/operate")}', ['id', 'type_id']);
         UIExtendedModals.init();
     }); 
@@ -106,7 +129,7 @@
             data = connection.decode(data);
             data = data.data;
             return {results: data};
-          },
+          }
         }
       });
     });

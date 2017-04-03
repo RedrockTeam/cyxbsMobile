@@ -247,7 +247,7 @@ class AdminController extends Controller
 
                 session('admin', $info);
                 //清理错误登录信息
-                S('adminLogin:'.$stunum, null);
+                S('adminLogin:'.$info['stunum'], null);
 
                 $this->success('登录成功',U('Index/index'), 3);
         }
