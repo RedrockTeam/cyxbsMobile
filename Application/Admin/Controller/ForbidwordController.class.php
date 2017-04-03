@@ -111,7 +111,7 @@ class ForbidwordController extends Controller
                         $range = explode(',', $range);
                 }
 
-                $forbidword = M('forbidword')->where("value='%s'", $value)->find();
+                $forbidword = M('forbidwords')->where("value='%s'", $value)->find();
                 if (!$forbidword) {
                         $w_id = $this->createForbidword($value);
                         if (!$w_id) {
@@ -221,13 +221,13 @@ class ForbidwordController extends Controller
                 if (!is_array) {
                         $data = array("value" => $data);
                 }
-                $forbidword = M("forbidword")
+                $forbidword = M("forbidwords")
                                 ->where("state=%d",$this->_state['normal'])
                                 ->where($data)
                                 ->find();
 
                 if (!$forbidword) {
-                        $this->_error = "Can't find which forbidword's value is ".$value;
+                        $this->_error = "Can't find which forbidword's value is ".$data['value'];
                         return false;
                 }
                 //获取所有应用范围
@@ -261,7 +261,7 @@ class ForbidwordController extends Controller
          */
         protected function forbidwordState($operate, $data)
         {
-                $table = 'forbidword';
+                $table = 'forbidwords';
                 // if ($operate === 'delete') {
                 //      if (!$this->changeForbidwordRange($data, array())) {
                 //              return false;
@@ -293,6 +293,8 @@ class ForbidwordController extends Controller
                 } else {
                         //$before_state 和 $after_state
                         extract($this->_status[$operate]);
+                        $before_state = $this->_status[$operate]['before_state'];
+                        $after_state = $this->_status[$operate]['after_state'];
                         if (!is_array($before_state)) {
                                 $before_state = explode(',', $before_state);
                         }
