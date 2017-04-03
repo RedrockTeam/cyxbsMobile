@@ -472,9 +472,9 @@ class DataController extends Controller
 
                 $searchField = array();
                 $search = $information['search'];
-                $searchvalue = $search['value'];
+                $searchValue = $search['value'];
 
-                if (isset($searchvalue)) {
+                if (!empty($searchValue)) {
 
                         foreach ($columns as $column) {
                                 //判断是否需要搜索的
@@ -484,7 +484,7 @@ class DataController extends Controller
                                 }
                         }
 
-                        $parameter['*'] = array($searchvalue, $searchField);
+                        $parameter['*'] = array($searchValue, $searchField);
                 }
                 $parameter = $this->parameter($parameter, $table);
 
@@ -500,31 +500,28 @@ class DataController extends Controller
                         $order[$field] = $value['dir'];
                 }
                 $articleRemarksField = array(
-                        'user_id'       => 'user_id',
-                        'max(__ARTICLES__.updated_time)'        => 'last_article_time',
-                        'max(__ARTICLEREMARKS__.created_time)'  => 'last_remark_time',
+                       'user_id',
+                        'max(created_time)'  => 'last_remark_time',
                 );
 
-                $articleRemarksField = $this->displayField($articleRemarksField, 'articles');
-                //mysql不能full join 坑！所以用 left join union right join
-                $articleRemarksSql_Left = M('articles')
-                                            ->join('__ARTICLEREMARKS__ ON __ARTICLEREMARKS__.user_id = __ARTICLES__.user_id','left')
+//                $articleRemarksField = $this->displayField($articleRemarksField, 'articleremarks');
+
+                $articleRemarksSql = M('articleremarks')
                                             ->group('user_id')
                                             ->field($articleRemarksField)
-                                            ->select(false);
+                                            ->buildSql();
+                $articleField = array(
+                    'user_id'            => 'user_id',
+                    'max(updated_time)'  => 'last_article_time',
+                );
+                $articleSql = M("articles")->group('user_id')->field($articleField)->buildSql();
 
-                $articleRemarksSql = M('articles')
-                                        ->join('__ARTICLEREMARKS__ ON __ARTICLEREMARKS__.user_id = __ARTICLES__.user_id','right')
-                                        ->group('user_id')
-                                        ->field($articleRemarksField)
-                                        ->union($articleRemarksSql_Left)
-                                        ->buildSql();
                 $data = M('users')
-                                ->join('LEFT JOIN '.$articleRemarksSql.' articleremark ON __USERS__.id = articleremark.user_id')
-                                ->where($parameter)
-                                ->field($displayField)
-                                ->order($order)
-                                ->select();
+                            ->join(array('LEFT JOIN '.$articleRemarksSql.' articleremark ON __USERS__.id = articleremark.user_id', 'LEFT JOIN '.$articleSql.' article ON __USERS__.id = article.user_id'))
+                            ->where($parameter)
+                            ->field($displayField)
+                            ->order($order)
+                            ->select();
 
 
                 $recordsFiltered = count($data);
@@ -543,7 +540,7 @@ class DataController extends Controller
                             elseif ($month = $interval->format('%m'))
                                 $value['jscy_age'] = $month.'月';
                             else
-                                $value['jscy_age'] = $interval->format('%a')."天";
+                                $value['jscy_age'] = $interval->format('%d')."天";
                         }
                 }
                 $recordsTotal = M('users')->count();
