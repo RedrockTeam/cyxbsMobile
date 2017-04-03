@@ -90,9 +90,9 @@ class DataController extends Controller
                         'users.id' =>'id',
                         'users.username' => 'username',
                         'users.stunum'  => 'stunum',
-//                        'role', 'role_id',
+//                      'role', 'role_id', 'status,'
                         "IF(status, IFNULL(role, '用户'), '用户')" => 'role',
-                        "IF(status, IFNULL(role_id, '-1'), '-1')"   => 'role_id'
+//                        "IF(status, IFNULL(role_id, '-1'), '-1')"   => 'role_id'
                 );
                 //处理
                 $displayField = $this->displayField($displayField, 'users');
@@ -455,7 +455,8 @@ class DataController extends Controller
                         '__USERS__.state'       => 'state',
                         'last_article_time',
                         'last_remark_time',
-                        "CONCAT(PERIOD_DIFF(DATE_FORMAT(NOW(), '%Y%m'),DATE_FORMAT(__USERS__.created_time, '%Y%m')), '个月')"   => 'jscy_age'
+                        'created_time',
+//                        "CONCAT(PERIOD_DIFF(DATE_FORMAT(NOW(), '%Y%m'),DATE_FORMAT(__USERS__.created_time, '%Y%m')), '个月')"   => 'jscy_age'
                 );
                 $columns = $information['columns'];
 
@@ -532,6 +533,18 @@ class DataController extends Controller
                 } else {
                         $length = ($recordsFiltered-$start)>$length ? $length : ($recordsFiltered-$start);
                         $data = array_slice($data, $start, $length);
+                        $currentTime = date_create();
+                        foreach ($data as &$value) {
+                            $createTime = date_create($value['created_time']);
+                            unset($value['created_time']);
+                            $interval = date_diff($currentTime, $createTime);
+                            if ($year = $interval->format('%y'))
+                                $value['jscy_age'] = $year.'年';
+                            elseif ($month = $interval->format('%m'))
+                                $value['jscy_age'] = $month.'月';
+                            else
+                                $value['jscy_age'] = $interval->format('%a')."天";
+                        }
                 }
                 $recordsTotal = M('users')->count();
                 $info = compact('data', 'recordsFiltered', 'recordsTotal', 'draw');
@@ -576,7 +589,7 @@ class DataController extends Controller
                 if (empty($draw)) {
                         returnJson(801);
                 }
-                $table = 'forbidword';
+                $table = 'forbidwords';
                 $start = $information['start'];
 
                 $length = $information['length'];
@@ -689,9 +702,7 @@ class DataController extends Controller
                         //学号
                         case 'stunum':
                                 foreach ($data as $val) {
-                                        $mark = $mark && (
-                                            $is_like ? is_numeric($val) :
-                                            (preg_match('/^20[0-9]{2}21[0-9]{4}$/', $val) > 0));
+                                        $mark = $mark && (preg_match('/^20[0-9]{2}21[0-9]{4}$/', $val) > 0);
                                 }
                                 break;
 
