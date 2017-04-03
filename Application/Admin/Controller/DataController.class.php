@@ -259,7 +259,7 @@ class DataController extends Controller
                 $loginListField = $this->displayField($loginListField, 'loginlist');
                 //得到子查询的sql
                 $loginList = M('loginlist')->group('admin_id')->field($loginListField)->buildSql();
-                echo $loginList;
+//                echo $loginList;
 
                 //结果返回带一些详细信息
                 $data = M('admin')
