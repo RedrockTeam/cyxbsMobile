@@ -77,8 +77,11 @@ class PersonController extends BaseController {
         $all_info['gender'] = trim($needInfo['data']['gender']);
         $checkExist = $user->where($user_condition)->find();
         if($checkExist != NULL){
+            $all_info['updated_time'] = date('Y-m-d H:i:s');
             $goal = $user->where($user_condition)->data($all_info)->save();
         }else{
+            $all_info['updated_time'] = date('Y-m-d H:i:s');
+            $all_info['created_time'] = date('Y-m-d H:i:s');
             $goal = $user->add($all_info);
         }  
         if ($goal) returnJson(200);

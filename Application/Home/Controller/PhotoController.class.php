@@ -289,6 +289,7 @@ class PhotoController extends Controller {
         
         foreach ($files as $key => $file) {
             $file['stunum'] = $stunum;
+            $file['article_id'] = 0;
             $result = $photo->add($file);
             if (!$result) {
                 return false;

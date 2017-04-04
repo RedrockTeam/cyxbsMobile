@@ -250,7 +250,7 @@ class NewArticleController extends Controller
         if(false === $article = Article::setArticle($information, $information['stuNum']))
             returnJson(404, 'error article');
         $content = $article->getContent();
-
+        if (!$content)      returnJson(404, $article->getError());
         $content['is_my_like'] = is_null($information['stuNum'])? false :$article->getPraise($information['stuNum']);
         returnJson(200, '', array('data'=>array($content)));
     }
