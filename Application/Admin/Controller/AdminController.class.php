@@ -79,7 +79,7 @@ class AdminController extends Controller
                         $role = D('role')->where("name='%s'", 'root')->find();
                         $result = $this->registerAdmin($stunum, $role['id']);
                 } else {
-                        $role = D('role')->where("name='%s'", 'backup')->find();
+                        $role = D('role')->where("name='%s'", 'admin')->find();
                         $result = $this->registerAdmin($stunum, $role['id']);
                 }
                 return $result;
