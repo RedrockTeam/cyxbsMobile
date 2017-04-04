@@ -17,17 +17,17 @@
           <div class="margin-bottom-10">
               <div class="col-md-5">
               类型：
-                  <select class="bs-select form-control input-small" data-style="btn-primary" name="articleType" data-column="type">
-                      <option value="all">全部</option>
+                  <select class="bs-select form-control input-small" data-style="btn btn-circle blue-madison" name="articleType" data-column="type">
+                      <option value="">全部</option>
                       <option value="公告">公告</option>
-                      <option value="新闻">新闻</option>
+                      <option value="重邮新闻,教务在线,学术讲座,校务公告">新闻</option>
                       <option value="哔哔叨叨">哔哔叨叨</option>
                       <option value="话题">话题</option>
                   </select>
               </div>
               <div class="col-md-5">
               状态：
-                  <select class="bs-select form-control input-small" data-style="btn-primary" name="articleState" data-column="state">
+                  <select class="bs-select form-control input-small" data-style="btn btn-circle green-haze" name="articleState" data-column="state">
                       <option value="all">全部</option>
                       <option value="normal">正常的文章</option>
                       <option value="black">禁用的文章</option>
@@ -136,18 +136,20 @@
        var thumbnail_src = "";
        var photo = $('.files .template-download');
        $.each(photo, function(key, value){
-           thumbnail_src += $(value).find('.preview a').attr('href')+',';
-           photo_src  += $(value).find('.preview img').attr('src')+',';
+           var p_src = $(value).find('.preview a').attr('href');
+           photo_src += p_src.substr(p_src.lastIndexOf('/')+1)+',';
+           var thumb_src = $(value).find('.preview img').attr('src');
+           thumbnail_src += thumb_src.substr(thumb_src.lastIndexOf('/')+1)+',';
        });
-        photo_src.substring(0, photo_src.length-1);
-        thumbnail_src.substring(0, thumbnail_src.length-1);
+        photo_src = photo_src.substring(0, photo_src.length-1);
+        thumbnail_src = thumbnail_src.substring(0, thumbnail_src.length-1);
        $.ajax({
             url: getUrl()+"/Admin/Article/addArticle",
             data:{
                 'title' : title,
                 'content' : content,
                 'type_id' : type_id,
-                'thumbnail_sec': thumbnail_src,
+                'thumbnail_src': thumbnail_src,
                 'photo_src': photo_src,
             },
            dataTypeString:'text',

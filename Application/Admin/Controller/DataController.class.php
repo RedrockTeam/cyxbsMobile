@@ -326,6 +326,10 @@ class DataController extends Controller
                 if (!empty($information['args'])) {
                         foreach($information['args'] as $field => $value) {
                                 if (in_array($field, $displayField)) {
+                                    if (is_array($value)) {
+                                        $value = implode(',', $value);
+                                        $parameter[$field] = array('in', $value);
+                                    }else
                                         $parameter[$field] = $value;
                                 }
                         }

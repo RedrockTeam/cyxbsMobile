@@ -63,16 +63,16 @@ class Article
                 throw new Exception("error article");
             } else {
                 //作者信息
-                if (in_array('user_id', $this->fields))
-                    $this->author = getUserInfo($this->article['user_id']);
-                elseif ($this->type_id == 6) {
+                if ($this->type_id == 6) {
                     $this->author = array(
                         'photo_src' => "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg',
                         'nickname'  => '红岩网校工作站',
                         'id'        => 0,
                     );
-                }
+                } elseif (in_array('user_id', $this->fields))
+                    $this->author = getUserInfo($this->article['user_id']);
             }
+
         }
     }
 
