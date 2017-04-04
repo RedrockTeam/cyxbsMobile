@@ -48,7 +48,7 @@
                 {% if (file.url) { %}
                     <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
                 {% } else { %}
-                    <span>{%=file.name%}</span>
+                    <span>图片{%=i%}</span>
                 {% } %}
             </p>
             {% if (file.error) { %}

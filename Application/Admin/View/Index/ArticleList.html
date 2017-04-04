@@ -35,16 +35,7 @@
               </div>
           </div>
 
-
-       <!--<div class="btn-group">-->
-        <!--<button data-state="all" class="btn sbold blue-madison"> 全部文章 <i class="fa fa-calendar"></i></button> -->
-       <!--</div> -->
-       <!--<div class="btn-group"> -->
-        <!--<button data-state="normal" class="btn sbold green-meadow"> 正常的文章 <i class="fa fa-calendar-check-o"></i></button> -->
-       <!--</div> -->
-       <!--<div class="btn-group"> -->
-        <!--<button  class="btn sbold blue-hoki" data-state="black"> 禁用的文章 <i class="fa fa-calendar-times-o"></i></button> -->
-       <!--</div> -->
+          
       </div> 
       <div class="col-md-6"> 
        <div class="btn-group pull-right btn-group-circle" > 
@@ -71,7 +62,7 @@
        <th data-data="content" data-searchable="false">内容</th> 
        <th data-data="like_num" data-searchable="false">点赞数</th> 
        <th data-data="remark_num" data-searchable="false">评论数</th> 
-       <th data-data="updated_time" data-searchable="false">上次修改时间</th> 
+       <th data-data="updated_time" data-searchable="false"c>上次修改时间</th>
        <th data-data="created_time" data-searchable="false">文章创建时间</th> 
        <th data-data="state" data-searchable="false">状态</th>  
       </tr>
@@ -132,6 +123,45 @@
           }
         }
       });
+    });
+    ArtcileModal.find('[action="submit"]').on('click',function () {
+       var title = $('[name="title"]').val();
+       var content = $('[name="content"]').val();
+       var type_id = $('[name="article_type"]').val();
+       if(type_id==='' || title==='' || content==='') {
+           alert("不能为空");
+           return;
+       }
+       var photo_src = "";
+       var thumbnail_src = "";
+       var photo = $('.files .template-download');
+       $.each(photo, function(key, value){
+           thumbnail_src += $(value).find('.preview a').attr('href')+',';
+           photo_src  += $(value).find('.preview img').attr('src')+',';
+       });
+        photo_src.substring(0, photo_src.length-1);
+        thumbnail_src.substring(0, thumbnail_src.length-1);
+       $.ajax({
+            url: getUrl()+"/Admin/Article/addArticle",
+            data:{
+                'title' : title,
+                'content' : content,
+                'type_id' : type_id,
+                'thumbnail_sec': thumbnail_src,
+                'photo_src': photo_src,
+            },
+           dataTypeString:'text',
+           type: 'post',
+           success:function (data) {
+               data = connection.decode(data);
+               if (data.status === 200) {
+                   alert("添加成功");
+               } else {
+                   alert(data.info);
+               }
+               ArtcileModal.modal('hide');
+           }
+       });
     });
 </script> 
  

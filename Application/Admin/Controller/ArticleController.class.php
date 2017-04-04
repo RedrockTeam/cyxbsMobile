@@ -3,8 +3,8 @@
 namespace Admin\Controller;
 
 use Think\Controller;
+use Home\Common\Article;
 
-use Home\Controller\EditController as edit;
 
 class ArticleController extends Controller
 {
@@ -143,32 +143,42 @@ class ArticleController extends Controller
         protected function delete($operate, $data)
         {
 
-                if(empty($data['id']) || empty($data['type_id'])) {
-                        return false;
-                }
-                //表
-                $table = self::$article_table[$data['type_id']];
-
-                if (empty($table)) {
-                        return false;
-                }
-
-                $article = M($table)->where($data)->find();
-
-                if (empty($article)) {
-                        return false;
-                }
-
-                //表里是否有state字段
-                if(isset($article['state'])) {
-                        if ($article['state'] != $this->_status['delete']['after_state']) {
-                                return $this->articleState('delete', $data);
-                        }
-                }
+//                if(empty($data['id']) || empty($data['type_id'])) {
+//                        return false;
+//                }
+//                //表
+//                $table = self::$article_table[$data['type_id']];
+//
+//                if (empty($table)) {
+//                        return false;
+//                }
+//
+//                $article = M($table)->where($data)->find();
+//
+//                if (empty($article)) {
+//                        return false;
+//                }
+//
+//                //表里是否有state字段
+//                if(isset($article['state'])) {
+//                        if ($article['state'] != $this->_status['delete']['after_state']) {
+//                                return $this->articleState('delete', $data);
+//                        }
+//                }
                 //硬删除
-                $edit = new edit();
-                return $edit->delete($data['id'], $data['type_id']);
+                $article = Article::setArticle($data, session('admin.user_id'));
+//                return $edit->delete($data['id'], $data['type_id']);
+                return $article->delete();
+        }
 
+        public function addArticle() {
+            $information = I('post.');
+
+            if ($information['is_official'])    $information['user_id'] = 0;
+            else $information['user_id'] = session('admin.user_id');
+            $article = Article::setArticle($information, $information['user_id']);
+            if (!$article) returnJson(801);
+            $article->add() ? returnJson(200) : returnJson(404);
         }
 
         public function getWriteType()
