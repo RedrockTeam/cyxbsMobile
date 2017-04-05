@@ -44,7 +44,7 @@ class TopicController extends Controller
             }
             $information['user_id'] = $user['id'];
         }
-        if (is_null($information['keyword']) || isset($information['id']) || is_null($information['user_id'])) {
+        if (empty($information['keyword']) || isset($information['id']) || is_null($information['user_id'])) {
             returnJson(404, 'error pram');
         }
 
@@ -90,7 +90,12 @@ class TopicController extends Controller
 
         $result = $article->add();
         if ($result) {
-            D('topics')->where('id=%d', $article->get('topic_id'))->setInc('article_num');
+            $topic = D('topics')->where('id=%d', $article->get('topic_id'))->find();
+            if (!is_my_join($article->get('topic_id'), $information['stuNum'])) {
+                $topic['join_num']++;
+            }
+            $topic['remark_num']++;
+            D('topics')->save($topic);
             returnJson(200, '', array('state'=>200));
         } else {
             returnJson(404, $article->getError());
