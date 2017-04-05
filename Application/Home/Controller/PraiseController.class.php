@@ -7,15 +7,7 @@ class PraiseController extends Controller {
         $praise_id = I('post.article_id');
         $articletypes_id = I('post.type_id');
         if($praise_id == null || $articletypes_id == null){
-            
-            $info = array(
-                    'state' => 801,
-                    'status' => 801,
-                    'info'  => 'invalid parameter',
-                    'data'  => array(),
-                );
-            echo json_encode($info,true);
-            exit;
+            returnJson(801, '', array('state' => 801));
         }
 
         $user = M('users');
@@ -24,15 +16,10 @@ class PraiseController extends Controller {
         );
         $user_exist = $user->where($condition_user)->find();
         if(!$user_exist){
-            $info = array(
-                    'state' => 801,
-                    'info'  => 'invalid parameter',
-                    'data'  => array(),
-                );
-            echo json_encode($info,true);
-            exit;
+            returnJson(801, '',array('data'=>array(), 'state'=>801));
         }
         $praise = M('articlepraises');
+
         $condition = array(
             "article_id" => $praise_id,
             "stunum"     => I('post.stuNum'),
@@ -41,93 +28,47 @@ class PraiseController extends Controller {
 
         $result = $praise->where($condition)->find();
         if($result){
-            $info = array(
-                    'state' => 404,
-                    'status' => 404,
-                    'info'  => 'praised',
-                    'data'  => array(),
-                );
-        }else{
-            $hotarticle = M('hotarticles');
-            if($articletypes_id == 6){
-                $notice = M('notices');
-                $condition = array(
-                    "id"  => $praise_id,
-                );
-                $notice->where($condition)->setInc('like_num');
-                $content = array(
-                    "article_id" => $praise_id,
-                    "stunum"     => I('post.stuNum'),
-                    "created_time" => date("Y-m-d H:i:s", time()),
-                    "updated_time"  => date("Y-m-d H:i:s", time()),
-                    "articletype_id"    => $articletypes_id
-                );
-                $condition_all = array(
-                    "article_id" => $praise_id,
-                    "articletype_id" => I('post.type_id')
-                );
-                $praise->add($content);
-                $num = $praise->where($condition_all)->count();
-                $info = array(
-                        'state' => 200,
-                        'status' => 200,
-                        'like_num'  => $num,
-                    );
-                echo json_encode($info,true);
-                exit;
-            }elseif($articletypes_id > 4){
-                $article = M('articles');
-                $condition = array(
-                    "id"  => $praise_id,
-                );
-                $article->where($condition)->setInc('like_num');
-            }else{
-                $news = M('news');
-                $condition = array(
-                    "id"  => $praise_id,
-                );
-                $news->where($condition)->setInc('like_num');
-            }
-            $content = array(
-                "article_id" => $praise_id,
-                "stunum"     => I('post.stuNum'),
-                "created_time" => date("Y-m-d H:i:s", time()),
-                "update_time"  => date("Y-m-d H:i:s", time()),
-                "articletype_id"    => $articletypes_id
-            );
-            $praise->add($content);
-            $condition_all = array(
-                "article_id" => $praise_id,
-                "articletype_id" => I('post.type_id')
-            );
-            $article = M('articles');
-            $condition_article = array(
-                    "id"  => $praise_id,
-                );
-            $a = $hotarticle->where($condition_all)->find();
-            $hotarticle->where($condition_all)->setInc('like_num');
-            $num = $praise->where($condition_all)->count();
-            $info = array(
-                    'state' => 200,
-                    'status' => 200,
-                    'like_num'  => $num,
-                );
+            returnJson(404, 'praised',array('data'=>array(), 'state'=>404));
         }
-        echo json_encode($info,true);
+        $articleTable = getArticleTable($articletypes_id);
+
+        $condition = array(
+            "id"  => $praise_id,
+        );
+        D($articleTable)->where($condition)->setInc('like_num');
+        if ($articletypes_id != 6) {
+            $hotarticle = M('hotarticles');
+            $condition['articletype_id'] = $articletypes_id;
+            $hotarticle->where($condition)->setInc('like_num');
+        }
+        if ($articletypes_id == 7) {
+            $topic_id = D($articleTable)->where($condition)->getField('topic_id');
+            D('topics')->where(array('id'=>$topic_id))->setInc('like_num');
+        }
+        $content = array(
+            "article_id" => $praise_id,
+            "stunum"     => I('post.stuNum'),
+            "created_time" => date("Y-m-d H:i:s", time()),
+            "update_time"  => date("Y-m-d H:i:s", time()),
+            "articletype_id"    => $articletypes_id
+        );
+        $condition_all = array(
+            "article_id" => $praise_id,
+            "articletype_id" => I('post.type_id')
+        );
+        $praise->add($content);
+        $num = $praise->where($condition_all)->count();
+
+
+        returnJson(200, '', array('like_num'=>$num,'state'=>200));
+
     }
     
     public function cancel(){
         $praise_id = I('post.article_id');
         $articletypes_id = I('post.type_id');
         if($praise_id == null || $articletypes_id == nul){
-            $info = array(
-                    'state' => 801,
-                    'status' => 801,
-                    'info'  => 'invalid parameter',
-                    'data'  => array(),
-                );
-            echo json_encode($info,true);
-            exit;
+            returnJson(801, '', array('state' => 801));
         }
         $praise = M('articlepraises');
         $condition = array(
@@ -137,73 +78,35 @@ class PraiseController extends Controller {
         );
         $result = $praise->where($condition)->find();
         if(!$result){
-            $info = array(
-                    'state' => 404,
-                    'status' => 404,
-                    'info'  => 'praised',
-                    'data'  => array(),
-                );
-        }else{
-            $hotarticle = M('hotarticles');
-            if($articletypes_id == 6){
-                $notices = M('notices');
-                $condition = array(
-                    "id"  => $praise_id,
-                );
-                $condition_praise = array(
-                        "articletype_id" => I('post.type_id'),
-                        "stunum"         => I('post.stuNum'),
-                        "article_id"     => $condition['id']
-                    );
-                $praise->where($condition_praise)->delete(); 
-
-                $notices->where($condition)->setDec('like_num');
-
-                $condition_all = array(
-                    "article_id" => $praise_id,
-                    "articletype_id" => I('post.type_id')
-                );
-                $num = $praise->where($condition_all)->count();
-                $info = array(
-                    'state' => 200,
-                    'status' => 200,
-                    'like_num'  => $num,
-                );
-                echo json_encode($info,true);exit;
-            }elseif($articletypes_id > 4 && $articletypes_id != 6){
-                $article = M('articles');
-                $condition = array(
-                    "id"  => $praise_id,
-                );
-                $article->where($condition)->setDec('like_num');
-            }elseif($articletypes_id < 5){
-                $news_now = M('news');
-                $condition_news_now = array(
-                    "id"  => $praise_id,
-                );
-                $news_now->where($condition_news_now)->setDec('like_num');
-            }
-            $condition_all = array(
-                "article_id" => $praise_id,
-                "articletype_id" => I('post.type_id')
-            );
-            $article = M('articles');
-            $condition_article = array(
-                    "id"  => $praise_id,
-                );
-            $condition_praise['articletype_id'] = I('post.type_id');
-            $condition_praise['stunum'] = I('post.stuNum');
-            $condition_praise['article_id'] = $praise_id;
-            $goal = $praise->where($condition_praise)->delete(); 
-            $b = $hotarticle->where($condition_all)->setDec('like_num');
-            $num = $praise->where($condition_all)->count();
-            $info = array(
-                    'state' => 200,
-                    'status' => 200,
-                    'like_num'  => $num,
-                );
-
+            returnJson(404, 'praised',array('data'=>array(), 'state'=>404));
         }
-        echo json_encode($info,true);
+        $articleTable = getArticleTable($articletypes_id);
+
+        $condition = array(
+            "id"  => $praise_id,
+        );
+        D($articleTable)->where($condition)->setDec('like_num');
+        if ($articletypes_id != 6) {
+            $hotarticle = M('hotarticles');
+            $condition['articletype_id'] = $articletypes_id;
+            $hotarticle->where($condition)->setDec('like_num');
+        }
+        if ($articletypes_id == 7) {
+            $topic_id = D($articleTable)->where($condition)->getField('topic_id');
+            D('topics')->where(array('id'=>$topic_id))->setDec('like_num');
+        }
+        $content = array(
+            "article_id" => $praise_id,
+            "stunum"     => I('post.stuNum'),
+            "articletype_id"    => $articletypes_id
+        );
+        $condition_all = array(
+            "article_id" => $praise_id,
+            "articletype_id" => I('post.type_id')
+        );
+        $praise->where($content)->delete();
+        $num = $praise->where($condition_all)->count();
+
+        returnJson(200, '', array('like_num'=>$num,'state'=>200));
     }
 }
