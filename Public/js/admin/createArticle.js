@@ -5,8 +5,9 @@ var createArticle = function() {
 		init: function() {
 	   var templets = {
       title: '<div class="form-group"><div class="input-icon"><i class="fa fa-file-o font-green"></i><input type="text" class="form-control" placeholder="标题" name="title"></div></div>',
-      content: '<div class="form-group"><div class="input-icon><i class="fa fa-comment-o font-green"></i><textarea class="form-control" placeholder="想写点啥。。" name="content"></textarea></div></div>',
+      content: '<div class="form-group"><div class="input-icon><i class="fa fa-comment-o font-green"></i><input class="form-control" placeholder="想写点啥。。" name="content"></div></div>',
       keyword: '<div class="form-group"><div class="input-icon"><i class="fa fa-bullhorn font-green"></i><input type="text" class="form-control" placeholder="话题" name="keyword"></div></div>',
+      official: '<div class="form-group"> <input type="checkbox" class="make-switch"  name="is_official" data-on-text="官方" data-off-text="个人" data-on-color="warning" data-off-color="danger"></div>',
       photo:    '<form>' 
                   + '<div class="form-group">'
                   +'<div class="row fileupload-buttonbar" style="margin-left: 0px;">'
@@ -123,7 +124,7 @@ var createArticle = function() {
    					data = connection.decode(data);
    					if (data.status === 200) {
    						var templet = '';
-              var has_photo = false;
+   						var has_photo = false;
    						$.each(data.data, function(key, value){
                   if (value === 'photo')
                     has_photo = true;
@@ -133,7 +134,8 @@ var createArticle = function() {
               
               
               that.closest('.form-group').nextAll().remove();
-   						that.closest('.form-group').after(templet);
+              that.closest('.form-group').after(templet);
+              $('.make-switch').bootstrapSwitch();
               if (has_photo) {
                 // templet += templets.photo;
                 var lastInput = that.closest(".form-group").nextAll().last();
