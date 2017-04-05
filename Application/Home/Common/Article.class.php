@@ -63,7 +63,7 @@ class Article
                 throw new Exception("error article");
             } else {
                 //作者信息
-                if ($this->type_id == 6 || $this->get('official') == 1) {
+                if ($this->type_id == 6 || (in_array("official", $this->fields) && $this->get('official') == 1)) {
                     $this->author = array(
                         'photo_src' => "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg',
                         'nickname'  => '红岩网校工作站',
