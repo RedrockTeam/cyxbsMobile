@@ -762,6 +762,7 @@ class Article
         if (isset($this->article['remark_num'])) {
             $data = $this->article;
             $data['remark_num']++;
+            $data['updated_time'] = date('Y-m-d H:i:s');
             $result = D($this->table)->save($data);
             if (!$result){
                 $this->error[] = "article remark_num add error";
@@ -776,6 +777,7 @@ class Article
         $hotArticle = D('hotarticles')->where($pos)->find();
         if ($hotArticle) {
             $hotArticle['remark_num']++;
+            $hotArticle['updated_time'] = date('Y-m-d H:i:s');
             if ($this->operator['id'] == $this->author['id'])
                 $hotArticle['self_remark_num']++;
 
