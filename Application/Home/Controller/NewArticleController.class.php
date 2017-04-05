@@ -80,6 +80,10 @@ class NewArticleController extends Controller
                 'type_id'   => $value['articletype_id']
             );
             $article = Article::setArticle($article);
+            if (!$article) {
+                var_dump($value);exit;
+            }
+
             //不存在的字段throw exception
             if($article->is_exist() === false)  continue;
             try {
