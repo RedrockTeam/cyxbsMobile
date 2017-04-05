@@ -63,8 +63,9 @@
        <th data-data="like_num" data-searchable="false">点赞数</th> 
        <th data-data="remark_num" data-searchable="false">评论数</th> 
        <th data-data="updated_time" data-searchable="false"c>上次修改时间</th>
-       <th data-data="created_time" data-searchable="false">文章创建时间</th> 
-       <th data-data="state" data-searchable="false">状态</th>  
+       <th data-data="created_time" data-searchable="false">文章创建时间</th>
+          <th data-data="state" data-searchable="false" data-orderable="false">状态</th>
+          <th data-data="official" data-searchable="false" data-orderable="false">代表</th>
       </tr>
      </thead> 
      <tbody> 
@@ -125,9 +126,11 @@
       });
     });
     ArtcileModal.find('[action="submit"]').on('click',function () {
-       var title = $('[name="title"]').val();
-       var content = $('[name="content"]').val();
-       var type_id = $('[name="article_type"]').val();
+       var title = ArtcileModal.find('[name="title"]').val();
+       var content = ArtcileModal.find('[name="content"]').val();
+       var type_id = ArtcileModal.find('[name="article_type"]').val();
+       var official =  ArtcileModal.find('[name="is_official"]').bootstrapSwitch('state');
+
        if(type_id==='' || title==='' || content==='') {
            alert("不能为空");
            return;
@@ -143,21 +146,31 @@
        });
         photo_src = photo_src.substring(0, photo_src.length-1);
         thumbnail_src = thumbnail_src.substring(0, thumbnail_src.length-1);
+        var data = {
+            'title' : title,
+            'content' : content,
+            'type_id' : type_id,
+            'thumbnail_src': thumbnail_src,
+            'photo_src': photo_src,
+            'official': official,
+        };
+        if (parseInt(type_id) === 7) {
+            var keyword = $('[name="keyword"]').val();
+            if (keyword === '') {
+                alert("关键词不能为空");
+                return;
+            }
+            data['keyword'] = keyword;
+        }
        $.ajax({
             url: getUrl()+"/Admin/Article/addArticle",
-            data:{
-                'title' : title,
-                'content' : content,
-                'type_id' : type_id,
-                'thumbnail_src': thumbnail_src,
-                'photo_src': photo_src,
-            },
-           dataTypeString:'text',
-           type: 'post',
-           success:function (data) {
-               data = connection.decode(data);
+            data:data,
+            dataTypeString:'text',
+            type: 'post',
+            success:function (data) {
+           data = connection.decode(data);
                if (data.status === 200) {
-                   alert("添加成功");
+                       alert("添加成功");
                } else {
                    alert(data.info);
                }
