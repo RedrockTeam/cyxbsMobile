@@ -2,7 +2,7 @@
 namespace Home\Controller;
 use Think\Controller;
 
-class PraiseController extends Controller {
+class PraiseController extends BaseController {
     public function addone(){
         $praise_id = I('post.article_id');
         $articletypes_id = I('post.type_id');
@@ -34,16 +34,24 @@ class PraiseController extends Controller {
 
         $condition = array(
             "id"  => $praise_id,
+            "state" => 1,
         );
-        D($articleTable)->where($condition)->setInc('like_num');
+        $article = D($articleTable)->where($condition)->find();
+        if (!$article) {
+            returnJson(404, 'error article',array('data'=>array(), 'state'=>404));
+        }
         if ($articletypes_id != 6) {
             $hotarticle = M('hotarticles');
             $condition['articletype_id'] = $articletypes_id;
             $hotarticle->where($condition)->setInc('like_num');
         }
         if ($articletypes_id == 7) {
-            $topic_id = D($articleTable)->where($condition)->getField('topic_id');
-            D('topics')->where(array('id'=>$topic_id))->setInc('like_num');
+            D('topics')->where(array('id'=>$article['topic_id']))->setInc('like_num');
+        }
+        $article['like_num']++;
+        $result = D($articleTable)->save($article);
+        if (!$result) {
+            returnJson(404, 'add false',array('data'=>array(), 'state'=>404));
         }
         $content = array(
             "article_id" => $praise_id,
@@ -67,7 +75,7 @@ class PraiseController extends Controller {
     public function cancel(){
         $praise_id = I('post.article_id');
         $articletypes_id = I('post.type_id');
-        if($praise_id == null || $articletypes_id == nul){
+        if($praise_id == null || $articletypes_id == null){
             returnJson(801, '', array('state' => 801));
         }
         $praise = M('articlepraises');
@@ -76,8 +84,8 @@ class PraiseController extends Controller {
             "stunum"     => I('post.stuNum'),
             "articletype_id" => $articletypes_id
         );
-        $result = $praise->where($condition)->find();
-        if(!$result){
+        $article = $praise->where($condition)->find();
+        if(!$article){
             returnJson(404, 'praised',array('data'=>array(), 'state'=>404));
         }
         $articleTable = getArticleTable($articletypes_id);
@@ -85,15 +93,21 @@ class PraiseController extends Controller {
         $condition = array(
             "id"  => $praise_id,
         );
-        D($articleTable)->where($condition)->setDec('like_num');
+        $result = D($articleTable)->where($condition)->setDec('like_num');
+        if (!$result)       returnJson(404, 'error article',array('data'=>array(), 'state'=>404));
+
         if ($articletypes_id != 6) {
             $hotarticle = M('hotarticles');
             $condition['articletype_id'] = $articletypes_id;
             $hotarticle->where($condition)->setDec('like_num');
         }
         if ($articletypes_id == 7) {
-            $topic_id = D($articleTable)->where($condition)->getField('topic_id');
-            D('topics')->where(array('id'=>$topic_id))->setDec('like_num');
+            D('topics')->where(array('id'=>$article['topic_id']))->setInc('like_num');
+        }
+        $article['like_num']++;
+        $result = D($articleTable)->save($article);
+        if (!$result) {
+            returnJson(404, 'add false',array('data'=>array(), 'state'=>404));
         }
         $content = array(
             "article_id" => $praise_id,
