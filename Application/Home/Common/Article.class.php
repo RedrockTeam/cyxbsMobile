@@ -115,7 +115,6 @@ class Article
         try {
             $obj =  new self($article, $table, $stu);
         } catch(Exception $e) {
-            var_dump($e);
             return false;
         }
         return $obj;

@@ -81,9 +81,8 @@ class NewArticleController extends Controller
             );
             $article = Article::setArticle($article, $stuNum);
             if (!$article) {
-                var_dump($value);exit;
+                returnJson(404, 'class article error');
             }
-
             //不存在的字段throw exception
             if($article->is_exist() === false)  continue;
             try {
@@ -178,7 +177,7 @@ class NewArticleController extends Controller
     }
 
 	 public function listNews() {
-        $type = I('post.type_id');
+//        $type = I('post.type_id');
         $page = I('post.page');
         $size = I('post.size');
         $page = empty($page) ? 0 : $page;
@@ -241,7 +240,6 @@ class NewArticleController extends Controller
             $contents = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
             //判断自己是否点过赞
             $mynum = I('post.stuNum');
-            $praise = M('articlepraises');
             foreach ($contents as &$content) {
                 $content['is_my_like'] = $this->is_my_like($content['id'], $content['type_id'], $mynum);
             }
