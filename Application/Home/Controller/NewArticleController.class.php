@@ -79,7 +79,7 @@ class NewArticleController extends Controller
                 'article_id'=>$value['article_id'],
                 'type_id'   => $value['articletype_id']
             );
-            $article = Article::setArticle($article);
+            $article = Article::setArticle($article, $stuNum);
             if (!$article) {
                 var_dump($value);exit;
             }
