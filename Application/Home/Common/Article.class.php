@@ -63,7 +63,7 @@ class Article
                 throw new Exception("error article");
             } else {
                 //作者信息
-                if ($this->type_id == 6) {
+                if ($this->type_id == 6 || $this->get('official') == 1) {
                     $this->author = array(
                         'photo_src' => "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg',
                         'nickname'  => '红岩网校工作站',
@@ -649,6 +649,14 @@ class Article
             case 'id':
             case 'state':
                 return false;
+                break;
+            case 'official':
+                if ($value == 'true') {
+                    if($this->is_admin()) {
+                        $value = 1;
+                    }
+                    return false;
+                }
                 break;
 
         }

@@ -32,18 +32,20 @@ class TopicController extends Controller
 
         if ($information['official'] == 'true') {
             //官方发起话题
+
             if (!is_admin($information['stuNum'])) {
                 returnJson(403, '你还不是管理员哟');
             }
-            $information['user_id'] = 0;            //以红岩网校工作站名义创建的话题
-        } else {
-            //个人发起话题
-            $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();
-            if(!$user) {
-                returnJson(403, '你还不是掌邮的用户');
-            }
-            $information['user_id'] = $user['id'];
+            $information['official'] = 1;
+
         }
+        //个人发起话题
+        $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();
+        if(!$user) {
+            returnJson(403, '你还不是掌邮的用户');
+        }
+        $information['user_id'] = $user['id'];
+
         if (empty($information['keyword']) || isset($information['id']) || is_null($information['user_id'])) {
             returnJson(404, 'error pram');
         }
@@ -83,7 +85,7 @@ class TopicController extends Controller
         if (isset($information['article_id']) || isset($information['id'])) {
             returnJson(801);
         }
-        $user = !empty($information['official']) ? 0 : $information['stuNum'];
+        $user = $information['stuNum'];
         $article = Article::setArticle($information,  $user);
         if ($article === false)
             returnJson(404);
@@ -123,7 +125,8 @@ class TopicController extends Controller
             'join_num',
             'like_num',
             'article_num',
-            'user_id'
+            'user_id',
+            'official',
         );
         $pos = array(
             'created_time' => array('elt', date('Y-m-d H:i:s')),
@@ -145,7 +148,7 @@ class TopicController extends Controller
             ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
         foreach ($data as $key => &$value) {
-            $user = (int)$value['user_id'] === 0 ? array(
+            $user = (int)$value['official'] === 1 ? array(
                 'nickname' => "红岩网校工作站",
                 'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
                 'user_id' => '0'
@@ -157,6 +160,7 @@ class TopicController extends Controller
             $value['is_my_join'] = is_my_join($value['topic_id'], $information['stuNum']);
             unset($value['photo_src']);
             unset($value['thumbnail_src']);
+            unset($value['official']);
             $value['content'] = array("content" => $value['content']);
         }
         returnJson(200, '', array('searchKeyword' => $information['searchKeyword'] ,'data'=>$data));
@@ -236,7 +240,8 @@ class TopicController extends Controller
             'join_num',
             'like_num',
             'article_num',
-            'user_id'
+            'user_id',
+            'official'
         );
         $data = D('topics')
                     ->field($displayField)
@@ -246,7 +251,7 @@ class TopicController extends Controller
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
 
         foreach ($data as $key => &$value) {
-            $user = (int)$value['user_id'] === 0 ? array(
+            $user = (int)$value['official'] === 1 ? array(
                 'nickname' => "红岩网校工作站",
                 'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
                 'user_id' => '0'
@@ -254,7 +259,7 @@ class TopicController extends Controller
             $value = array_merge($value, $user);
             $value['img']['img_small_src'] = $value['photo_src'];
             $value['img']['img_src'] = $value['thumbnail_src'];
-
+            unset($value['official']);
             unset($value['photo_src']);
             unset($value['thumbnail_src']);
             $value['content'] = array("content" => $value['content']);
@@ -289,6 +294,7 @@ class TopicController extends Controller
             $user_alias.'.photo_thumbnail_src'      => 'user_thumbnail_src',
             'like_num',
             'remark_num',
+            'official',
         );
         $site = $_SERVER["SERVER_NAME"];
         //话题
@@ -308,7 +314,7 @@ class TopicController extends Controller
         $topic["topic_id"] = $topic['id'];
         unset($topic['id']);
         //user_id为0时使用官方的身份
-        if ($topic['user_id'] == 0) {
+        if ($topic['official'] == 1) {
             $topic['nickname'] = "红岩网校工作站";
             $topic['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
         } else {
@@ -317,6 +323,7 @@ class TopicController extends Controller
             $topic['user_photo_src'] = $user['photo_src'];
             $topic['user_thumbnail_src'] = $user['photo_thumbnail_src'];
         }
+        unset($topic['official']);
         unset($topic['user_id']);
 
         $pos = array('topic_id' => $topic['topic_id'], $article_alias.'.state'=> 1);
@@ -337,7 +344,7 @@ class TopicController extends Controller
 
         foreach ($articles as $key => &$value) {
 
-            if($value['user_id'] == false) {
+            if($value['official'] == 1) {
                 $value['nickname'] = "红岩网校工作站";
                 $value['user_id'] = 0;
                 $value['user_photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
@@ -366,6 +373,8 @@ class TopicController extends Controller
         $information['type_id'] = 7;
         if(false === $article = Article::setArticle($information, $information['stuNum']))
             returnJson(404, 'error article');
+        $pos = array("state" => 1, 'id' => $article->get('topic_id'));
+        if (!D('topics')->where($pos)->find())  returnJson(404, 'not find article');
         $content = $article->getContent();
         if (!$content)  returnJson(404, $article->getError());
         $content['is_my_like'] = is_null($information['stuNum'])? false :$article->getPraise($information['stuNum']);

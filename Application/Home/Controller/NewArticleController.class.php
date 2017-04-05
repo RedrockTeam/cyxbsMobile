@@ -145,7 +145,7 @@ class NewArticleController extends Controller
         $content = $article
                     ->where($condition)
                     ->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')
-                    ->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src  ')
+                    ->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src,official  ')
                     ->limit($start,$size)
                     ->order('updated_time DESC')
                     ->select();
@@ -153,7 +153,14 @@ class NewArticleController extends Controller
         $result = array();
         foreach($content as $key => $value){
             $stuNum = I('post.stuNum');
+            if($value['official'] == 1) {
+                $value['nickname'] = '红岩网校工作站';
+                $value['stunum'] = "0000000000";
+            }
             $value['is_my_like'] = $this->is_my_like($value['id'], $value['type_id'], $stuNum);
+            $value['photo_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
+            $value['photo_thumbnail_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
+            unset($value['official']);
             array_push($result,$value);
         }
 
