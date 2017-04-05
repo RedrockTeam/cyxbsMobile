@@ -230,3 +230,24 @@ function is_my_join($topic_id, $user) {
     return $result ? true : false;
 
 }
+
+function getArticleTable($type_id) {
+    $table = '';
+    switch ($type_id) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            $table = 'news';
+            break;
+        case 5:
+            $table = 'articles';
+            break;
+        case 6:
+            $table = 'notices';
+        case 7:
+            $table = 'topicarticles';
+            break;
+    }
+    return empty($table) ? false : $table;
+}
