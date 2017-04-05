@@ -306,6 +306,7 @@ class DataController extends Controller
                         'created_time',
                         'updated_time',
                         'state',
+                        'official',
                 );
 
                 $columns = $information['columns'];
@@ -358,7 +359,8 @@ class DataController extends Controller
                         'content',
                         'type_id',
                         'id',
-                        'state'
+                        'state',
+                        'official',
                 ), 'articles');
 
                 //获得子查询的sql语句
@@ -381,7 +383,8 @@ class DataController extends Controller
                         'content',
                         'articletype_id' =>'type_id',
                         'id',
-                        "'1'"   => 'state'
+                        "'1'"   => 'state',
+                        '"1"'   => 'official',
                 ), 'news');
                 $joinSql = M('news')
                             ->field($newsDisplayField)
@@ -401,6 +404,7 @@ class DataController extends Controller
                         'created_time',
                         'updated_time',
                         'state',
+                        '"1"'   => 'official'
                 ), 'notices');
 
                 $joinNotice = M('notices')
@@ -435,6 +439,7 @@ class DataController extends Controller
                         $value['content'] = mb_substr($value['content'], 0, 30, 'UTF-8').'...';
                     if (mystrlen($value['content']) > 15)
                         $value['title'] = mb_substr($value['title'], 0, 15, 'UTF-8').'...';
+                    $value['official'] = (int)$value['official'] === 1 ? "官方" : "个人";
                 }
                 $info = compact('data', 'recordsFiltered', 'recordsTotal', 'draw');
                 returnJson('datatable','', $info);
@@ -552,6 +557,8 @@ class DataController extends Controller
                                 $value['jscy_age'] = $month.'个月';
                             else
                                 $value['jscy_age'] = $interval->format('%d')."个天";
+                            $value['official'] = $value['official'] == 1 ? "官方" : "个人";
+
                         }
                 }
                 $recordsTotal = M('users')->count();
@@ -685,6 +692,94 @@ class DataController extends Controller
                 returnJson('datatable','', $info);
 
         }
+
+        public function topicList()
+        {
+            $information = I('post.');
+            $draw = $information['draw'];
+            if (empty($draw)) {
+                returnJson(801);
+            }
+            $table = "topics";
+            $start = $information['start'];
+            $length = $information['length'];
+            $columns = $information['columns'];
+            $displayField = array(
+                'id',
+                'username' => 'author',
+                'keyword',
+                'content',
+                'like_num',
+                'join_num',
+                'article_num',
+                'created_time',
+                'state',
+                'official',
+            );
+            $parameter = array();
+            //框定条件
+            if (!empty($information['args'])) {
+                foreach ($information['args'] as $field => $value) {
+                    if (in_array($field, $displayField)) {
+                        $parameter[$field] = $value;
+                    }
+                }
+            }
+
+            $searchField = array();
+            $search = $information['search'];
+            $searchValue = $search['value'];
+
+            if (!empty($searchValue)) {
+
+                foreach ($columns as $column) {
+                    //判断是否需要搜索的
+                    if ($column['searchable'] === 'true') {
+                        $key = array_search($column['data'], $displayField);
+                        $searchField[] = is_numeric($key) ? $column['data'] : $key;
+                    }
+                }
+
+                $parameter['*'] = array($searchValue, $searchField);
+            }
+            $parameter = $this->parameter($parameter, $table);
+
+
+
+            $order = array();
+
+            $orders = $information['order'];
+
+            foreach ($orders as $value) {
+                //排序需要的列
+                $field = $columns[$value['column']]['data'];
+                $key = array_search($field, $displayField);
+                if (!is_numeric($key))
+                    $field = $key;
+                $order[$field] = $value['dir'];
+            }
+            $displayField = $this->displayField($displayField, $table);
+            $data = D($table)
+                ->join("__USERS__ ON __USERS__.id = __TOPICS__.user_id", 'left')
+                ->where($parameter)
+                ->field($displayField)
+                ->order($order)
+                ->select();
+            $recordsFiltered = count($data);
+            if ($start > $recordsFiltered) {
+                $data = array();
+            } else {
+                $length = ($recordsFiltered - $start) > $length ? $length : ($recordsFiltered - $start);
+                $data = array_slice($data, $start, $length);
+                foreach ($data as &$value) {
+                    $value['official'] = $value['official'] == 1 ? "官方" : "个人";
+                }
+                $recordsTotal = M($table)->count();
+                $info = compact('data', 'recordsFiltered', 'recordsTotal', 'draw');
+                returnJson('datatable', '', $info);
+            }
+        }
+
 
         /**
          * 对某些字段进行过滤,给出一些规则进行匹配

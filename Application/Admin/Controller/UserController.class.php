@@ -27,13 +27,16 @@ class UserController extends Controller
 
         public function _initialize()
         {
-                //初始化
-                $this->_status = array(
-                        'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
-                        'unlock' => array('before_state'=>$this->_state['lock'],'after_state'=>$this->_state['normal']),
-                        'lock' => array('before_state'=>$this->_state['normal'],'after_state'=>$this->_state['lock']),
-                        'delete' => array('before_state'=>array($this->_state['                       normal'], $this->_state['lock']),'after_state'=>$this->_state['delete']),
-                );
+            if (!is_alive()) {
+                returnJson(403);
+            }
+            //初始化
+            $this->_status = array(
+                    'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
+                    'unlock' => array('before_state'=>$this->_state['lock'],'after_state'=>$this->_state['normal']),
+                    'lock' => array('before_state'=>$this->_state['normal'],'after_state'=>$this->_state['lock']),
+                    'delete' => array('before_state'=>array($this->_state['                       normal'], $this->_state['lock']),'after_state'=>$this->_state['delete']),
+            );
         }
 
         /**

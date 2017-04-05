@@ -30,15 +30,18 @@ class ForbidwordController extends Controller
 
         public function _initialize()
         {
-                $this->forbidword_type =  ArticleController::getType();
-                $this->forbidword_type['-1'] = 'nickname';
-                //初始化
-                $this->_status =  array(
-                        'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
-                        'active' => array('before_state'=>$this->_state['inactive'],'after_state'=>$this->_state['normal']),
-                        'inactive' => array('before_state'=>$this->_state['normal'],'after_state'=>$this->_state['inactive']),
-                        'delete' => array('before_state'=>array($this->_state['normal'], $this->_state['inactive']),'after_state'=>$this->_state['delete']),
-                );
+            if (!is_alive()) {
+                returnJson(403);
+            }
+            $this->forbidword_type =  ArticleController::getType();
+            $this->forbidword_type['-1'] = 'nickname';
+            //初始化
+            $this->_status =  array(
+                    'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
+                    'active' => array('before_state'=>$this->_state['inactive'],'after_state'=>$this->_state['normal']),
+                    'inactive' => array('before_state'=>$this->_state['normal'],'after_state'=>$this->_state['inactive']),
+                    'delete' => array('before_state'=>array($this->_state['normal'], $this->_state['inactive']),'after_state'=>$this->_state['delete']),
+            );
 
         }
 

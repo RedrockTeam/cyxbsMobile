@@ -247,13 +247,23 @@ function getUserInfo($stu) {
         $user = D('users')->where("stunum='%s'", $stu)->find();
         if ($user)      return $user;
     }
-    $user = (int)$stu === 0 ? array(
-        'nickname' => "红岩网校工作站",
-        'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
-        'photo_thumbnail_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
-        'stunum' => 0,
-        'id'    => 0,
-    ) : D("users")->find($stu);
-
+//    $user = (int)$stu === 0 ? array(
+//        'nickname' => "红岩网校工作站",
+//        'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+//        'photo_thumbnail_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+//        'stunum' => 0,
+//        'id'    => 0,
+//    ) : D("users")->find($stu);
+    $user = D("users")->find($stu);
     return $user;
 }
+
+/**
+ *
+ */
+function is_alive() {
+    $admin = session('admin');
+    return !empty($admin);
+}
+
+
