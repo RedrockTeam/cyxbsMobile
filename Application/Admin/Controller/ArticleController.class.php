@@ -43,7 +43,9 @@ class ArticleController extends Controller
 
         public function _initialize()
         {
-
+            if (!is_alive()) {
+                returnJson(403);
+            }
             //初始化
             $this->_status = array(
                     'recover' => array('before_state'=>$this->_state['delete'],'after_state'=>$this->_state['normal']),
@@ -174,8 +176,8 @@ class ArticleController extends Controller
         public function addArticle() {
             $information = I('post.');
 
-            if ($information['is_official'])    $information['user_id'] = 0;
-            else $information['user_id'] = session('admin.user_id');
+            if ($information['official'] == 'true')    $information['official'] = 1;
+            $information['user_id'] = session('admin.user_id');
             $article = Article::setArticle($information, $information['user_id']);
             if (!$article) returnJson(801);
             $article->add() ? returnJson(200) : returnJson(404);
@@ -194,31 +196,34 @@ class ArticleController extends Controller
 
         public function getWriteTemplet()
         {
-            $templet = array(
-                    'title' => array('type' => 'text', 'text'=>'标题', 'name'=>'title', 'placeholder'=> '请输入标题'),
-                    'content' => array('type' => 'text', 'text' => '内容', 'name'=> 'content', 'placeholder'=> '详细内容..'),
-                    'photo' => array('type' => 'file', 'text' => '上传图片', 'name'=>'photo_src'),
-                    'keyword' => array('type' => 'text', 'text'=>'话题', 'name' => 'keyword', 'placeholder' => '话题..')
-            );
+//            $templet = array(
+//                    'title' => array('type' => 'text', 'text'=>'标题', 'name'=>'title', 'placeholder'=> '请输入标题'),
+//                    'content' => array('type' => 'text', 'text' => '内容', 'name'=> 'content', 'placeholder'=> '详细内容..'),
+//                    'photo' => array('type' => 'file', 'text' => '上传图片', 'name'=>'photo_src'),
+//                    'keyword' => array('type' => 'text', 'text'=>'话题', 'name' => 'keyword', 'placeholder' => '话题..')
+//            );
 
             $display = array(
 
                 '5' =>    array(
-                                'title', 
-                                'content',
-                                'photo', 
-                            ),
+                            'title',
+                            'content',
+                            'photo',
+                            'official',
+                        ),
                 '6' =>  array(
-                                'title', 
-                                'content',
-                                'photo', 
-                            ),
+                            'title',
+                            'content',
+                            'photo',
+
+                        ),
                 '7' => array(
-                                'title', 
-                                'keyword',
-                                'content',
-                                'photo',
-                            ),
+                            'title',
+                            'keyword',
+                            'content',
+                            'photo',
+                            'official',
+                        ),
             );
 
             $type_id = I('type_id');
