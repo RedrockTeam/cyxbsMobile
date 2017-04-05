@@ -788,11 +788,19 @@ class Article
             }
         }
         if (isset($this->article['topic_id'])) {
-            $result = D('topics')->where('id=%d', $this->article['topic_id'])->setInc('remark_num');
+            $result = D('topics')->where('id=%d', $this->article['topic_id'])->select();
+            $result['remark_num']++;
+            $result['updated_time'] = date('Y-m-d H:i:s');
+
+            if (!is_my_join($this->article['topic_id'], $this->operator['id'])) {
+                $result['join_num'] = date('Y-m-d H:i:s');
+            }
+            $result = D('topics')->save($result);
             if (!$result) {
-                $this->error[] = "fatal add topics remark_num";
+                $this->error[] = "fatal add topics join_num";
                 return false;
             }
+
         }
         return true;
     }
