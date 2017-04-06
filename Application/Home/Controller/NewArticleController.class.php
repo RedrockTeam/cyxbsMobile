@@ -159,10 +159,10 @@ class NewArticleController extends Controller
             if($value['official'] == 1) {
                 $value['nickname'] = '红岩网校工作站';
                 $value['stunum'] = "0000000000";
+                $value['photo_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
+                $value['photo_thumbnail_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
             }
             $value['is_my_like'] = $this->is_my_like($value['id'], $value['type_id'], $stuNum);
-            $value['photo_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
-            $value['photo_thumbnail_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
             unset($value['official']);
             array_push($result,$value);
         }
