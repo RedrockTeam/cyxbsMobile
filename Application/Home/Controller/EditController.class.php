@@ -13,11 +13,10 @@ class EditController extends BaseController
     public function deleteArticle()
     {
         $information = I('post.');
-        $url = U("Home/Article/deleteArticle",'',true,true);
-        $result = curlPost($url, $information);
+        $url = U("Home/Article/deleteArticle",'',true,false);
+        $result = curlPost("172.17.0.5".$url, $information);
         if (!$result)
             returnJson(404);
-
         echo $result;
     }
 

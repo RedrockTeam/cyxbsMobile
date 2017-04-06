@@ -742,7 +742,7 @@ class Article
             return false;
         }
         if (!$this->addRemarkNum())   return false;
-        if ($answerToUser == 0) $answerUserId = 0;
+        if (!$answerToUser) $answerUserId = 0;
         else {
             $answerUser = getUserInfo($answerToUser);
             $answerUserId = $answerUser['id'];

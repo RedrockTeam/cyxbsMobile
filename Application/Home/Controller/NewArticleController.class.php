@@ -10,10 +10,10 @@ class NewArticleController extends Controller
 {
 	protected    $newsList = array('jwzx','cyxw','xsjz','xwgg');
 
-    public function index(){
-        $article = D("hotarticles");
-        $articles = $article->relation(true)->select();
-    }
+//    public function index(){
+//        $article = D("hotarticles");
+//        $articles = $article->relation(true)->select();
+//    }
 
     /**
      * 热门动态
