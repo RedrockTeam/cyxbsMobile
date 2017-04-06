@@ -6,10 +6,10 @@ use Think\Controller;
 
 class ArticleController extends BaseController {
     protected    $newsList = array('jwzx','cyxw','xsjz','xwgg');
-    public function index(){
-        $article = D("hotarticles");
-        $articles = $article->relation(true)->select();
-    }
+//    public function index(){
+//        $article = D("hotarticles");
+//        $articles = $article->relation(true)->select();
+//    }
 
     public function searchContent(){
         $article    = D('articles');
