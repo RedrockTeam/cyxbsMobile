@@ -22,6 +22,7 @@ class ArticleController extends Controller
                 4               => 'news',
                 5               => 'articles',
                 6               => 'notices',
+                7               => 'topicarticles',
         );
 
         protected static $article_type = array(
@@ -31,7 +32,7 @@ class ArticleController extends Controller
                 4               => '校务公告',
                 5               => '哔哔叨叨',
                 6               => '公告',
-                7               => '话题',
+                7               => '话题文章',
         );
 
         private $_state = array(
@@ -58,6 +59,10 @@ class ArticleController extends Controller
         public static function getType()
         {
                 return self::$article_type;
+        }
+
+        public static function getTable() {
+            return self::$article_table;
         }
 
 
