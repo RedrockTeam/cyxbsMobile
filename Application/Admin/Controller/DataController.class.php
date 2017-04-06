@@ -277,172 +277,221 @@ class DataController extends Controller
 
         public function articleList()
         {
-                $information = I('post.');
-                $table = 'hotarticles';
+            $information = I('post.');
 
-                $draw = $information['draw'];
+            $draw = $information['draw'];
 
-                if(empty($draw)) {
-                        returnJson(801);
-                }
+            if (empty($draw)) {
+                returnJson(801);
+            }
 
-                $start = $information['start'];
+            $start = $information['start'];
 
-                $length = $information['length'];
+            $length = $information['length'];
 
-                if (!(is_numeric($start) && is_numeric($length))) {
-                        returnJson(801);
-                }
-                $caseSql = $this->tranSqlCase('articletype_id', Article::getType());
-                $displayField = array(
-                        'article_id' => 'id',
-                        'title',
-                        'articletype_id' => 'type_id',
-                        'author',
-                        $caseSql => 'type',
-                        'content',
-                        'like_num',
-                        'remark_num',
-                        'created_time',
-                        'updated_time',
-                        'state',
-                        'official',
-                );
+            if (!(is_numeric($start) && is_numeric($length))) {
+                returnJson(801);
+            }
+//                $caseSql = $this->tranSqlCase('articletype_id', Article::getType());
+            $displayField = array(
+                'id',
+                'title',
+                'username' => 'author',
+                'type_id' => 'type',
+                'content',
+                'like_num',
+                'remark_num',
+                'created_time',
+                'updated_time',
+                'state',
+                'official',
+            );
 
-                $columns = $information['columns'];
-                $order = array();
+            $columns = $information['columns'];
+            $order = array();
 
-                $orders = $information['order'];
+            $orders = $information['order'];
 
-                foreach ($orders as $value) {
-                        //排序需要的列
-                        $field = $columns[$value['column']]['data'];
-                        $order[$field] = $value['dir'];
-                }
+            foreach ($orders as $value) {
+                //排序需要的列
+                $field = $columns[$value['column']]['data'];
+                $key = array_search($field, $displayField);
+                if ($key === false)
+                    continue;
+                $order[$field] = $value['dir'];
+            }
+            $parameter = array();
 
-
-                $parameter = array();
-
-                //框定条件
-                if (!empty($information['args'])) {
-                        foreach($information['args'] as $field => $value) {
-                                if (in_array($field, $displayField)) {
-                                    if (is_array($value)) {
-                                        $value = implode(',', $value);
-                                        $parameter[$field] = array('in', $value);
-                                    }else
-                                        $parameter[$field] = $value;
-                                }
+            $transferValue = array(
+                'type' => Article::getType(),
+            );
+            $articleTable = Article::getTable();
+            //框定条件
+            if (!empty($information['args'])) {
+                foreach ($information['args'] as $column => $value) {
+                    $key = array_search($column, $displayField);
+                    if ($key === false) continue;
+                    $field = is_numeric($key) ? $column : $key;
+                    if (is_array($value)) {
+                        if (!empty($transferValue[$column]))
+                            foreach ($value as &$val) {
+                                $key = array_search($val, $transferValue[$column]);
+                                if ($key)   $val = $key;
+                            }
+                        $value = implode(',', $value);
+                        $parameter[$field] = array('in', $value);
+                    } else {
+                        if (!empty($transferValue[$column])){
+                            $key = array_search($value, $transferValue[$column]);
+                            if ($key)   $value = $key;
                         }
+                        $parameter[$field] = $value;
+                    }
                 }
-
-                $searchField = array();
-                $searchvalue = $information['search']['value'];
-                if (!empty($searchvalue)) {
-
-                        foreach ($columns as $column) {
-                                //判断是否需要搜索的
-                                if ($column['searchable'] == 'true') {
-                                        if (in_array($column['data'], $displayField)) {
-                                                $searchField[] = $column['data'];
-                                        }
-                                }
-                        }
-                        $parameter['*'] = array($searchvalue, $searchField);
+            }
+            //搜索
+            $searchField = array();
+            $searchValue = $information['search']['value'];
+            if (!empty($searchValue)) {
+                foreach ($columns as $column) {
+                    //判断是否需要搜索的
+                    if ($column['searchable'] == 'true') {
+                        $key = array_search($column['data'], $displayField);
+                        if ($key === false) continue;
+                        $searchField[] = is_numeric($key) ? $column['data'] : $key;
+                    }
                 }
-
-                $displayField = $this->displayField($displayField, $table);
-                //用户帖需要的属性
-                $articlesDisplayField = $this->displayField(array(
-                        'username' => 'author',
-                        'title',
-                        'content',
-                        'type_id',
-                        'id',
-                        'state',
-                        'official',
-                ), 'articles');
-
-                //获得子查询的sql语句
-                //bbdd 用户写的文章
-                $joinArticles = M('articles')
-                            ->join('__USERS__ ON __ARTICLES__.user_id = __USERS__.id')
-                            ->field($articlesDisplayField)
-                            ->select(false);
-            $caseSql = $this->tranSqlCase('articletype_id', array(
-                        '1' => "重邮新闻",
-                        '2' => "教务在线",
-                        '3' => "学术讲座",
-                        '4' => "校务公告"
-                ));
-
-                //新闻文章
-                $newsDisplayField = $this->displayField(array(
-                        $caseSql => 'author',
-                        'title',
-                        'content',
-                        'articletype_id' =>'type_id',
-                        'id',
-                        "'1'"   => 'state',
-                        '"1"'   => 'official',
-                ), 'news');
-                $joinSql = M('news')
-                            ->field($newsDisplayField)
-                            ->union($joinArticles)
-                            ->buildSql();
-                //echo $joinSql;
-                //公告
-                $noticeDisplayField = $this->displayField(array(
-                        'id',
-                        'username' => 'author',
-                        'title',
-                        "'6'" => 'type_id',
-                        "'公告'" => 'type',
-                        'content',
-                        'like_num',
-                        'remark_num',
-                        'created_time',
-                        'updated_time',
-                        'state',
-                        '"1"'   => 'official'
-                ), 'notices');
-
-                $joinNotice = M('notices')
-                                ->field($noticeDisplayField)
-                                ->join('__USERS__ ON __USERS__.id=__NOTICES__.user_id')
-                                ->select(false);
-                 //获得所有文章的字查询表
-                $allArticle = M($table)
-                                ->join(" JOIN ".$joinSql." article ON article.id=__HOTARTICLES__.article_id and article.type_id = __HOTARTICLES__.articletype_id")
-                                ->field($displayField)
-                                ->union($joinNotice)
-                                ->buildSql();
-
-                $parameter = $this->parameter($parameter);
-
-                //总共的数据量
-                $recordsTotal = M()->table($allArticle.' article')->count();
-                //筛选的数据
-                $result = M()->table($allArticle.' article')->where($parameter)->order($order)->select();
-                //筛选得到的数据量
-                $recordsFiltered = count($result);
-                //分页选取数据
-                if ($start >= $recordsFiltered) {
-                        $data = array();
+                $parameter['*'] = array($searchValue, $searchField);
+            }
+            //解决联表问题
+            $tables = array();
+            if (empty($parameter['type_id']))   $tables = array_flip($articleTable);
+            else {
+                if (is_array($parameter['type_id'])) {
+                    $type_ids = explode(',', $parameter['type_id'][1]);
+                    foreach ($type_ids as $type_id) {
+                        $tables[$articleTable[$type_id]] = $type_id;
+                    }
                 } else {
-                        $length = ($recordsFiltered-$start)>$length ? $length : ($recordsFiltered-$start);
-                        $data = array_slice($result, $start, $length);
+                    $tables[$articleTable[$parameter['type_id']]] = $parameter['type_id'];
+                }
+            }
+            $tables = array_flip($tables);
+            $articles = array();
+            //获得子查询的sql语句
+            foreach ($tables as $type_id => $table) {
+                $fields = D($table)->getDbFields();
+                $articleDisplayField = $displayField;
+                $articleParameter = $parameter;
+                $article = D($table);
+                $articleParameter = $this->parameter($articleParameter);
+                if (!in_array('type_id', $fields)) {
+                    if(in_array('articletype_id', $fields)) {
+                        $field = 'articletype_id';
+                    } elseif (in_array('articletypes_id', $fields)){
+                        $field = 'articletypes_id';
+                    } else {
+                        $field = "'$type_id'";
+                    }
+                    if ($articleParameter['type_id']) {
+                        $articleParameter[$field] = $articleParameter['type_id'];
+                    }
+                    $articleDisplayField[$field] = $articleDisplayField['type_id'];
+                    unset($articleDisplayField['type_id']);
+                    unset($articleParameter['type_id']);
+                    if (isset($articleParameter['_complex']['type_id'])) {
+                        $articleParameter['_complex'][$field] = $articleParameter['_complex']['type_id'];
+                        unset($articleParameter['_complex']['type_id']);
+                    }
+                }
+                if (!in_array('state', $fields)) {
+                    $key = array_search('state', $articleDisplayField);
+                    if ($key !== false)
+                        unset($articleDisplayField[$key]);
+                    $field = "'1'";
+                    $articleDisplayField[$field] = 'state';
+                    if (isset($articleParameter['state']) && (int)$articleParameter['state'] != 1) {
+                        continue;
+                    }
+                    unset($articleParameter['state']);
+                    if (isset($articleParameter['_complex']))
+                        unset($articleParameter['_complex']['state']);
+                }
+                if (!in_array('official', $fields)) {
+                    $key = array_search('official', $articleDisplayField);
+                    if ($key !== false)
+                        unset($articleDisplayField[$key]);
+                    $field = '"1"';
+                    $articleDisplayField[$field] = 'official';
+                    unset($articleParameter['official']);
+                    if (isset($articleParameter['_complex']))
+                        unset($articleParameter['_complex']['official']);
+                }
+                if (!in_array('created_time', $fields)) {
+                    $key = array_search('created_time', $articleDisplayField);
+                    unset($articleDisplayField[$key]);
+                    if (in_array('updated_time', $fields)) {
+                        $articleDisplayField['updated_time'] = 'created_time';
+                    } elseif(in_array('date', $fields)) {
+                        $articleDisplayField['date'] = 'created_time';
+                    }
+                }
+                if (!in_array('updated_time', $fields)) {
+                    $key = array_search('updated_time', $articleDisplayField);
+                    unset($articleDisplayField[$key]);
+                    if (in_array('created_time', $fields)) {
+                        $articleDisplayField['created_time'] = 'updated_time';
+                    } elseif(in_array('date', $fields)) {
+                        $articleDisplayField['`date`'] = 'updated_time';
+                    }
+                }
 
+                if(!in_array('user_id', $fields)) {
+                    $key = array_search('author', $articleDisplayField);
+                    if ($key !== false)
+                        unset($articleDisplayField[$key]);
+                    $articleDisplayField['\'\''] = 'author';
+                    if (isset($articleParameter['_complex']))
+                        unset($articleParameter['_complex'][$key]);
+                    unset($articleParameter[$key]);
+                } else {
+                    $article->join("__USERS__ on __USERS__.id = user_id ", 'LEFT');
                 }
-                foreach($data as &$value) {
-                    if (mystrlen($value['content']) > 30)
-                        $value['content'] = mb_substr($value['content'], 0, 30, 'UTF-8').'...';
-                    if (mystrlen($value['content']) > 15)
-                        $value['title'] = mb_substr($value['title'], 0, 15, 'UTF-8').'...';
-                    $value['official'] = (int)$value['official'] === 1 ? "官方" : "个人";
+                $articleDisplayField = $this->displayField($articleDisplayField, $table);
+                $articles[] = $article->field($articleDisplayField)->where($articleParameter)->select(false);
+            }
+            $allArticle = array_shift($articles);
+            if (!empty($articles)) {
+                foreach ($articles as $article) {
+                    $allArticle = $allArticle." union all ".$article;
                 }
-                $info = compact('data', 'recordsFiltered', 'recordsTotal', 'draw');
-                returnJson('datatable','', $info);
+            }
+//            echo $allArticle;exit;
+            $recordsTotal = 0;
+            $tables = array_flip($articleTable);
+            $tables = array_flip($tables);
+            foreach ($tables as $table) {
+                $recordsTotal += D($table)->count();
+            }
+            //总共的数据量
+            $recordsFiltered = M()->table('('.$allArticle.') article')->count();
+            //筛选的数据
+            $data =  M()->table('('.$allArticle.') article')->limit($start, $length)->order($order)->select();
+
+            //分页选取数据
+            foreach($data as &$value) {
+                if (mystrlen($value['content']) > 30)
+                    $value['content'] = mb_substr($value['content'], 0, 30, 'UTF-8').'...';
+                if (mystrlen($value['content']) > 15)
+                    $value['title'] = mb_substr($value['title'], 0, 15, 'UTF-8').'...';
+                $value['official'] = (int)$value['official'] === 1 ? "官方" : "个人";
+                $value['type_id'] = $value['type'];
+                $value['type'] = $transferValue['type'][$value['type']];
+                if (empty($value['author']))
+                    $value['author'] = $value['type'];
+            }
+            $info = compact('data', 'recordsFiltered', 'recordsTotal', 'draw');
+            returnJson('datatable','', $info);
 
         }
         //用户信息查看

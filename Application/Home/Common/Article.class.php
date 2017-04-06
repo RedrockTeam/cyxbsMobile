@@ -827,7 +827,7 @@ class Article
             4     => '校务公告',
             5     => '哔哔叨叨',
             6     => '公告',
-            7     => '话题',
+            7     => '话题文章',
         );
         $article_type_brief = array(
             1 => 'cyxw',
