@@ -263,12 +263,12 @@ class DataController extends Controller
 
                 //结果返回带一些详细信息
                 $data = M('admin')
-                                ->join('LEFT JOIN'.$loginList.' loginlist ON __ADMIN__.id = loginlist.admin_id')
-                                ->join('__ROLE__ ON __ADMIN__.role_id = __ROLE__.id')
-                                ->where($parameter)
-                                ->field($displayField)
-                                ->order($order)
-                                ->select();
+                            ->join('LEFT JOIN'.$loginList.' loginlist ON __ADMIN__.id = loginlist.admin_id')
+                            ->join('__ROLE__ ON __ADMIN__.role_id = __ROLE__.id')
+                            ->where($parameter)
+                            ->field($displayField)
+                            ->order($order)
+                            ->select();
 
 //            var_dump($data);
                 return $data;
@@ -289,9 +289,12 @@ class DataController extends Controller
 
             $length = $information['length'];
 
+
             if (!(is_numeric($start) && is_numeric($length))) {
                 returnJson(801);
             }
+            if ($length == '-1')
+                unset($length);
 //                $caseSql = $this->tranSqlCase('articletype_id', Article::getType());
             $displayField = array(
                 'id',
