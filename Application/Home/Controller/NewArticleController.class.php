@@ -36,7 +36,7 @@ class NewArticleController extends Controller
                     "created_time" => array('GT',$now_date),
                     "state"        => 1,
                 );
-            $data_notice   = $notice->where($data_notice_condition)->order('created_time')->select();
+            $data_notice   = $notice->where($data_notice_condition)->order('created_time')->select(false);
             $site = $_SERVER["SERVER_NAME"];
             foreach ($data_notice as $key => $value) {
                 $stuNum = I('post.stuNum');
@@ -97,7 +97,7 @@ class NewArticleController extends Controller
             $now_info = array(
                 'status' => 200,
                 'page'   => $page,
-                'data'   =>array(
+                'data'   => array(
                             'id'        => $value['id'],
                             'type'      => $article->articleType(true),
                             'type_id'   => $value['articletype_id'],

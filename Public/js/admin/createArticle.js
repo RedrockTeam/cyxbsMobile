@@ -83,7 +83,7 @@ var createArticle = function() {
                       <td>\
                           <p class="name">\
                               {% if (file.url) { %}\
-                                  <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?\'data-gallery\':\'\'%}>{%=file.name%}</a>\
+                                  <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?\'data-gallery\':\'\'%}>{%=file.name.substr(0,8)%}</a>\
                               {% } else { %}\
                                   <span>{%=file.name.substr(0,8)%}</span>\
                               {% } %}\

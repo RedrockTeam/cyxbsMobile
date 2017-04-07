@@ -129,7 +129,7 @@
        var title = ArtcileModal.find('[name="title"]').val();
        var content = ArtcileModal.find('[name="content"]').val();
        var type_id = ArtcileModal.find('[name="article_type"]').val();
-       var official =  ArtcileModal.find('[name="is_official"]').bootstrapSwitch('state');
+       var official =  ArtcileModal.find('[name="is_official"]');
 
        if(type_id==='' || title==='' || content==='') {
            alert("不能为空");
@@ -152,8 +152,10 @@
             'type_id' : type_id,
             'thumbnail_src': thumbnail_src,
             'photo_src': photo_src,
-            'official': official,
         };
+        if (official.length > 0) {
+            data['official'] = official.bootstrapSwitch('state');
+        }
         if (parseInt(type_id) === 7) {
             var keyword = $('[name="keyword"]').val();
             if (keyword === '') {
@@ -162,6 +164,7 @@
             }
             data['keyword'] = keyword;
         }
+        console.log(data);
        $.ajax({
             url: getUrl()+"/Admin/Article/addArticle",
             data:data,
