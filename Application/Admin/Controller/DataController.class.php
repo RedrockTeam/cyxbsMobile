@@ -482,7 +482,7 @@ class DataController extends Controller
             foreach($data as &$value) {
                 if (mystrlen($value['content']) > 30)
                     $value['content'] = mb_substr($value['content'], 0, 30, 'UTF-8').'...';
-                if (mystrlen($value['content']) > 15)
+                if (mystrlen($value['title']) > 15)
                     $value['title'] = mb_substr($value['title'], 0, 15, 'UTF-8').'...';
                 $value['official'] = (int)$value['official'] === 1 ? "官方" : "个人";
                 $value['type_id'] = $value['type'];
