@@ -214,13 +214,13 @@ function is_my_join($topic_id, $user) {
     if ($user === false) {
         return false;
     }
-    $pos = D('topics')->where(array('id' => $topic_id, 'user_id' => $user['id']))->find();
+    $pos = D('topics')->where(array('id' => $topic_id, 'user_id' => $user['id'], 'official'=>array('NEQ',1)))->find();
     if ($pos)   return true;
     $pos = array('topic_id' => $topic_id, 'user_id' => $user['id'], 'state' => 1);
     $result = D('topicarticles')->where($pos)->find();
     if($result) return true;
 
-    $article_ids = D('topicarticles')->field('id')->where(array('topic_id' => $topic_id, 'state'=>1))->select(false);
+    $article_ids = D('topicarticles')->field('id')->where(array('topic_id' => $topic_id, 'state'=>1,'official'=>array('NEQ',1)))->select(false);
 
     $pos['articletype_id'] = 7;
     //in 子句

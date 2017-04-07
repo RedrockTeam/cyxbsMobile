@@ -38,6 +38,8 @@ class TopicController extends Controller
             }
             $information['official'] = 1;
 
+        } else {
+            $information['join_num'] = 1;
         }
         //个人发起话题
         $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();
@@ -65,7 +67,7 @@ class TopicController extends Controller
         $information = array_merge($default, $information);
         $result = M('topics')->add($information);
         if ($result) {
-            returnJson(200);
+            returnJson(200, '', array('topic_id'=> $result));
         } else {
             returnJson(404);
         }
@@ -90,18 +92,24 @@ class TopicController extends Controller
         if ($article === false)
             returnJson(404);
 
-        $result = $article->add();
-        if ($result) {
-            $topic = D('topics')->where('id=%d', $article->get('topic_id'))->find();
-            if (!is_my_join($article->get('topic_id'), $information['stuNum'])) {
-                $topic['join_num']++;
-            }
-            $topic['remark_num']++;
-            D('topics')->save($topic);
-            returnJson(200, '', array('state'=>200));
-        } else {
-            returnJson(404, $article->getError());
+
+
+        $topic = D('topics')->where('id=%d', $article->get('topic_id'))->find();
+
+        if ($information['official'] != 'true' && !is_my_join($article->get('topic_id'), $information['stuNum'])) {
+            $topic['join_num']++;
         }
+
+        $topic['article_num']++;
+        $result = D('topics')->save($topic);
+
+        if (!$result)
+            returnJson(404, $article->getError());
+
+        $result = $article->add();
+
+        $result ? returnJson(200, '', array('state'=>200)) :  returnJson(404, $article->getError());
+
     }
 
     /**
@@ -197,26 +205,30 @@ class TopicController extends Controller
         if (!empty($articleIds)) {
             foreach($articleIds as $articleId)
                 $remarkTopicIds[] = M('topicarticles')->where(array('id'=>$articleId))->getField('topic_id');
-            $remarkTopicIds = array_flip($remarkTopicIds);
         }
 
 
-        //反转去重
         //获取该用户通过回答写文章参与过话题
         $pos = array(
             'user_id' => $user['id'],
             'state' => 1,
             'created_time' => array('elt', date('Y-m-d H:i:s')),
+            'official' => array('NEQ', 1),
         );
         $articleTopicIds = D('topicarticles')->where($pos)->group('topic_id')->getField('topic_id', true);
-        $articleTopicIds = empty($articleTopicIds) ? array() : array_flip($articleTopicIds);
+        $articleTopicIds = empty($articleTopicIds) ? array() : $articleTopicIds;
+
         //获取该用户发起的话题 参与过话题
         $topicIds = D('topics')->where($pos)->getField('id', true);
-        $topicIds = empty($topicIds)? array() : array_flip($topicIds);
-        //数组合并
-        $topicIds = $articleTopicIds + $remarkTopicIds + $topicIds;
 
+        $topicIds = empty($topicIds)? array() : $topicIds;
+
+        //数组合并
+        $topicIds = array_merge($remarkTopicIds, $topicIds, $articleTopicIds);
+        //反转去重
         $topicIds = array_flip($topicIds);
+        $topicIds = array_flip($topicIds);
+
         //没找到对应的话题返回空
         if(empty($topicIds))    returnJson(200, '', array('data' => array()));
 
