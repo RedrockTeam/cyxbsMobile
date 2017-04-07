@@ -460,6 +460,7 @@ class DataController extends Controller
                 } else {
                     $article->join("__USERS__ on __USERS__.id = user_id ", 'LEFT');
                 }
+                $articleParameter = $this->parameter($articleParameter, $table);
                 $articleDisplayField = $this->displayField($articleDisplayField, $table);
                 $articles[] = $article->field($articleDisplayField)->where($articleParameter)->select(false);
             }
