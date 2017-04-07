@@ -201,8 +201,6 @@ class DataController extends Controller
                         'username',
                         'stunum',
                         'display_name'    => 'role',
-                        'last_login_time',
-                        'last_login_ip',
                         'state'
                 );
 
@@ -251,26 +249,30 @@ class DataController extends Controller
                 }
 
                 //子查询需要的字段
-                $loginListField  = array(
-                        'admin_id',
-                        'max(login_time)' => 'last_login_time',
-                        'login_ip'        => 'last_login_ip',
-                );
-                $loginListField = $this->displayField($loginListField, 'loginlist');
+//                $loginListField  = array(
+//                        'admin_id',
+//                        'max(login_time)' => 'last_login_time',
+//                        'login_ip'        => 'last_login_ip',
+//                );
+//                $loginListField = $this->displayField($loginListField, 'loginlist');
                 //得到子查询的sql
-                $loginList = M('loginlist')->group('admin_id')->field($loginListField)->buildSql();
+//                $loginList = M('loginlist')->group('admin_id')->field($loginListField)->buildSql();
 //                echo $loginList;
 
                 //结果返回带一些详细信息
                 $data = M('admin')
-                            ->join('LEFT JOIN'.$loginList.' loginlist ON __ADMIN__.id = loginlist.admin_id')
                             ->join('__ROLE__ ON __ADMIN__.role_id = __ROLE__.id')
                             ->where($parameter)
                             ->field($displayField)
                             ->order($order)
                             ->select();
 
-//            var_dump($data);
+                foreach ($data as &$value) {
+                    $loginInfo = D('loginlist')->where('admin_id = %d', $value['id'])->order('login_time desc')->find();
+                    $value['last_login_time'] = $loginInfo ? $loginInfo['login_time']: '';
+                    $value['last_login_ip']  = $loginInfo ? $loginInfo['login_ip']: '';
+                    $value['last_login_os'] = $loginInfo ? $loginInfo['platform']: '';
+                }
                 return $data;
 
         }
