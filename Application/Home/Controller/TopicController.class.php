@@ -123,7 +123,7 @@ class TopicController extends Controller
         $information = array_merge($get, $post);
         $information['page'] = isset($information['page']) ? $information['page'] : 0;
         $information['size'] = isset($information['size']) ? $information['size'] : 10;
-
+        $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
         $displayField = array(
             "topics.id" => "topic_id",
             'content',
@@ -137,7 +137,7 @@ class TopicController extends Controller
             'official',
         );
         $pos = array(
-            'created_time' => array('elt', date('Y-m-d H:i:s')),
+//            'created_time' => array('elt', date('Y-m-d H:i:s')),
             "state"   => 1,
         );
 
@@ -151,7 +151,7 @@ class TopicController extends Controller
             ->alias('topics')
             ->where($pos)
             ->field($displayField)
-            ->order('created_time')
+            ->order('(join_num*join_num+remark_num*2+article_num*3+like_num-) DESC updated_time DESC')
             ->limit($information['page']*$information['size'], $information['size'])
             ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
@@ -306,6 +306,7 @@ class TopicController extends Controller
             $user_alias.'.photo_thumbnail_src'      => 'user_thumbnail_src',
             'like_num',
             'remark_num',
+            'created_time',
             'official',
         );
         $site = $_SERVER["SERVER_NAME"];
@@ -363,10 +364,10 @@ class TopicController extends Controller
                 $value['user_thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
             }
             if (!isset($information['stuNum'])) {
-                $value['is_my_like)'] = false;
+                $value['is_my_like'] = false;
             }
             else {
-                $value['is_my_like)'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
+                $value['is_my_like'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
             }
         }
         $topic['is_my_join'] = empty($information['stuNum']) ? false : is_my_join($topic['id'], $information['stuNum']);
