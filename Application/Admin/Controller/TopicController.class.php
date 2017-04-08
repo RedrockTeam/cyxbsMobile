@@ -131,6 +131,8 @@ class TopicController extends Controller
         if ($information['official'] == 'true') {
             //官方发起话题
             $information['official'] = 1;            //以红岩网校工作站名义创建的话题
+        } else {
+            $information['join_num'] = 1;
         }
             //个人发起话题
         $information['user_id'] = session('admin.user_id');
