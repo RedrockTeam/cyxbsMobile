@@ -108,9 +108,10 @@ var createArticle = function() {
                               </button>\
                           {% } %}\
                       </td>\
+                      \
                   </tr>\
               {% } %}\
-</script>'
+        </script>'
 
      };
    		$("[name='article_type']").on('change', function(){
@@ -142,7 +143,7 @@ var createArticle = function() {
                 lastInput.after(templets.photo);
                 var form = lastInput.next();
                 var FormAttrbution = {
-                  id: 'upload',
+                  id: 'uploadArticlePhoto',
                   action: getUrl()+'/Home/Photo/multipleUploadArticle',
                   method: 'post',
                 };

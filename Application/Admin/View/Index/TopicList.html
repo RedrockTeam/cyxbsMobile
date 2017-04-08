@@ -199,7 +199,7 @@
     });
     var topiceModal = $('#addTopic');
     var FormAttrbution = {
-        id: 'upload',
+        id: 'uploadTopicPhoto',
         action: getUrl()+'/Home/Photo/multipleUploadArticle',
         method: 'post',
     };
@@ -207,8 +207,8 @@
     form.attr(FormAttrbution);
     FormFileUpload.init('#'+ form.attr('id'));
     topiceModal.find('[action="submit"]').on('click',function () {
-        var keyword = $('[name="keyword"]').val();
-        var content = $('[name="content"]').val();
+        var keyword = $('[name="keyword"]', topiceModal);
+        var content = $('[name="content"]', topiceModal);
         if(keyword==='' || content==='') {
             alert("不能为空");
             return;
@@ -227,8 +227,8 @@
         $.ajax({
             url: getUrl()+"/Admin/Topic/addTopic",
             data:{
-                'keyword' : keyword,
-                'content' : content,
+                'keyword' : keyword.val(),
+                'content' : content.val(),
                 'official' : $('[name="is_official"]').bootstrapSwitch('state'),
                 'thumbnail_src': thumbnail_src,
                 'photo_src': photo_src,
@@ -238,6 +238,8 @@
             success:function (data) {
                 data = connection.decode(data);
                 if (data.status === 200) {
+                    keyword.val('');
+                    content.val('');
                     alert("添加成功");
                 } else {
                     alert(data.info);
