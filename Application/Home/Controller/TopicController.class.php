@@ -151,7 +151,7 @@ class TopicController extends Controller
             ->alias('topics')
             ->where($pos)
             ->field($displayField)
-            ->order('(join_num*join_num+remark_num*2+article_num*3+like_num-) DESC updated_time DESC')
+            ->order('(join_num*join_num+remark_num*2+article_num*3+like_num) DESC updated_time DESC')
             ->limit($information['page']*$information['size'], $information['size'])
             ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
