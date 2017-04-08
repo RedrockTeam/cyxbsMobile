@@ -306,7 +306,7 @@ class TopicController extends Controller
             $user_alias.'.photo_thumbnail_src'      => 'user_thumbnail_src',
             'like_num',
             'remark_num',
-            'created_time',
+            $article_alias.'.created_time',
             'official',
         );
         $site = $_SERVER["SERVER_NAME"];
