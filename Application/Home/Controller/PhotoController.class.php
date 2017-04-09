@@ -260,6 +260,7 @@ class PhotoController extends Controller {
                 ), $content);
             }
             $thumbnail->open($config['rootPath'].$file['savename']);
+            $thumbnail->save($config['rootPath'].$file['savename']);
             $thumbnail->thumb($config['thumb_width'], $config['thumb_height'])->save($config['thumbnail_rootPath'].$file['savename']);
            
             $info[$key] = $content;
