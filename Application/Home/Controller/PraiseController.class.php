@@ -42,8 +42,8 @@ class PraiseController extends BaseController {
         }
         if ($articletypes_id != 6) {
             $hotarticle = M('hotarticles');
-            $condition['articletype_id'] = $articletypes_id;
-            $hotarticle->where($condition)->setInc('like_num');
+            $condition = array('article_id' => $praise_id, 'articletype_id' => $articletypes_id);
+            $result  = $hotarticle->where($condition)->setInc('like_num');
         }
         if ($articletypes_id == 7) {
             D('topics')->where(array('id'=>$article['topic_id']))->setInc('like_num');
@@ -84,8 +84,8 @@ class PraiseController extends BaseController {
             "stunum"     => I('post.stuNum'),
             "articletype_id" => $articletypes_id
         );
-        $article = $praise->where($condition)->find();
-        if(!$article){
+        $articlePraise = $praise->where($condition)->find();
+        if(!$articlePraise){
             returnJson(404, 'praised',array('data'=>array(), 'state'=>404));
         }
         $articleTable = getArticleTable($articletypes_id);
@@ -93,22 +93,20 @@ class PraiseController extends BaseController {
         $condition = array(
             "id"  => $praise_id,
         );
-        $result = D($articleTable)->where($condition)->setDec('like_num');
-        if (!$result)       returnJson(404, 'error article',array('data'=>array(), 'state'=>404));
+        $article = D($articleTable)->where($condition)->setDec('like_num');
+        if (!$article)       returnJson(404, 'error article',array('data'=>array(), 'state'=>404));
 
         if ($articletypes_id != 6) {
             $hotarticle = M('hotarticles');
-            $condition['articletype_id'] = $articletypes_id;
+            $condition = array('article_id' => $praise_id, 'articletype_id' => $articletypes_id);
+            $condition['like_num'] = array('GT', 0);
             $hotarticle->where($condition)->setDec('like_num');
         }
         if ($articletypes_id == 7) {
             D('topics')->where(array('id'=>$article['topic_id']))->setInc('like_num');
         }
-        $article['like_num']++;
-        $result = D($articleTable)->save($article);
-        if (!$result) {
-            returnJson(404, 'add false',array('data'=>array(), 'state'=>404));
-        }
+
+
         $content = array(
             "article_id" => $praise_id,
             "stunum"     => I('post.stuNum'),
