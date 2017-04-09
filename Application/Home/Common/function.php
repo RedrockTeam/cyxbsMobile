@@ -222,7 +222,7 @@ function is_my_join($topic_id, $user) {
 
     $article_ids = D('topicarticles')->field('id')->where(array('topic_id' => $topic_id, 'state'=>1,'official'=>array('NEQ',1)))->select(false);
 
-    $pos['articletype_id'] = 7;
+    $pos['articletypes_id'] = 7;
     //in 子句
     $pos['article_id'] = array('exp', 'IN('.$article_ids.')');
 
@@ -231,6 +231,10 @@ function is_my_join($topic_id, $user) {
 
 }
 
+/**
+ * @param $type_id  int 文章类型
+ * @return bool|string
+ */
 function getArticleTable($type_id) {
     $table = '';
     switch ($type_id) {
@@ -245,9 +249,132 @@ function getArticleTable($type_id) {
             break;
         case 6:
             $table = 'notices';
+            break;
         case 7:
             $table = 'topicarticles';
             break;
     }
     return empty($table) ? false : $table;
+}
+
+/**
+ * 参与一个话题
+ * @param $topicId   int    话题
+ * @param $stuNum   string  学号
+ * @return bool     是否参与成功
+ */
+function addJoinTopicIds($topicId, $stuNum) {
+    if (empty($topicId) || empty($stuNum))  return false;
+    $topicIds = getJoinTopicIds($stuNum);
+    if (false !== $key=array_search($topicId, $topicIds))
+        unset($topicIds[$key]);
+    else {
+        D('topics')->where('id=%d',$topicId)->setInc('join_num');
+    }
+    array_unshift($topicIds, $topicId);
+    setTopicIds($stuNum, $topicIds);
+    return true;
+}
+
+/**
+ * 退出一个话题
+ * @param $topicId  int    话题
+ * @param $stuNum   string  学号
+ * @return bool 是否添加成功
+ */
+function subscribeJoinTopicIds($topicId, $stuNum) {
+    if (!is_my_join($topicId, $stuNum)) {
+        $result = D('topics')->where('id=%d', $topicId)->setDec('join_num');
+        if (!$result)   return false;
+        $topicIds = getJoinTopicIds($stuNum);
+        $key = array_search($topicId, $stuNum);
+        if ($key === false)     return false;
+        unset($topicIds[$key]);
+        setTopicIds($stuNum, $topicIds);
+    } else {
+        setTopicIds($stuNum, '');
+    }
+    return true;
+}
+
+/**
+ * @param $stuNum   string  学号
+ * @param $topicIds int     话题号
+ * 参加话题的缓存
+ */
+function setTopicIds($stuNum, $topicIds) {
+    S('ZSCY-JoinedTopic-'.$stuNum, $topicIds);
+}
+
+/**
+ * @param $stuNum   string 学号
+ * @return array|bool|mixed|null    null 没有参与 false传入参数有问题 array 参与的话题列表
+ */
+function getJoinTopicIds($stuNum) {
+    if (empty($stuNum)) return false;
+    $topicIds = S('ZSCY-JoinedTopic-'.$stuNum);
+    //缓存了的
+    if (!empty($topicIds)) {
+        return $topicIds;
+    }
+
+    $user = getUserInfo($stuNum);
+    if (!$user)    return false;
+    //获取该用户通过回答回复参与过话题
+    $remarkPos = array(
+        'user_id' => $user['id'],
+        'state' => 1,
+        'articletypes_id' => 7,
+        'created_time' => array('elt', date('Y-m-d H:i:s')),
+    );
+    $topicArticleRemarks = D('articleremarks')->field('max(created_time) as created_time, article_id')->where($remarkPos)->group('article_id')->select();
+
+    $remarkTopicIds = array();
+
+    if (!empty($topicArticleRemarks)) {
+        foreach($topicArticleRemarks as $remark)
+            $remarkTopicIds[$remark['created_time']] = M('topicarticles')->where(array('id'=>$remark['article_id'], 'state'=>1))->getField('topic_id');
+    }
+    unset($topicArticleRemarks);
+
+    //获取该用户通过回答写文章参与过话题
+    $pos = array(
+        'user_id' => $user['id'],
+        'state' => 1,
+        'created_time' => array('elt', date('Y-m-d H:i:s')),
+        'official' => array('NEQ', 1),
+    );
+    $topicArticles = D('topicarticles')->field('max(created_time) as created_time, topic_id')->where($pos)->group('topic_id')->select();
+    $articleTopicIds = array();
+    if (!empty($topicArticles))
+        foreach ($topicArticles as $article) {
+            $articleTopicIds[$article['created_time']] = $articleTopicIds[$article['topic_id']];
+        }
+    unset($topicArticles);
+    //获取该用户发起的话题 参与过话题
+    $topics = D('topics')->field('created_time, id')->where($pos)->select();
+
+    $topicIds = array();
+    if (!empty($topics))
+        foreach ($topics as $topic)
+            $topicIds[$topic['created_time']] = $topic['id'];
+    //数组合并
+    $topicIds = array_merge($remarkTopicIds, $topicIds, $articleTopicIds);
+
+    unset($remarkTopicIds);
+    unset($articleTopicIds);
+
+    //没找到对应的话题返回空
+    if(empty($topicIds))    return null;
+    //排序
+    ksort($topicIds, SORT_LOCALE_STRING);
+    //反转去重
+    $topicIds = array_flip($topicIds);
+    $topicIds = array_flip($topicIds);
+    //倒序排列
+    krsort($topicIds, SORT_LOCALE_STRING);
+    $topicIds = array_values($topicIds);
+    //缓存
+    S('JoinedTopic-'.$stuNum, $topicIds);
+    return $topicIds;
 }
