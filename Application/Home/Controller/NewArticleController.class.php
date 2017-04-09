@@ -40,7 +40,7 @@ class NewArticleController extends Controller
             $site = $_SERVER["SERVER_NAME"];
             foreach ($data_notice as $key => $value) {
                 $stuNum = I('post.stuNum');
-                $exist = $this->is_my_like($value['article_id'], 6, $stuNum);
+                $exist = $this->is_my_like($value['id'], 6, $stuNum);
                 $now_info = array(
                     'status' => 200,
                     'page'   => $page,
