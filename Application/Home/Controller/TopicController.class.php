@@ -37,9 +37,6 @@ class TopicController extends Controller
                 returnJson(403, '你还不是管理员哟');
             }
             $information['official'] = 1;
-
-        } else {
-            $information['join_num'] = 1;
         }
         //个人发起话题
         $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();
@@ -67,6 +64,8 @@ class TopicController extends Controller
         $information = array_merge($default, $information);
         $result = M('topics')->add($information);
         if ($result) {
+            if ($information['official'] != 1)
+                addJoinTopicIds($result, $information['stuNum']);
             returnJson(200, '', array('topic_id'=> $result));
         } else {
             returnJson(404);
@@ -92,20 +91,6 @@ class TopicController extends Controller
         if ($article === false)
             returnJson(404);
 
-
-
-        $topic = D('topics')->where('id=%d', $article->get('topic_id'))->find();
-
-        if ($information['official'] != 'true' && !is_my_join($article->get('topic_id'), $information['stuNum'])) {
-            $topic['join_num']++;
-        }
-
-        $topic['article_num']++;
-        $result = D('topics')->save($topic);
-
-        if (!$result)
-            returnJson(404, $article->getError());
-
         $result = $article->add();
 
         $result ? returnJson(200, '', array('state'=>200)) :  returnJson(404, $article->getError());
@@ -123,7 +108,7 @@ class TopicController extends Controller
         $information = array_merge($get, $post);
         $information['page'] = isset($information['page']) ? $information['page'] : 0;
         $information['size'] = isset($information['size']) ? $information['size'] : 10;
-        $now_date = date("Y-m-d H:i:s",mktime(0,0,0,date("m"),date("d")-7,date("Y")));
+        $now_date = date("Y-m-d H:i:s");
         $displayField = array(
             "topics.id" => "topic_id",
             'content',
@@ -145,13 +130,13 @@ class TopicController extends Controller
             $pos['keyword'] =  array('like', $information['searchKeyword'].'%');
         else
             $information['searchKeyword'] = '';
-
+        $g = 1.8;
         //话题信息的查询
         $data = M('topics')
             ->alias('topics')
             ->where($pos)
             ->field($displayField)
-            ->order('(join_num*join_num+remark_num*2+article_num*3+like_num) DESC, updated_time DESC')
+            ->order("((join_num*join_num+remark_num*2+article_num*4+like_num+read_num/2)/POWER(DATEDIFF('$now_date', created_time)+2, $g)) DESC, updated_time DESC")
             ->limit($information['page']*$information['size'], $information['size'])
             ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
@@ -190,59 +175,24 @@ class TopicController extends Controller
         if (true !== authUser(I('post.stuNum'), I('post.idNum'))) {
             returnJson(403, "你未登入");
         }
-        $user = getUserInfo($information['stuNum']);
-        //获取该用户通过回答回复参与过话题
-        $remarkPos = array(
-            'user_id' => $user['id'],
-            'state' => 1,
-            'articletypes_id' => 7,
-            'created_time' => array('elt', date('Y-m-d H:i:s')),
-        );
-        $articleIds = D('articleremarks')->where($remarkPos)->group('article_id')->getField('article_id', true);
-
-        $remarkTopicIds = array();
-
-        if (!empty($articleIds)) {
-            foreach($articleIds as $articleId)
-                $remarkTopicIds[] = M('topicarticles')->where(array('id'=>$articleId))->getField('topic_id');
-        }
-
-
-        //获取该用户通过回答写文章参与过话题
-        $pos = array(
-            'user_id' => $user['id'],
-            'state' => 1,
-            'created_time' => array('elt', date('Y-m-d H:i:s')),
-            'official' => array('NEQ', 1),
-        );
-        $articleTopicIds = D('topicarticles')->where($pos)->group('topic_id')->getField('topic_id', true);
-        $articleTopicIds = empty($articleTopicIds) ? array() : $articleTopicIds;
-
-        //获取该用户发起的话题 参与过话题
-        $topicIds = D('topics')->where($pos)->getField('id', true);
-
-        $topicIds = empty($topicIds)? array() : $topicIds;
-
-        //数组合并
-        $topicIds = array_merge($remarkTopicIds, $topicIds, $articleTopicIds);
-        //反转去重
-        $topicIds = array_flip($topicIds);
-        $topicIds = array_flip($topicIds);
-
-        //没找到对应的话题返回空
-        if(empty($topicIds))    returnJson(200, '', array('data' => array()));
-
-        $topicIds = implode(',', $topicIds);
-
         $condition = array(
             'state'=>1,
             'created_time' => array('elt', date('Y-m-d H:i:s')),
-            'id'=>array('in', $topicIds),
         );
 
-        if (isset($information['keyword'])) {
+        if (!empty($information['keyword'])) {
             $condition['keyword'] = array("like", $information['keyword'].'%');
+        } else {
+            $information['keyword'] = '';
         }
+        //setTopicIds($information['stuNum'], null);
+        $topicIds  = getJoinTopicIds($information['stuNum']);
+        if (empty($topicIds)) {
+            returnJson(200, '', array('data'=>array(),'searchKeyWord' => $information['keyword']));
+        }
+        $condition['id'] = array('in', $topicIds);
+
+
         $displayField = array(
             "id" => "topic_id",
             'content',
@@ -255,10 +205,12 @@ class TopicController extends Controller
             'user_id',
             'official'
         );
+
         $data = D('topics')
                     ->field($displayField)
                     ->where($condition)
                     ->limit($information['page']*$information['size'], $information['size'])
+                    ->order("find_in_set(id,'$topicIds')")
                     ->select();
         $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
 
@@ -276,7 +228,7 @@ class TopicController extends Controller
             unset($value['thumbnail_src']);
             $value['content'] = array("content" => $value['content']);
         }
-        returnJson(200, '', compact('data'));
+        returnJson(200, '', array('searchKeyWord' => $information['keyword'], 'data'=>$data,));
     }
     /**
      * 话题文章列表
@@ -345,7 +297,7 @@ class TopicController extends Controller
             $pos['title'] = array('like', $information['searchTitle'].'%');
         else
             $information['searchTitle'] = '';
-
+        $this->addTopicRead($information['topic_id']);
         $articles = M('topicarticles')
             ->alias($article_alias)
             ->join('__USERS__ '.$user_alias.' ON '.$user_alias.'.id='.$article_alias.'.user_id', "LEFT")
@@ -357,7 +309,7 @@ class TopicController extends Controller
 
         foreach ($articles as $key => &$value) {
 
-            if($value['official'] == 1) {
+            if((int)$value['official'] === 1) {
                 $value['nickname'] = "红岩网校工作站";
                 $value['user_id'] = 0;
                 $value['user_photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
@@ -386,10 +338,11 @@ class TopicController extends Controller
         $information['type_id'] = 7;
         if(false === $article = Article::setArticle($information, $information['stuNum']))
             returnJson(404, 'error article');
-        $pos = array("state" => 1, 'id' => $article->get('topic_id'));
-        if (!D('topics')->where($pos)->find())  returnJson(404, 'not find article');
+//        $pos = array("state" => 1, 'id' => $article->get('topic_id'));
+//        if (!D('topics')->where($pos)->find())  returnJson(404, 'not find article');
         $content = $article->getContent();
         if (!$content)  returnJson(404, $article->getError());
+        $this->addTopicRead($article->get('topic_id'));
         $content['is_my_like'] = is_null($information['stuNum'])? false :$article->getPraise($information['stuNum']);
         returnJson(200, '', array('data'=>array($content)));
 

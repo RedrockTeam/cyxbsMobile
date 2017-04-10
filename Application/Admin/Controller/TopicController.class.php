@@ -97,7 +97,20 @@ class TopicController extends Controller
             $topic['state'] = $after_state;
             //修改成功
             $result = M($table)->save($topic);
-            if ($result) {
+            if (!$result) {
+                return false;
+            }
+            if ($operate == 'recover') {
+                $pos = array('topic_id' => $topic['id'], 'state' => -1);
+                $article_ids = D('topicarticles')->where($pos)->field('id')->buildSql();
+                $result = D('topicarticles')->where($pos)->data('state=1')->save();
+                if (!$result) return false;
+                $pos['article_id'] = array('exp', 'IN' . $article_ids);
+                if (!$result) return false;
+                unset($pos['topic_id']);
+                $result = D('articleremarks')->where($pos)->data('state=1')->save();
+                return $result ? true : false;
+            } else {
                 return true;
             }
         }
@@ -113,6 +126,15 @@ class TopicController extends Controller
         $topic['state'] = $this->_status[$operate]['after_state'];
 
         $result = D('topics')->save($topic);
+        if (!$result)   return false;
+        $pos = array('topic_id'=>$topic['id'], 'state' => 1);
+        $article_ids = D('topicarticles')->where($pos)->field('id')->buildSql();
+        $result = D('topicarticles')->where($pos)->data('state=-1')->save();
+        if (!$result)   return false;
+        $pos['article_id'] = array('exp', 'IN'.$article_ids);
+        if (!$result)   return false;
+        unset($pos['topic_id']);
+        $result = D('articleremarks')->where($pos)->data('state=-1')->save();
         return $result ? true : false;
     }
 

@@ -108,7 +108,10 @@ class ArticleController extends Controller
                         return false;
                 }
 
-                $Data = new DataController();
+              if ($operate == 'recover') {
+                    $article = Article::setArticle($data, session('admin.user_id'));
+                    return $article->recover();
+              }
 
                 $operate = strtolower($operate);
 
@@ -122,7 +125,6 @@ class ArticleController extends Controller
                         }
                 }
 
-                $data = $Data->parameter($data, $table);
 
                 $article = M($table)->where($data)->find();
 

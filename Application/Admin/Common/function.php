@@ -227,36 +227,7 @@ function message_decrypt($string)
 	return $data;
 }
 
-/**
- * @param $str  string 字符串
- * @return int
- */
-function mystrlen($str) {
-    return mb_strlen($str, 'UTF-8');
-}
-/**
- * @param $stu   string   学号或者user_id
- * @return mixed    用户信息
- */
-function getUserInfo($stu) {
-    if (is_null($stu)) {
-        return null;
-    }
 
-    if (mystrlen($stu) == 10) {
-        $user = D('users')->where("stunum='%s'", $stu)->find();
-        if ($user)      return $user;
-    }
-//    $user = (int)$stu === 0 ? array(
-//        'nickname' => "红岩网校工作站",
-//        'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
-//        'photo_thumbnail_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
-//        'stunum' => 0,
-//        'id'    => 0,
-//    ) : D("users")->find($stu);
-    $user = D("users")->find($stu);
-    return $user;
-}
 
 /**
  *

@@ -226,17 +226,36 @@ class Article
 
 		//是否有权力删除文章
 		if ($this->hasPower()) {
-		        //根据类型和参数是否直接删除
-				if($forceDelete || !in_array('state', $this->fields))
-				    $result = $this->forthDelete();
-                else
-                    $result =  $this->softDelete();
-                if(!$result) $this->error[] = 'delete error';
-			
+
+            //根据类型和参数是否直接删除
+            if($forceDelete || !in_array('state', $this->fields))
+                $result = $this->forthDelete();
+            else
+                $result =  $this->softDelete();
+            if(!$result) {
+                $this->error[] = 'delete error';
+                return false;
+            }
+            if (in_array('type_id', $this->fields)) {
+                $data = $this->article;
+                $topic = D('topics')->find($data['topic_id']);
+                $pos = array('articletypes_id' => $this->type_id, 'article_id' => $data['id'], 'state'=>1);
+                $remarkUsers = D('articleremarks')->where($pos)->group('user_id')->getField('user_id', true);
+                $remark_num = D('articleremarks')->where($pos)->data('state=-1')->save();
+                $topic['remark_num'] -= $remark_num;
+                $topic['article_num']--;
+                $result = D('topics')->save($topic);
+                foreach ($remarkUsers as $user) {
+                    subscribeJoinTopicIds($data['topic_id'], $user);
+                }
+                subscribeJoinTopicIds($data['topic_id'], $this->author['stunum']);
+            }
+
 		} else {	
 			$this->error[] =  'don\'t permit';
             return false;
 		}
+
         return true;
 	}
 
@@ -253,10 +272,11 @@ class Article
 
         $data = $this->article;
         $data['state'] = 0;
-        if (in_array('updated_time', $this->fields)) $data['updated_time'] = date('Y-m-d H:i:s');
+        if (isset($data['updated_time'])) $data['updated_time'] = date('Y-m-d H:i:s');
         $result = D($this->table)->save($data);
-        if ($result)
+        if ($result) {
             $this->article = $data;
+        }
         return $result ? true : false;
     }
 
@@ -279,8 +299,22 @@ class Article
         //如果有updated_time 更新时间
         if (in_array('updated_time', $this->fields)) $data['updated_time'] = date('Y-m-d H:i:s');
         $result = D($this->table)->save($data);
-        if ($result)
+        if ($result) {
             $this->article = $result;
+            if (isset($data['topic_id'])) {
+                $topic = D('topics')->find($data['topic_id']);
+                $pos = array('articletypes_id' => $this->type_id, 'article_id' => $data['id'], 'state'=>-1);
+                $remarkUsers = D('articleremarks')->where($pos)->group('user_id')->getField('user_id', true);
+                $remark_num = D('articleremarks')->where($pos)->data('state=1')->save();
+                $topic['remark_num'] += $remark_num;
+                $topic['article_num']++;
+                $result = D('topics')->save($topic);
+                foreach ($remarkUsers as $user) {
+                    addJoinTopicIds($data['topic_id'], $user);
+                }
+                addJoinTopicIds($data['topic_id'], $this->author['stunum']);
+            }
+        }
         return $result ? true : false;
     }
 
@@ -437,13 +471,16 @@ class Article
                 $this->error[] = "invalid topic_id";
                 return false;
             }
-            $exist = D('topics')->find($this->get('topic_id'));
-            if ($exist === false ) {
+            $topic = D('topics')->where('id=%d',$this->get('topic_id'))->setInc('article_num');
+            if (!$topic) {
                 $this->error[] = "error topic_id";
                 return false;
             }
-        }
 
+            if ($this->tmp['official'] != 1) {
+                addJoinTopicIds($this->get('topic_id'), $this->operator['stunum']);
+            }
+        }
         $result = D($this->table)->add($data);
 
         if ($result) {
@@ -488,7 +525,11 @@ class Article
      */
     public  function is_exist() {
         if (empty($this->article))    return false;
-        if ($this->article['state'] == 0)  return false;
+        if ($this->article['state'] != 1)  return false;
+        if (isset($this->article['topic_id'])) {
+            $topic = D('topics')->where('state=1')->find($this->article['topic_id']);
+            if (!$topic)    return false;
+        }
         return true;
     }
 
@@ -651,11 +692,13 @@ class Article
                 return false;
                 break;
             case 'official':
+
                 if ($value == 'true') {
-                    if($this->is_admin()) {
+                    if(!$this->is_admin()) {
+                        return false;
+                    } else {
                         $value = 1;
                     }
-                    return false;
                 }
                 break;
 
@@ -800,16 +843,12 @@ class Article
             $result['remark_num']++;
             $result['updated_time'] = date('Y-m-d H:i:s');
 
-            if (!is_my_join($this->article['topic_id'], $this->operator['id'])) {
-                $result['join_num'] = date('Y-m-d H:i:s');
-            }
-
+            addJoinTopicIds($this->article['topic_id'], $this->operator['stunum']);
             $result = D('topics')->save($result);
             if (!$result) {
                 $this->error[] = "fatal add topics join_num";
                 return false;
             }
-
         }
         return true;
     }
