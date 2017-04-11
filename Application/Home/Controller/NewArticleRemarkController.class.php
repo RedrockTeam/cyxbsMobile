@@ -27,7 +27,7 @@ class NewArticleRemarkController extends Controller
         $condition = array(
             "cyxbsmobile_articleremarks.article_id" => $remark_id,
             "cyxbsmobile_articleremarks.articletypes_id" => $type_id,
-            "state"     => 1
+            "cyxbsmobile_articleremarks.state"     => 1
         );
         if($page != null ){
             $page = empty($page) ? 0 : $page;
