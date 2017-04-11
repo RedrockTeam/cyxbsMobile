@@ -450,7 +450,8 @@ class NewsController extends Controller {
             $hot_content = array(
                     "article_id"         => $news_id,
                     "articletype_id"     => $articleType['id'],
-                    "created_time"       => date("Y-m-d H:i:s", time()),
+                    "created_time"       => date("Y-m-d H:i:s"),
+                    "updated_time"       => date("Y-m-d H:i:s"),
                 );
             $hot->add($hot_content);
         }
