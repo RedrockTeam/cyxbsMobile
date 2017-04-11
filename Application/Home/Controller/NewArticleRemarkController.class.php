@@ -10,6 +10,9 @@ class NewArticleRemarkController extends Controller
         $size = I('post.size');
         $remark_id = I('post.article_id');
         $type_id   = I('post.type_id');
+        if($remark_id< 200 && $type_id == 5) {
+            $type_id = 6;
+        }
         if($remark_id == null||$type_id == null){
             $info = array(
                     'state' => 801,

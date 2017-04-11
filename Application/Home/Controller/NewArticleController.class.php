@@ -47,7 +47,8 @@ class NewArticleController extends Controller
                     'data'   =>array(
                                 'id'        => $value['id'],
                                 'type'      => "notice",
-                                'type_id'   => "6",
+//                                'type_id'   => "6",
+                                'type_id'   => '5',
                                 'article_id'=> $value['id'],
                                 'user_id'   => "0",
                                 'nick_name' => "红岩网校工作站",
@@ -255,7 +256,9 @@ class NewArticleController extends Controller
 
     public function searchContent() {
         $information = I('post.');
-
+        if($information['id']< 200 && $information['type_id'] == 5) {
+            $information['type_id'] = 6;
+        }
         if(false === $article = Article::setArticle($information, $information['stuNum']))
             returnJson(404, 'error article');
         $content = $article->getContent();

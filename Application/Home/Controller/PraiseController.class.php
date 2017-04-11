@@ -10,6 +10,9 @@ class PraiseController extends BaseController {
             returnJson(801, '', array('state' => 801));
         }
 
+        if ($praise_id < 200 && $articletypes_id == 5) {
+            $articletypes_id = 6;
+        }
         $user = M('users');
         $condition_user = array(
             "stunum" => I('post.stuNum'),
@@ -77,6 +80,9 @@ class PraiseController extends BaseController {
         $articletypes_id = I('post.type_id');
         if($praise_id == null || $articletypes_id == null){
             returnJson(801, '', array('state' => 801));
+        }
+        if ($praise_id < 200 && $articletypes_id == 5) {
+            $articletypes_id = 6;
         }
         $praise = M('articlepraises');
         $condition = array(
