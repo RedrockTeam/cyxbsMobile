@@ -10,9 +10,6 @@ class NewArticleRemarkController extends Controller
         $size = I('post.size');
         $remark_id = I('post.article_id');
         $type_id   = I('post.type_id');
-        if($remark_id< 200 && $type_id == 5) {
-            $type_id = 6;
-        }
         if($remark_id == null||$type_id == null){
             $info = array(
                     'state' => 801,
@@ -22,6 +19,9 @@ class NewArticleRemarkController extends Controller
                 );
             echo json_encode($info,true);
             exit;
+        }
+        if($remark_id< 200 && $type_id == 5) {
+            $type_id = 6;
         }
         $remark = M('articleremarks');
         $condition = array(
@@ -43,7 +43,7 @@ class NewArticleRemarkController extends Controller
         }else{
             $result = $remark
                 ->join('cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id =cyxbsmobile_users.id')
-                ->where("cyxbsmobile_articleremarks.article_id = '$remark_id' and cyxbsmobile_articleremarks.articletypes_id = '$type_id'")
+                ->where($condition)
                 ->order('created_time DESC')
                 ->field('stunum,nickname,username,photo_src,photo_thumbnail_src,cyxbsmobile_articleremarks.created_time,content,answer_user_id')
                 ->select();
