@@ -256,7 +256,7 @@ class NewArticleController extends Controller
 
     public function searchContent() {
         $information = I('post.');
-        if($information['id']< 200 && $information['type_id'] == 5) {
+        if($information['article_id']< 200 && $information['type_id'] == 5) {
             $information['type_id'] = 6;
         }
         if(false === $article = Article::setArticle($information, $information['stuNum']))
