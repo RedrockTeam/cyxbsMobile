@@ -56,7 +56,7 @@ class ArticleRemarkController extends BaseController {
      */
     public function postRemarks(){
         $information = I('post.');
-        if($information['id']< 200 && $information['type_id'] == 5) {
+        if($information['article_id']< 200 && $information['type_id'] == 5) {
             $information['type_id'] = 6;
         }
         if (empty($information['content']) || empty($information['article_id']) || empty($information['type_id']))
