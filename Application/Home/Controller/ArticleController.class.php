@@ -175,6 +175,7 @@ class ArticleController extends BaseController {
             returnJson(801, 'error articleType');
         }
         $article = Article::setArticle($data, $data['stuNum']);
+        if($article === false)    returnJson(801);
         if ($article->add())
             returnJson(200, '', array('state'=>200));
         else

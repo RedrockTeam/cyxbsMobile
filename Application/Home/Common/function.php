@@ -41,16 +41,33 @@ function returnJson($status, $info="", $data = null)
         $report['info'] = $info;
     }
     if($data !== null) {
-        if(array_key_exists('info', $data) || array_key_exists('status', $data)) {
-            return false;
+        if (is_array($data)) {
+            if (array_key_exists('info', $data) || array_key_exists('status', $data)) {
+                return false;
+            }
         } else {
-            $report = array_merge($report, $data);
+            $data = array('data' => $data);
         }
+       $data = checkJson($data);
+        $report = array_merge($report, $data);
     }
+
     header('Content-type:application/json');
-    $json = json_encode($report, JSON_NUMERIC_CHECK);
+    $json = json_encode($report);
     echo $json;
     exit;
+}
+
+function checkJson($data) {
+    foreach ($data as $key => &$value) {
+        if (is_array($value))
+            $value = checkJson($value);
+        elseif (is_numeric($value)) {
+            $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address');
+            $value = in_array($key, $fields) ? $value : (double)$value;
+        }
+    }
+    return $data;
 }
 
  /**
