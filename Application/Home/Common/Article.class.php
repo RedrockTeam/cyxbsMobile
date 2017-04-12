@@ -481,7 +481,11 @@ class Article
                 addJoinTopicIds($this->get('topic_id'), $this->operator['stunum']);
             }
         }
-        $result = D($this->table)->add($data);
+        try {
+            $result = D($this->table)->add($data);
+        } catch (\PDOException $e) {
+            return false;
+        }
 
         if ($result) {
             $this->article = D($this->table)->find($result);
