@@ -764,6 +764,7 @@ class Article
                 'photo_src',
                 'thumbnail_src',
                 'type_id',
+                'stunum' => 'user_id',
                 'articletype_id' => 'type_id',
                 'updated_time',
                 'created_time',

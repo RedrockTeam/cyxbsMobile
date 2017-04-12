@@ -103,7 +103,7 @@ class NewArticleController extends Controller
                             'type'      => $article->articleType(true),
                             'type_id'   => $value['articletype_id'],
                             'article_id'=> $value['article_id'],
-                            'user_id'   => $author ? $author['id'] : '',
+                            'user_id'   => $author ? $author['stunum'] : '',
                             'nick_name' => $author ? $author['nickname'] : '',
                             'user_head' => $author ? $author['photo_src'] : '',
                             'time'      => $time,
@@ -236,7 +236,6 @@ class NewArticleController extends Controller
             $condition_article = array(
                     'user_id' =>$user['id'],
                     'state'   => 1,
-
                 );
             $contents = $article->where($condition_article)->order('updated_time DESC')->limit($start,$size)->field('id,photo_src,thumbnail_src,content,type_id,created_time,updated_time,created_time,like_num,remark_num')->select();
             //判断自己是否点过赞

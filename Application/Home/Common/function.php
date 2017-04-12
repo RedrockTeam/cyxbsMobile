@@ -22,19 +22,19 @@ function returnJson($status, $info="", $data = null)
     // print_r(debug_backtrace());exit;
     switch ($status) {
         case 404: 
-            $report = array('status'=> 404, 'info'=>'请求参数错误');
+            $report = array('status'=> 404, 'info'=>'请求参数错误', 'state'=> 404);
             break;
         case 403:
-            $report = array('status'=> 403, 'info'=>'Don\'t permit');
+            $report = array('status'=> 403, 'info'=>'Don\'t permit', 'state'=> 403);
             break;
         case 801:
-            $report = array('status'=> 801, 'info'=>'invalid parameter');
+            $report = array('status'=> 801, 'info'=>'invalid parameter', 'state'=> 801);
             break;
         case 200:
-            $report = array('status'=> 200, 'info'=>'success');
+            $report = array('status'=> 200, 'info'=>'success', 'state'=>801);
             break;
         default:
-            $report = array('status'=>$status, 'info'=>"");
+            $report = array('status'=>$status, 'info'=>"", 'state'=>$status);
     }
 
     if(!empty($info)) {
@@ -64,7 +64,7 @@ function checkJson($data) {
         if (is_array($value))
             $value = checkJson($value);
         elseif (is_numeric($value)) {
-            $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address');
+            $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address', 'classnum', 'stunum');
             $value = in_array($key, $fields, true) ? $value : (double)$value;
         }
     }
