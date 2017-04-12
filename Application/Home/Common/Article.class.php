@@ -529,7 +529,7 @@ class Article
      */
     public  function is_exist() {
         if (empty($this->article))    return false;
-        if ($this->article['state'] != 1)  return false;
+        if (isset($this->article['state'])&& $this->article['state'] != 1)  return false;
         if (isset($this->article['topic_id'])) {
             $topic = D('topics')->where('state=1')->find($this->article['topic_id']);
             if (!$topic)    return false;
