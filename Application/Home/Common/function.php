@@ -60,11 +60,12 @@ function returnJson($status, $info="", $data = null)
 
 function checkJson($data) {
     foreach ($data as $key => &$value) {
+
         if (is_array($value))
             $value = checkJson($value);
         elseif (is_numeric($value)) {
             $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address');
-            $value = in_array($key, $fields) ? $value : (double)$value;
+            $value = in_array($key, $fields, true) ? $value : (double)$value;
         }
     }
     return $data;
