@@ -171,7 +171,7 @@ class ArticleController extends BaseController {
     public  function addArticle() {
         $data = I('post.');
 
-        if ($data['type_id'] != 5) {
+        if (!$data['type_id']) {
             returnJson(801, 'error articleType');
         }
         $article = Article::setArticle($data, $data['stuNum']);
