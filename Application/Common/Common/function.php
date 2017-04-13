@@ -70,10 +70,12 @@ function getArticleTable($type_id) {
 function addJoinTopicIds($topicId, $stuNum) {
     if (empty($topicId) || empty($stuNum))  return false;
     $topicIds = getJoinTopicIds($stuNum);
-    if (false !== $key=array_search($topicId, $topicIds))
+    $pos = array('id' => $topicId, 'state' => 1);
+    $joinNum = D('topics')->where($pos)->getField('join_num');
+    if ($joinNum != 0 &&false !== $key=array_search($topicId, $topicIds))
         unset($topicIds[$key]);
     else {
-        $result = D('topics')->where('id='.$topicId)->setInc('join_num');
+        $result = D('topics')->where($pos)->setInc('join_num');
         if (!$result)       return false;
     }
     array_unshift($topicIds, intval($topicId));
@@ -174,7 +176,8 @@ function getJoinTopicIds($stuNum)
     unset($articleTopicIds);
 
     //没找到对应的话题返回空
-    if (empty($topicIds)) return null;
+    if (empty($topicIds))
+        return null;
     //排序
     ksort($topicIds, SORT_LOCALE_STRING);
     //反转去重

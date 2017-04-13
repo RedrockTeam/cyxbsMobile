@@ -61,6 +61,7 @@ class TopicController extends Controller
             'created_time'  => date("Y-m-d H:i:s"),
             'updated_time'  => date("Y-m-d H:i:s")
         );
+        getJoinTopicIds($information['stuNum']);
         $information = array_merge($default, $information);
         $result = M('topics')->add($information);
         if ($result) {
