@@ -31,7 +31,7 @@ function returnJson($status, $info="", $data = null)
             $report = array('status'=> 801, 'info'=>'invalid parameter', 'state'=> 801);
             break;
         case 200:
-            $report = array('status'=> 200, 'info'=>'success', 'state'=>801);
+            $report = array('status'=> 200, 'info'=>'success', 'state'=>200);
             break;
         default:
             $report = array('status'=>$status, 'info'=>"", 'state'=>$status);
