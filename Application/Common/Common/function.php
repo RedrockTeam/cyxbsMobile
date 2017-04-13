@@ -69,9 +69,7 @@ function getArticleTable($type_id) {
  */
 function addJoinTopicIds($topicId, $stuNum) {
     if (empty($topicId) || empty($stuNum))  return false;
-    var_dump($stuNum);
     $topicIds = getJoinTopicIds($stuNum);
-    var_dump($topicIds);
     if (false !== $key=array_search($topicId, $topicIds))
         unset($topicIds[$key]);
     else {
