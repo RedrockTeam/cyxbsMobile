@@ -11,19 +11,22 @@ class SearchPeopleController extends Controller {
         if(strlen($studentNum)==10){
             $data = $this->exec($this->url ,$studentNum);
             if (empty($data)) {
-                $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
+                returnJson(404,'', array('data'=>array()));
+//                $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
             } else {
-                $this->returnJson(200, '', $data[0], JSON_FORCE_OBJECT);
+                returnJson(200,'', array('data'=>$data[0]));
+//                $this->returnJson(200, '', $data[0], JSON_FORCE_OBJECT);
             }            
         }else{
-           $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
+            returnJson(404,'', array('data'=>array()));
+//            $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
         }
     }
 
     public function peopleList(){
         $studentNum = I('stu');
-        $goal_mod = strlen($studentNum)%3;
-        $studentList = array();
+//        $goal_mod = strlen($studentNum)%3;
+//        $studentList = array();
         if(strlen($studentNum) == 0){
            $this->returnJson(404, '', array(), true);
         }else if(!preg_match("/[^\\x80-\\xff]/",$studentNum) && strlen($studentNum) == 3){
@@ -34,9 +37,11 @@ class SearchPeopleController extends Controller {
             
             $data = $this->exec($this->url, $studentNum);
             if (empty($data)) {
-               $this->returnJson(404, '', array(), true);
+                returnJson(404,'', array('data'=>array()));
+//               $this->returnJson(404, '', array(), true);
             }else{
-                $this->returnJson(200, '', $data, true);
+                returnJson(200, '', array('data'=>$data));
+//                $this->returnJson(200, '', $data, true);
             }
         }
     }
@@ -54,7 +59,7 @@ class SearchPeopleController extends Controller {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
         if (!empty($data)) {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
@@ -129,7 +134,7 @@ class SearchPeopleController extends Controller {
      */
     public function exec($url, $searchKey) 
     {
-        $searchKey  = $searchKey;
+//        $searchKey  = $searchKey;
         $page = 1;
         $rows = 30;
         $dirId = '';

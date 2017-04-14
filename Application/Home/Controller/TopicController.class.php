@@ -37,6 +37,8 @@ class TopicController extends Controller
                 returnJson(403, '你还不是管理员哟');
             }
             $information['official'] = 1;
+        } else {
+            $information['official'] = 0;
         }
         //个人发起话题
         $user = M('users')->where('stunum=\'%s\'', $information['stuNum'])->find();

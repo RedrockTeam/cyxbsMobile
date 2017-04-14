@@ -51,5 +51,52 @@ class IndexController extends Controller {
         print_r($forbidword->transForbidwordList($wordList));
         
     }
+
+    public function exportAnalyse(){
+        $information = I('post.');
+        if (!authUser($information['stuNum'], $information['idNum']) || !is_admin($information['stuNum'])) {
+            returnJson('403');
+        }
+        $college = array(
+            array('通信与信息工程学院'),
+            array('计算机科学与技术学院'),
+            array('自动化学院'),
+            array('先进制造工程学院'),
+            array('光电工程学院', '国际半导体学院'),
+            array('生物信息学院'),
+            array('理学院'),
+            array('经济管理学院'),
+            array('网络空间安全与信息法学院'),
+            array('传媒艺术学院'),
+            array('外国语学院'),
+            array('国际学院'),
+            array('软件工程学院')
+        );
+        $Data = [];
+        $id = 106;
+        $url = "http://hongyan.cqupt.edu.cn/api/verify";
+        while($id >93) {
+            $pos = array('article_id' => $id, 'articletype_id' => 6, 'p.created_time'=> array('lt','2017-04-13'));
+            $field = array('p.stunum' => 'stuNum', 'idnum'=>'idNum');
+            $praisesUser = D('articlepraises')->alias('p')->join('__USERS__ ON __USERS__.stunum = p.stunum', 'left')->where($pos)->field($field)->select();
+            $selfCollege = $college[106-$id];
+            $data['college'] = $selfCollege[0];
+            $data['totalPraise'] = count($praisesUser);
+            $data['selfPraise'] = 0; $data['otherPraise'] = 0;
+
+            foreach ($praisesUser as $value) {
+                $college = S('studentCollege'.$value['stuNum']);
+                if (!$college) {
+                    $jsonMessage = curlPost($url, $value);
+                    $message = json_decode($jsonMessage, true);
+                    S('studentMessage'.$value['stuNum'], $message['college']);
+                }
+                in_array($college, $selfCollege) ? $data['selfPraise']++ : $data['otherPraise']++;
+            }
+            $Data[] = $data;
+            $id--;
+        }
+        returnJson(200, '', array('data'=>$Data));
+    }
 }
 
