@@ -302,7 +302,7 @@ class TopicController extends Controller
             $pos['title'] = array('like', $information['searchTitle'].'%');
         else
             $information['searchTitle'] = '';
-        $this->addTopicRead($information['topic_id']);
+        $this->addTopicRead($topic['topic_id']);
         $articles = M('topicarticles')
             ->alias($article_alias)
             ->join('__USERS__ '.$user_alias.' ON '.$user_alias.'.id='.$article_alias.'.user_id', "LEFT")
@@ -320,12 +320,10 @@ class TopicController extends Controller
                 $value['user_photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
                 $value['user_thumbnail_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
             }
-            if (!isset($information['stuNum'])) {
-                $value['is_my_like'] = false;
-            }
-            else {
-                $value['is_my_like'] = $this->is_my_like($value['id'], $value['type_id'], $information['stuNum']);
-            }
+            unset($value['official']);
+
+            $value['is_my_like'] = isset($information['stuNum']) ? $this->is_my_like($value['article_id'], $value['type_id'], $information['stuNum']) : false;
+
         }
         $topic['is_my_join'] = empty($information['stuNum']) ? false : is_my_join($topic['id'], $information['stuNum']);
         $topic['articles'] = $articles;
@@ -406,7 +404,7 @@ class TopicController extends Controller
      * 判断我是否对该文章点赞
      * @param  number  $article_id 文章的id值
      * @param  number  $type_id    文章类型
-     * @param  string  $stunum     学号
+     * @param  string  $stuNum     学号
      * @return boolean             是否喜欢
      */
     protected function is_my_like($article_id, $type_id, $stuNum)
@@ -416,16 +414,12 @@ class TopicController extends Controller
         }
         $praise_condition = array(
             'article_id'    => $article_id,
-            'articletypes_id'=> $type_id,
+            'articletype_id'=> $type_id,
             'stunum'        => $stuNum
         );
         $praise = M('articlepraises');
         $praise_exist = $praise->where($praise_condition)->find();
-        if ($praise_exist) {
-            return true;
-        } else {
-            return false;
-        }
+        return $praise_exist ? true : false;
     }
 
     protected function addTopicRead($topic_id) {

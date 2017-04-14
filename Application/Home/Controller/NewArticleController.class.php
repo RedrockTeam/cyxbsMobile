@@ -285,11 +285,7 @@ class NewArticleController extends Controller
             );
         $praise = M('articlepraises');
         $praise_exist = $praise->where($praise_condition)->find();
-        if ($praise_exist) {
-            return true;
-        } else {
-            return false;
-        }
+        return $praise_exist ? true : false;
     }
 
 
