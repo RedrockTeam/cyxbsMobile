@@ -703,6 +703,8 @@ class Article
                     } else {
                         $value = 1;
                     }
+                } else {
+                    $value = 0;
                 }
                 break;
 

@@ -72,7 +72,7 @@ class IndexController extends Controller {
             array('国际学院'),
             array('软件工程学院')
         );
-        $Data = [];
+        $Data = array();
         $id = 106;
         $url = "http://hongyan.cqupt.edu.cn/api/verify";
         while($id >93) {
