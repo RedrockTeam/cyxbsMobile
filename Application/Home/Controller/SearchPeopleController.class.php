@@ -14,8 +14,8 @@ class SearchPeopleController extends Controller {
                 returnJson(404,'', array('data'=>array()));
 //                $this->returnJson(404, '', array(), JSON_FORCE_OBJECT);
             } else {
-                returnJson(200,'', array('data'=>$data[0]));
-//                $this->returnJson(200, '', $data[0], JSON_FORCE_OBJECT);
+//                returnJson(200,'', array('data'=>$data[0]));
+                $this->returnJson(200, '', $data[0], JSON_FORCE_OBJECT);
             }            
         }else{
             returnJson(404,'', array('data'=>array()));
@@ -40,8 +40,8 @@ class SearchPeopleController extends Controller {
                 returnJson(404,'', array('data'=>array()));
 //               $this->returnJson(404, '', array(), true);
             }else{
-                returnJson(200, '', array('data'=>$data));
-//                $this->returnJson(200, '', $data, true);
+//                returnJson(200, '', array('data'=>$data));
+                $this->returnJson(200, '', $data, true);
             }
         }
     }
