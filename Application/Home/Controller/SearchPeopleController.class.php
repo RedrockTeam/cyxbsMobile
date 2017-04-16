@@ -55,11 +55,11 @@ class SearchPeopleController extends Controller {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
- 
+        curl_setopt($ch,CURLOPT_REFERER, 'http://jwzx.cqupt.edu.cn/jwzxtmp/kebiao.php');
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36");
         if (!empty($data)) {
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt ($ch, CURLOPT_POSTFIELDS, http_build_query($data));
