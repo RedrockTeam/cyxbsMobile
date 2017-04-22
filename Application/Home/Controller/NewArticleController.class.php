@@ -91,9 +91,13 @@ class NewArticleController extends Controller
             }catch (Exception $e) {
                 $time = $article->get('created_time');
             }
-            $photo_src = $article->get("photo_src");
-            $small_src = $article->get("thumbnail_src");
-            $author = $article->get('author');
+            try {
+                $photo_src = $article->get("photo_src");
+                $small_src = $article->get("thumbnail_src");
+                $author = $article->get('author');
+            }catch(Exception $e) {
+                returnJson('404','error',array('data'=>$value));
+            }
             //兼容格式
             $now_info = array(
                 'status' => 200,
