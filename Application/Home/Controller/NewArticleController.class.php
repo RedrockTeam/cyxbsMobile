@@ -92,9 +92,13 @@ class NewArticleController extends Controller
                 $time = $article->get('created_time');
             }
             try {
-                $photo_src = $article->get("photo_src");
-                $small_src = $article->get("thumbnail_src");
-                $author = $article->get('author');
+                if ($value['articletype_id'] > 5) {
+                    $photo_src = $article->get("photo_src");
+                    $small_src = $article->get("thumbnail_src");
+                    $author = $article->get('author');
+                } else {
+                    $author = array();
+                }
             }catch(Exception $e) {
                 returnJson('404','error',array('data'=>$value));
             }
