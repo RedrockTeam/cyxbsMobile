@@ -33,9 +33,9 @@ class NewArticleController extends Controller
         if ($page == 0) {
             $notice = M('notices');
             $data_notice_condition = array(
-                    "created_time" => array('GT',$now_date),
-                    "state"        => 1,
-                );
+                "created_time" => array('GT',$now_date),
+                "state"        => 1,
+            );
             $data_notice   = $notice->where($data_notice_condition)->order('created_time')->select();
             $site = $_SERVER["SERVER_NAME"];
             foreach ($data_notice as $key => $value) {
