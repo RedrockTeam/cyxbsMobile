@@ -92,7 +92,7 @@ class NewArticleController extends Controller
                 $time = $article->get('created_time');
             }
             try {
-                if ($value['articletype_id'] > 5) {
+                if ($value['articletype_id'] >= 5) {
                     $photo_src = $article->get("photo_src");
                     $small_src = $article->get("thumbnail_src");
                     $author = $article->get('author');
