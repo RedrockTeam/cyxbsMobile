@@ -65,7 +65,7 @@ function checkJson($data) {
         elseif (is_numeric($value)) {
             $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address', 'classnum', 'stunum','user_id', 'stuNum');
 
-            $value = in_array($key, $fields, true) ? $value :  PHP_INT_MAX;;
+            $value = in_array($key, $fields, true) ? $value :  is_integer($value) ? (int)$value : (double)$value;
         }
     }
     return $data;
