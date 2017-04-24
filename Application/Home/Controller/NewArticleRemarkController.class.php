@@ -17,8 +17,11 @@ class NewArticleRemarkController extends Controller
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
-            echo json_encode($info,true);
-            exit;
+            //根据 版本号 返回 值
+            if (I('version') >= 1)
+                returnJson($info);
+            else
+                echo json_encode($info);
         }
         if($remark_id< 200 && $type_id == 5) {
             $type_id = 6;
@@ -53,6 +56,10 @@ class NewArticleRemarkController extends Controller
                     'status' => 200,
                     'data'  => $result,
                 );
-        echo json_encode($info,true);
+        //根据 版本号 返回 值
+        if (I('version') >= 1)
+            returnJson($info);
+        else
+            echo json_encode($info);
     }
 }

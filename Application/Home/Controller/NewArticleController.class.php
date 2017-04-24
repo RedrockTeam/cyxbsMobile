@@ -127,7 +127,12 @@ class NewArticleController extends Controller
             );
             array_push($info,$now_info);
         }
-        echo json_encode($info);
+       //根据 版本号 返回 值
+        if (I('version') >= 1)
+           returnJson($info);
+        else
+           echo json_encode($info);
+
     }
 
     public function listArticle(){
@@ -144,8 +149,7 @@ class NewArticleController extends Controller
                     'info'  => 'invalid parameter',
                     'data'  => array(),
                 );
-            echo json_encode($info,true);
-            exit;
+            returnJson($info);
         }
 //        $articleType = D('articletypes');
         $article     = D('articles');
@@ -182,7 +186,11 @@ class NewArticleController extends Controller
                 "page"   => $page,
                 'data'   => $result
         );
-        echo json_encode($info);
+        //根据 版本号 返回 值
+        if (I('version') >= 1)
+            returnJson($info);
+        else
+            echo json_encode($info);
     }
 
 	 public function listNews() {
@@ -212,7 +220,11 @@ class NewArticleController extends Controller
                 "page"   => $page,
                 'data'   => $result
         );
-        echo json_encode($info);
+         //根据 版本号 返回 值
+         if (I('version') >= 1)
+             returnJson($info);
+         else
+             echo json_encode($info);
     }
 
     public function searchTrends() {
@@ -256,7 +268,11 @@ class NewArticleController extends Controller
                 "info"   => "success",
                 'data'   => $contents
             );
-            echo json_encode($info);
+            //根据 版本号 返回 值
+            if (I('version') >= 1)
+                returnJson($info);
+            else
+                echo json_encode($info);
         }
     }
 

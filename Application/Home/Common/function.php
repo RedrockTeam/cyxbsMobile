@@ -12,50 +12,54 @@ function getMillisecond()
 
 /**
  * 根据status返回对应的json语句
- * @param  int $status      http请求码
- * @param  array  $data   json里需要返回的数据
- * @param  string $info   重写info信息
- * @return [type]         [description]
+ * @param  int|array $status http请求码
+ * @param  string|array $info 重写info信息
+ * @param  array $data json里需要返回的数据
+ * @throws \Think\Exception
  */
 function returnJson($status, $info="", $data = null)
-{   
+{
     // print_r(debug_backtrace());exit;
-    switch ($status) {
-        case 404: 
-            $report = array('status'=> 404, 'info'=>'请求参数错误', 'state'=> 404);
-            break;
-        case 403:
-            $report = array('status'=> 403, 'info'=>'Don\'t permit', 'state'=> 403);
-            break;
-        case 801:
-            $report = array('status'=> 801, 'info'=>'invalid parameter', 'state'=> 801);
-            break;
-        case 200:
-            $report = array('status'=> 200, 'info'=>'success', 'state'=>200);
-            break;
-        default:
-            $report = array('status'=>$status, 'info'=>"", 'state'=>$status);
+    if (is_array($status)) {
+        $report = checkJson($status);
+        header('Content-type:application/json');
+        $json = json_encode($report);
+        echo $json;
+        exit;
     }
-
-    if(!empty($info)) {
+    if (is_numeric($status)) {
+        switch ($status) {
+            case 404:
+                $report = array('status' => 404, 'info' => '请求参数错误', 'state' => 404);
+                break;
+            case 403:
+                $report = array('status' => 403, 'info' => 'Don\'t permit', 'state' => 403);
+                break;
+            case 801:
+                $report = array('status' => 801, 'info' => 'invalid parameter', 'state' => 801);
+                break;
+            case 200:
+                $report = array('status' => 200, 'info' => 'success', 'state' => 200);
+                break;
+            default:
+                $report = array('status' => $status, 'info' => "", 'state' => $status);
+        }
+    } else {
+        throw new \Think\Exception('错误参数');
+    }
+    if (is_array($info)) {
+        $report = array_merge($report, $info);
+        returnJson($report);
+    }
+    if(!empty($info) && is_string($info)) {
         $report['info'] = $info;
     }
     if($data !== null) {
-        if (is_array($data)) {
-            if (array_key_exists('info', $data) || array_key_exists('status', $data)) {
-                return false;
-            }
-        } else {
+        if (!is_array($data))
             $data = array('data' => $data);
-        }
-       $data = checkJson($data);
         $report = array_merge($report, $data);
+        returnJson($report);
     }
-
-    header('Content-type:application/json');
-    $json = json_encode($report);
-    echo $json;
-    exit;
 }
 
 function checkJson($data) {
@@ -64,7 +68,9 @@ function checkJson($data) {
             $value = checkJson($value);
         elseif (is_numeric($value)) {
             $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address', 'classnum', 'stunum','user_id', 'stuNum');
-            $value = in_array($key, $fields, true) ? $value :  $value==(int)$value ? (int)$value : (double)$value;
+            if (!in_array($key, $fields, true)) {
+                $value =  $value==(int)$value ? (int)$value : (double)$value;
+            }
         }
     }
     return $data;
