@@ -58,8 +58,8 @@ function returnJson($status, $info="", $data = null)
         if (!is_array($data))
             $data = array('data' => $data);
         $report = array_merge($report, $data);
-        returnJson($report);
     }
+    returnJson($report);
 }
 
 function checkJson($data) {
