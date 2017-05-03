@@ -347,6 +347,7 @@ class DataController extends Controller
                         $parameter[$field] = array('in', $value);
                     } else {
                         if (!empty($transferValue[$column])){
+                            //查找对应的列名
                             $key = array_search($value, $transferValue[$column]);
                             if ($key)   $value = $key;
                         }
@@ -385,6 +386,7 @@ class DataController extends Controller
             $articles = array();
             //获得子查询的sql语句
             foreach ($tables as $type_id => $table) {
+                //表里所有字段
                 $fields = D($table)->getDbFields();
                 $articleDisplayField = $displayField;
                 $articleParameter = $parameter;
@@ -421,6 +423,8 @@ class DataController extends Controller
                     unset($articleParameter['state']);
                     if (isset($articleParameter['_complex']))
                         unset($articleParameter['_complex']['state']);
+                } elseif (is_null($articleParameter['state'])) {
+                    $articleParameter['state'] = array('EGT', 0);
                 }
                 if (!in_array('official', $fields)) {
                     $key = array_search('official', $articleDisplayField);
@@ -883,11 +887,11 @@ class DataController extends Controller
                                 }
                                 break;
 
-                        case 'state':
-                                foreach ($data as $val) {
-                                    $mark = $mark && is_numeric($val);
-                                }
-                                break;
+//                        case 'state':
+//                                foreach ($data as $val) {
+//                                    $mark = $mark && is_numeric($val);
+//                                }
+//                                break;
 
                 }
                 return $mark;
@@ -911,6 +915,7 @@ class DataController extends Controller
                         if ( !empty($key) || !is_numeric($key)) {
                                 // '*' => array('keyword', array('fields')) 关键词, 搜索的区域
                                 //*指向查询
+                        $field = '';
                                 if ($key === '*') {
                                         $like_exist = true;
                                         continue;
@@ -1057,7 +1062,7 @@ class DataController extends Controller
          * 生成一个sql 的case语句
          * @param  string $field 字段名
          * @param  array $data  字段的值 => 想转换成的值
-         * @return stirng        sql的case语句
+         * @return string        sql的case语句
          */
         protected function tranSqlCase($field, $data)
         {
