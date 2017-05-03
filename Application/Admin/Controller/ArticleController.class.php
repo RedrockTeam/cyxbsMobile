@@ -182,7 +182,13 @@ class ArticleController extends Controller
 
         public function addArticle() {
             $information = I('post.');
-
+            if (isset($data['keyword'])) {
+                $topic = D('topics')->where(array('keyword'=>$data['keyword']))->find();
+                if ($topic) {
+                    $data['topic_id'] = $topic['id'];
+                    unset($data['keyword']);
+                }
+            }
             if ($information['official'] == 'true')    $information['official'] = 1;
             $information['user_id'] = session('admin.user_id');
             $article = Article::setArticle($information, $information['user_id']);
