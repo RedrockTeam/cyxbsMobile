@@ -174,6 +174,13 @@ class ArticleController extends BaseController {
         if (!$data['type_id']) {
             returnJson(801, 'error articleType');
         }
+        if (isset($data['keyword'])) {
+            $topic = D('topics')->where(array('keyword'=>$data['keyword']))->find();
+            if ($topic) {
+                $data['topic_id'] = $topic['id'];
+                unset($data['keyword']);
+            }
+        }
         $article = Article::setArticle($data, $data['stuNum']);
         if($article === false)    returnJson(801);
         if ($article->add())
