@@ -73,15 +73,7 @@
     </table> 
    </div> 
   </div> 
-  <div id="static2" class="modal fade hide" tabindex="-1" data-backdrop="static" data-keyboard="false"> 
-   <div class="modal-body"> 
-    <p> Would you like to continue with some arbitrary task? </p> 
-   </div> 
-   <div class="modal-footer"> 
-    <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button> 
-    <button type="button" data-dismiss="modal" class="btn green">Continue Task</button> 
-   </div> 
-  </div>
+
   <div id="addArticle" class="modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="portlet-body form" id="article_wizard">
       <div class="modal-header">
@@ -157,7 +149,7 @@
             data['official'] = official.bootstrapSwitch('state');
         }
         if (parseInt(data['type_id']) === 7) {
-            var keyword = $('[name="keyword"]').val();
+            var keyword = $('[name="keyword"]', ArtcileModal).val();
             if (keyword === '') {
                 alert("关键词不能为空");
                 return;
