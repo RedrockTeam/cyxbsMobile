@@ -125,6 +125,9 @@ class NewArticleController extends Controller
                             "is_my_Like"=> $stuNum ? $article->getPraise($stuNum) : false,
                         ),
             );
+            if (I('version') > 1) {
+                $now_info['content'] = $now_info['content']['content'];
+            }
             array_push($info,$now_info);
         }
        //根据 版本号 返回 值
@@ -213,6 +216,10 @@ class NewArticleController extends Controller
         foreach($content as $key => $value) {
             $stuNum = I('post.stuNum');
             $value['is_my_like'] = $this->is_my_like($value['id'], $value['articletype_id'], $stuNum);
+            if (I('version') >= 1) {
+                $value['type_id'] = $value['articletype_id']; unset($value['articletype_id']);
+                $value['time'] = $value['date'];    unset($value['date']);
+            }
             array_push($result,$value);
         }
          $info = array(
