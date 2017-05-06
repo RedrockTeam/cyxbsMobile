@@ -125,8 +125,16 @@ class NewArticleController extends Controller
                             "is_my_Like"=> $stuNum ? $article->getPraise($stuNum) : false,
                         ),
             );
-            if (I('version') > 1) {
-                $now_info['content'] = $now_info['content']['content'];
+            if (I('version') >= 1) {
+                $now_info['data']['content'] = $now_info['data']['content']['content'];
+                $now_info['data']['nickname']  = $now_info['data']['nick_name'];
+                unset($now_info['data']['nick_name']);
+                $now_info['data']['user_photo_src'] = $author['photo_src'];
+                $now_info['data']['user_thumbnail_src'] = $author['thumbnail_src'];
+                unset($now_info['data']['user_head']);
+                $now_info['article_photo_src'] = $now_info['data']['img']['img_src'];
+                $now_info['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
+                unset($now_info['data']['img']);
             }
             array_push($info,$now_info);
         }
@@ -179,6 +187,12 @@ class NewArticleController extends Controller
                 $value['photo_thumbnail_src'] = "http://".$_SERVER["SERVER_NAME"].'/cyxbsMobile/Public/HONGY.jpg';
             }
             $value['is_my_like'] = $this->is_my_like($value['id'], $value['type_id'], $stuNum);
+            if (I('version') >= 1) {
+                $value['user_photo_src'] = $value['photo_src'];
+                unset($value['photo_src']);
+                $value['user_thumbnail_src'] = $value['photo_thumbnail_src'];
+                unset($value['photo_thumbnail_src']);
+            }
             unset($value['official']);
             array_push($result,$value);
         }
