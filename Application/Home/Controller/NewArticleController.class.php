@@ -66,6 +66,17 @@ class NewArticleController extends Controller
                                 "is_my_Like"=> $exist,
                             ),
                 );
+                if (I('version') >= 1) {
+                    $now_info['data']['content'] = $now_info['data']['content']['content'];
+                    $now_info['data']['nickname']  = $now_info['data']['nick_name'];
+                    unset($now_info['data']['nick_name']);
+                    $now_info['data']['user_photo_src'] = $author['photo_src'];
+                    $now_info['data']['user_thumbnail_src'] = $author['thumbnail_src'];
+                    unset($now_info['data']['user_head']);
+                    $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
+                    $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
+                    unset($now_info['data']['img']);
+                }
                array_push($info,$now_info);
             }
         }
@@ -132,8 +143,8 @@ class NewArticleController extends Controller
                 $now_info['data']['user_photo_src'] = $author['photo_src'];
                 $now_info['data']['user_thumbnail_src'] = $author['thumbnail_src'];
                 unset($now_info['data']['user_head']);
-                $now_info['article_photo_src'] = $now_info['data']['img']['img_src'];
-                $now_info['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
+                $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
+                $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
                 unset($now_info['data']['img']);
             }
             array_push($info,$now_info);
