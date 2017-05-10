@@ -122,14 +122,14 @@ class NewArticleController extends Controller
                             'type'      => $article->articleType(true),
                             'type_id'   => $value['articletype_id'],
                             'article_id'=> $value['article_id'],
-                            'user_id'   => $author ? $author['stunum'] : '',
-                            'nick_name' => $author ? $author['nickname'] : '',
-                            'user_head' => $author ? $author['photo_src'] : '',
+                            'user_id'   => isset($author) ? $author['stunum'] : '',
+                            'nick_name' => isset($author) ? $author['nickname'] : '',
+                            'user_head' => isset($author) ? $author['photo_src'] : '',
                             'time'      => $time,
                             'content'   => array('content' => $article->get('content')),
                             'img'       => array(
-                                            'img_small_src' => $small_src ? $small_src : '',
-                                            'img_src' => $photo_src ? $photo_src : '',
+                                            'img_small_src' => isset($small_src) ? $small_src : '',
+                                            'img_src' => isset($photo_src) ? $photo_src : '',
                                         ),
                             'like_num'  => $value['like_num'],
                             'remark_num'=> $value['remark_num'],
@@ -140,8 +140,8 @@ class NewArticleController extends Controller
                 $now_info['data']['content'] = $now_info['data']['content']['content'];
                 $now_info['data']['nickname']  = $now_info['data']['nick_name'];
                 unset($now_info['data']['nick_name']);
-                $now_info['data']['user_photo_src'] = $author['photo_src'];
-                $now_info['data']['user_thumbnail_src'] = $author['photo_thumbnail_src'];
+                $now_info['data']['user_photo_src'] = $now_info['user_head'];
+                $now_info['data']['user_thumbnail_src'] = isset($now_info['user_head'])? $author['photo_thumbnail_src'] : '';
                 unset($now_info['data']['user_head']);
                 $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
                 $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
