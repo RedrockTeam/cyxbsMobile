@@ -124,9 +124,9 @@ class NewArticleController extends Controller
                             'type'      => $article->articleType(true),
                             'type_id'   => $value['articletype_id'],
                             'article_id'=> $value['article_id'],
-                            'user_id'   => empty($author) ? '' : $author['stunum'] ,
-                            'nick_name' => empty($author) ? '' : $author['nickname']  ,
-                            'user_head' => empty($author) ? '' :$author['photo_src'] ,
+                            'user_id'   => empty($author['stunum']) ? '' : $author['stunum'] ,
+                            'nick_name' => empty($author['nickname']) ? '' : $author['nickname']  ,
+                            'user_head' => empty($author['photo_src']) ? '' : $author['photo_src'] ,
                             'time'      => $time,
                             'content'   => array('content' => $article->get('content')),
                             'img'       => array(
