@@ -76,6 +76,8 @@ class NewArticleController extends Controller
                     $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
                     $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
                     unset($now_info['data']['img']);
+                    unset($now_info['data']['article_id']);
+                    $now_info = $now_info['data'];
                 }
                array_push($info,$now_info);
             }
@@ -148,12 +150,15 @@ class NewArticleController extends Controller
                 $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
                 $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
                 unset($now_info['data']['img']);
+                $now_info['data']['id'] =  $now_info['data']['article_id'];
+                unset($now_info['data']['article_id']);
+                $now_info = $now_info['data'];
             }
             array_push($info,$now_info);
         }
        //根据 版本号 返回 值
         if (I('version') >= 1)
-           returnJson($info);
+           returnJson(200,['page' => $page,'data'=>$info]);
         else
            echo json_encode($info);
 
