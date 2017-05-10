@@ -158,7 +158,7 @@ class NewArticleController extends Controller
         }
        //根据 版本号 返回 值
         if (I('version') >= 1)
-           returnJson(200,['page' => $page,'data'=>$info]);
+           returnJson(200,array('page' => $page,'data'=>$info));
         else
            echo json_encode($info);
 
