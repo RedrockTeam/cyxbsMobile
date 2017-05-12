@@ -453,7 +453,8 @@ class NewsController extends Controller {
                     "created_time"       => date("Y-m-d H:i:s"),
                     "updated_time"       => date("Y-m-d H:i:s"),
                 );
-            $hot->add($hot_content);
+            //不添加到热门
+//            $hot->add($hot_content);
         }
         //$news->addall($content);
     }
