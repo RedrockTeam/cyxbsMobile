@@ -110,7 +110,7 @@ class NewArticleController extends Controller
                     $small_src = $article->get("thumbnail_src");
                     $author = $article->get('author');
                 } else {
-                    $author = array();
+                    $author = array('nickname' => Article::getType($value['articletype_id']));
                     $small_src = '';
                     $photo_src = '';
                 }
