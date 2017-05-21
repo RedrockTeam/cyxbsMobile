@@ -113,12 +113,17 @@ class ArticleController extends BaseController {
             limit $start,$size
         ";
         $result = M('')->query($sql);
-        $info = array(
+        if (I('version') >= 1) {
+            returnJson(200, $result);
+        } else {
+            $info = array(
                 'status' => '200',
                 "info"   => "success",
                 'data'   => $result
             );
-        echo json_encode($info);
+            echo json_encode($info);
+        }
+
     }
 
 

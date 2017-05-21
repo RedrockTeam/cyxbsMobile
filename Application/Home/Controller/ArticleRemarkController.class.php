@@ -72,6 +72,4 @@ class ArticleRemarkController extends BaseController {
     }
 
 
-
-
 }
