@@ -41,45 +41,52 @@ class NewArticleController extends Controller
             foreach ($data_notice as $key => $value) {
                 $stuNum = I('post.stuNum');
                 $exist = $this->is_my_like($value['id'], 6, $stuNum);
-                $now_info = array(
-                    'status' => 200,
-                    'page'   => $page,
-                    'data'   =>array(
-                                'id'        => $value['id'],
-                                'type'      => "notice",
-//                                'type_id'   => "6",
-                                'type_id'   => '5',
-                                'article_id'=> $value['id'],
-                                'user_id'   => "0",
-                                'nick_name' => "红岩网校工作站",
-                                'user_head' => "http://".$site.'/cyxbsMobile/Public/HONGY.jpg',
-                                'time'      => $value['created_time'],
-                                'content'   => array(
-                                                    "content" =>$value['content'],
-                                                ),
-                                'img'       => array(
-                                                'img_small_src' => $value['thumbnail_src'],
-                                                'img_src' => $value['photo_src'],
-                                            ),
-                                'like_num'  => $value['like_num'],
-                                'remark_num'=> $value['remark_num'],
-                                "is_my_Like"=> $exist,
+                if(I('version') >= 1) {
+                    $now_info = array(
+                        "id" => $value['id'],
+                        'type'      => 'notice',
+                        'type_id'   => '5',
+                        'article_id'=> $value['id'],
+                        'content'   => $value['content'],
+                        'like_num'  => $value['like_num'],
+                        'remark_num'=> $value['remark_num'],
+                        "is_my_like"=> $stuNum ? $exist : false,
+                        "nickname"  =>  '红岩网校工作站',
+                        "user_photo_src" =>  "http://".$site.'/cyxbsMobile/Public/HONGY.jpg',
+                        "user_thumbnail_src" => "http://".$site.'/cyxbsMobile/Public/HONGY.jpg',
+                        "time"      => $value['created_time'],
+                        'article_photo_src' => $value['thumbnail_src']  ,
+                        'article_thumbnail_src' => $value['photo_src'],
+                    );
+
+                }else {
+                    $now_info = array(
+                        'status' => 200,
+                        'page' => $page,
+                        'data' => array(
+                            'id' => $value['id'],
+                            'type' => "notice",
+//                                  'type_id'   => "6",
+                            'type_id' => '5',
+                            'article_id' => $value['id'],
+                            'user_id' => "0",
+                            'nick_name' => "红岩网校工作站",
+                            'user_head' => "http://" . $site . '/cyxbsMobile/Public/HONGY.jpg',
+                            'time' => $value['created_time'],
+                            'content' => array(
+                                "content" => $value['content'],
                             ),
-                );
-                if (I('version') >= 1) {
-                    $now_info['data']['content'] = $now_info['data']['content']['content'];
-                    $now_info['data']['nickname']  = $now_info['data']['nick_name'];
-                    unset($now_info['data']['nick_name']);
-                    $now_info['data']['user_photo_src'] = $now_info['data']['user_head'];
-                    $now_info['data']['user_thumbnail_src'] = $now_info['data']['user_head'];
-                    unset($now_info['data']['user_head']);
-                    $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
-                    $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
-                    unset($now_info['data']['img']);
-                    unset($now_info['data']['article_id']);
-                    $now_info = $now_info['data'];
+                            'img' => array(
+                                'img_small_src' => $value['thumbnail_src'],
+                                'img_src' => $value['photo_src'],
+                            ),
+                            'like_num' => $value['like_num'],
+                            'remark_num' => $value['remark_num'],
+                            "is_my_Like" => $exist,
+                        ),
+                    );
                 }
-               array_push($info,$now_info);
+                array_push($info,$now_info);
             }
         }
         $info = array_reverse($info);
@@ -117,48 +124,55 @@ class NewArticleController extends Controller
             }catch(Exception $e) {
                 returnJson('404','error',array('data'=>$value));
             }
-            //兼容格式
-            $now_info = array(
-                'status' => 200,
-                'page'   => $page,
-                'data'   => array(
-                            'id'        => $value['id'],
-                            'type'      => $article->articleType(true),
-                            'type_id'   => $value['articletype_id'],
-                            'article_id'=> $value['article_id'],
-                            'user_id'   => empty($author['stunum']) ? '' : $author['stunum'] ,
-                            'nick_name' => empty($author['nickname']) ? '' : $author['nickname']  ,
-                            'user_head' => empty($author['photo_src']) ? '' : $author['photo_src'] ,
-                            'time'      => $time,
-                            'content'   => array('content' => $article->get('content')),
-                            'img'       => array(
-                                            'img_small_src' => empty($small_src) ? '' : $small_src  ,
-                                            'img_src' => empty($photo_src) ? '' : $photo_src,
-                                        ),
-                            'like_num'  => $value['like_num'],
-                            'remark_num'=> $value['remark_num'],
-                            "is_my_Like"=> $stuNum ? $article->getPraise($stuNum) : false,
-                        ),
-            );
+
             if (I('version') >= 1) {
-                $now_info['data']['content'] = $now_info['data']['content']['content'];
-                $now_info['data']['nickname']  = $now_info['data']['nick_name'];
-                unset($now_info['data']['nick_name']);
-                $now_info['data']['user_photo_src'] = $now_info['data']['user_head'];
-                $now_info['data']['user_thumbnail_src'] = empty($now_info['data']['user_head']) ? '' :  $author['photo_thumbnail_src'];
-                unset($now_info['data']['user_head']);
-                $now_info['data']['article_photo_src'] = $now_info['data']['img']['img_src'];
-                $now_info['data']['article_thumbnail_src'] = $now_info['data']['img']['img_small_src'];
-                unset($now_info['data']['img']);
-                $now_info['data']['id'] =  $now_info['data']['article_id'];
-                unset($now_info['data']['article_id']);
-                $now_info = $now_info['data'];
+                //新格式
+                $now_info = array(
+                    "id" => $value['id'],
+                    'type'      => $article->articleType(true),
+                    'type_id'   => $value['articletype_id'],
+                    'article_id'=> $value['article_id'],
+                    'content'   => $article->get('content'),
+                    'like_num'  => $value['like_num'],
+                    'remark_num'=> $value['remark_num'],
+                    "is_my_like"=> $stuNum ? $article->getPraise($stuNum) : false,
+                    "nickname"  =>  empty($author['nickname']) ? '' : $author['nickname'],
+                    "user_photo_src" =>  empty($author['photo_src']) ? '' : $author['photo_src'],
+                    "user_thumbnail_src" => empty($author['photo_thumbnail_src']) ? "" : $author['photo_thumbnail_src'],
+                    "time"      => $time,
+                    'article_photo_src' => empty($small_src) ? '' : $small_src  ,
+                    'article_thumbnail_src' => empty($photo_src) ? '' : $photo_src,
+                );
+            } else {
+                //兼容格式
+                $now_info = array(
+                    'status' => 200,
+                    'page' => $page,
+                    'data' => array(
+                        'id' => $value['id'],
+                        'type' => $article->articleType(true),
+                        'type_id' => $value['articletype_id'],
+                        'article_id' => $value['article_id'],
+                        'user_id' => empty($author['stunum']) ? '' : $author['stunum'],
+                        'nick_name' => empty($author['nickname']) ? '' : $author['nickname'],
+                        'user_head' => empty($author['photo_src']) ? '' : $author['photo_src'],
+                        'time' => $time,
+                        'content' => array('content' => $article->get('content')),
+                        'img' => array(
+                            'img_small_src' => empty($small_src) ? '' : $small_src,
+                            'img_src' => empty($photo_src) ? '' : $photo_src,
+                        ),
+                        'like_num' => $value['like_num'],
+                        'remark_num' => $value['remark_num'],
+                        "is_my_Like" => $stuNum ? $article->getPraise($stuNum) : false,
+                    ),
+                );
             }
             array_push($info,$now_info);
         }
        //根据 版本号 返回 值
         if (I('version') >= 1)
-           returnJson(200,array('page' => $page,'data'=>$info));
+           returnJson(200,array('size'=>count($info),'page' => $page,'data'=>$info));
         else
            echo json_encode($info);
 
