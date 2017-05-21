@@ -71,8 +71,7 @@ function addJoinTopicIds($topicId, $stuNum) {
     if (empty($topicId) || empty($stuNum))  return false;
     $topicIds = getJoinTopicIds($stuNum);
     $pos = array('id' => $topicId, 'state' => 1);
-    $joinNum = D('topics')->where($pos)->getField('join_num');
-    if ($joinNum != 0 && !empty($topicIds) && false !== $key=array_search($topicId, $topicIds))
+    if (!empty($topicIds) && false !== $key=array_search($topicId, $topicIds))
         unset($topicIds[$key]);
     else {
         $result = D('topics')->where($pos)->setInc('join_num');

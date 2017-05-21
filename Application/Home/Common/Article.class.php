@@ -849,13 +849,12 @@ class Article
             $result = D('topics')->where('id=%d', $this->article['topic_id'])->find();
             $result['remark_num']++;
             $result['updated_time'] = date('Y-m-d H:i:s');
-
-            addJoinTopicIds($this->article['topic_id'], $this->operator['stunum']);
             $result = D('topics')->save($result);
             if (!$result) {
                 $this->error[] = "fatal add topics join_num";
                 return false;
             }
+            addJoinTopicIds($this->article['topic_id'], $this->operator['stunum']);
         }
         return true;
     }
