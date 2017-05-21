@@ -72,7 +72,7 @@ function addJoinTopicIds($topicId, $stuNum) {
     $topicIds = getJoinTopicIds($stuNum);
     $pos = array('id' => $topicId, 'state' => 1);
     $joinNum = D('topics')->where($pos)->getField('join_num');
-    if ($joinNum != 0 &&false !== $key=array_search($topicId, $topicIds))
+    if ($joinNum != 0 && !empty($topicIds) && false !== $key=array_search($topicId, $topicIds))
         unset($topicIds[$key]);
     else {
         $result = D('topics')->where($pos)->setInc('join_num');
@@ -123,6 +123,7 @@ function getJoinTopicIds($stuNum)
     if (empty($stuNum)) return false;
 
     $topicIds = S('ZSCY-JoinedTopic-' . $stuNum);
+
     //缓存了的
     if (!empty($topicIds)) {
         return $topicIds;
@@ -186,6 +187,7 @@ function getJoinTopicIds($stuNum)
     //倒序排列
     krsort($topicIds, SORT_LOCALE_STRING);
     $topicIds = array_values($topicIds);
+
     //缓存
     setTopicIds($stuNum, $topicIds);
     return $topicIds;
