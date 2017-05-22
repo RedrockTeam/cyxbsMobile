@@ -114,7 +114,7 @@ class ArticleController extends BaseController {
         ";
         $result = M('')->query($sql);
         if (I('version') >= 1) {
-            returnJson(200, $result);
+            returnJson(200, ['data'=>$result]);
         } else {
             $info = array(
                 'status' => '200',

@@ -129,6 +129,7 @@ class NewArticleController extends Controller
                 //新格式
                 $now_info = array(
                     "id" => $value['id'],
+                    'user_id' => empty($author['stunum']) ? '' : $author['stunum'],
                     'type'      => $article->articleType(true),
                     'type_id'   => $value['articletype_id'],
                     'article_id'=> $value['article_id'],
