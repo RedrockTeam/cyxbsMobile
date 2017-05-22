@@ -97,17 +97,19 @@ class ArticleController extends BaseController {
               FROM (cyxbsmobile_articleremarks JOIN cyxbsmobile_users ON cyxbsmobile_articleremarks.user_id = cyxbsmobile_users.id)JOIN cyxbsmobile_articles
         ON  cyxbsmobile_articleremarks.article_id = cyxbsmobile_articles.id
          WHERE 
+            cyxbsmobile_articleremarks.state > 0 AND
             cyxbsmobile_users.stunum != '$stunum' AND
             cyxbsmobile_articleremarks.article_id IN(
-                SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id' OR answer_user_id = '$user_id'
-        ) UNION
+                SELECT id FROM cyxbsmobile_articles WHERE state > 0 and (user_id = '$user_id' OR answer_user_id = '$user_id')
+        )  
+        UNION
         SELECT 'praise' as type,'' as content,cyxbsmobile_articles.content as article_content,cyxbsmobile_articles.thumbnail_src as article_photo_src,cyxbsmobile_articlepraises.created_time,cyxbsmobile_articlepraises.article_id,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src
         FROM (cyxbsmobile_articlepraises JOIN cyxbsmobile_users ON cyxbsmobile_articlepraises.stunum = cyxbsmobile_users.stunum )JOIN cyxbsmobile_articles
         ON cyxbsmobile_articlepraises.article_id = cyxbsmobile_articles.id
         WHERE 
             cyxbsmobile_users.stunum != '$stunum' AND
             cyxbsmobile_articlepraises.article_id IN(
-                SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id'
+                SELECT id FROM cyxbsmobile_articles WHERE user_id = '$user_id' AND state > 0
         ) 
             ORDER BY created_time DESC
             limit $start,$size
