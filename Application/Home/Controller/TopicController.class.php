@@ -101,7 +101,7 @@ class TopicController extends Controller
     }
 
     /**
-     * 话题范围
+     * 话题
      * @return [type] [description]
      */
     public function  topicList()
@@ -144,11 +144,10 @@ class TopicController extends Controller
             ->order("((join_num*join_num+remark_num*2+article_num*4+like_num+read_num/2)/POWER(DATEDIFF('$now_date', created_time)+2, $g)) DESC, updated_time DESC")
             ->limit($information['page']*$information['size'], $information['size'])
             ->select();
-        $userField = array('nickname', 'stunum'=>'user_id', 'photo_src'=>'user_photo');
+        $userField = array('nickname', 'stunum'=>'user_id');
         foreach ($data as $key => &$value) {
             $user = (int)$value['official'] === 1 ? array(
                 'nickname' => "红岩网校工作站",
-                'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
                 'user_id' => '0'
             ) : D('users')->field($userField)->find($value['user_id']);
             $value = array_merge($value, $user);
@@ -288,7 +287,8 @@ class TopicController extends Controller
         //user_id为0时使用官方的身份
         if ($topic['official'] == 1) {
             $topic['nickname'] = "红岩网校工作站";
-            $topic['photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
+            $topic['user_photo_src'] = "http://".$site.'/cyxbsMobile/Public/HONGY.jpg';
+            $topic['user_thumbnail_src'] = $topic['user_photo_src'];
         } else {
             $user = M('users')->find($topic['user_id']);
             $topic['nickname'] = $user['nickname'];
