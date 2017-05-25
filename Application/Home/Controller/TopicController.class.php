@@ -155,10 +155,10 @@ class TopicController extends Controller
                 $value['img']['img_small_src'] = $value['photo_src'];
             else{
                 $value['img']['img_small_src'] = explode(',',$value['photo_src']);
-                foreach ( $value['img']['img_small_src'] as &$image) {
-                    $image  = "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/photo/'.$image;
-                }
-                $value['img']['img_small_src'] = implode(',', $value['img']['img_small_src']);
+//                foreach ( $value['img']['img_small_src'] as &$image) {
+//                    $image  = "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/photo/'.$image;
+//                }
+                $value['img']['img_small_src'] = "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/photo/'.$value['img']['img_small_src'][0];
             }
             $value['img']['img_src'] = $value['thumbnail_src'];
             $value['is_my_join'] = is_my_join($value['topic_id'], $information['stuNum']);
