@@ -151,9 +151,16 @@ class TopicController extends Controller
                 'user_id' => '0'
             ) : D('users')->field($userField)->find($value['user_id']);
             $value = array_merge($value, $user);
-            $value['img']['img_small_src'] = $value['photo_src'];
+            if (empty($value['photo_src']))
+                $value['img']['img_small_src'] = $value['photo_src'];
+            else{
+                $value['img']['img_small_src'] = explode(',',$value['photo_src']);
+                foreach ( $value['img']['img_small_src'] as &$image) {
+                    $image  = "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/photo/'.$image;
+                }
+                $value['img']['img_small_src'] = implode(',', $value['img']['img_small_src']);
+            }
             $value['img']['img_src'] = $value['thumbnail_src'];
-
             $value['is_my_join'] = is_my_join($value['topic_id'], $information['stuNum']);
             unset($value['photo_src']);
             unset($value['thumbnail_src']);
@@ -223,7 +230,7 @@ class TopicController extends Controller
         foreach ($data as $key => &$value) {
             $user = (int)$value['official'] === 1 ? array(
                 'nickname' => "红岩网校工作站",
-                'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
+//                'photo_src' => "http://" . $_SERVER["SERVER_NAME"] . '/cyxbsMobile/Public/HONGY.jpg',
                 'user_id' => '0'
             ) : D('users')->field($userField)->find($value['user_id']);
             $value = array_merge($value, $user);
