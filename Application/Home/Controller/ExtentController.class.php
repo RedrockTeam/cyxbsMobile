@@ -26,6 +26,8 @@ class ExtentController
 
         $dormitoryId = $dormitory['building'] . '-' . $dormitory['room'];
         $month = I('post.month') ? I('post.month') : 6;
+        if ($month > 24)
+            returnJson(404, '浏览记录不能超过两年', compact('version'));
         $result = curlPost($this->apiUrl['electric'], array('month'=>$month,'room'=>$dormitoryId));
         if ($result === false) {
             returnJson(404, 'api error');
@@ -37,8 +39,11 @@ class ExtentController
         $trend = array();
         $current = $electric[0];
         unset($electric[0]);
+        $time = mb_substr($current['record_time'],0,2,'utf-8');
         foreach ($electric as $value) {
-            $elec['time'] = mb_substr($value['record_time'],0,2,'utf-8');
+            $time--;
+            $time =  $time==0 ?  12 : $time;
+            $elec['time'] = $time;
             $elec['spend'] = $value['elec_spend'];
             $elec['elec_start'] = $value['elec_start'];
             $elec['elec_end'] = $value['elec_end'];
