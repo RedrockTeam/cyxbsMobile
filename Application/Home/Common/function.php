@@ -63,7 +63,23 @@ function returnJson($status, $info="", $data = null)
 }
 
 function checkJson($data) {
-    $fields = array('nickname', 'title', 'content', 'keyword', 'name', 'message', 'address', 'classnum', 'stunum','user_id', 'stuNum','nick_name');
+    $fields = array(
+        'nickname',
+        'title',
+        'content',
+        'keyword',
+        'name',
+        'message',
+        'address',
+        'classnum',
+        'stunum',
+        'user_id',
+        'stuNum',
+        'nick_name',
+        'qq',
+        'phone',
+        'introduction'
+    );
     foreach ($data as $key => &$value) {
         if (is_array($value))
             $value = checkJson($value);
