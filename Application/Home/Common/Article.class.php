@@ -98,7 +98,7 @@ class Article
         //当以数组的形式传入
         if (is_array($article)) {
             //type_id 和 article_id 确定文章
-            $type_id = isset($article['type_id']) ? $article['type_id'] : $article['article_type_id'];
+            $type_id = isset($article['type_id']) ? $article['type_id'] : $article['articletype_id'];
             $table = $table_type[$type_id];
             //错误类型返回false
             if (empty($type_id) || empty($table)) {
@@ -491,7 +491,7 @@ class Article
             $this->article = D($this->table)->find($result);
             $this->tmp = array();
             // 提供测试
-            if ($this->type_id != 6 && $this->type_id != 7) {
+            if ($this->type_id != 6) {
                 return $this->addHotArticles();
             }
             return true;
@@ -748,6 +748,11 @@ class Article
             $author = $this->author;
             $content['nickname'] = $author['nickname'];
             $content['user_photo'] = $author['photo_src'];
+        }
+        if ($this->type_id == 7) {
+            $topic = D('topics')->find($this->get('topic_id'));
+            $content['keyword'] = $topic['keyword'];
+            $content['topic_id'] = $topic['id'];
         }
         return $content;
     }

@@ -178,7 +178,7 @@ class NewArticleController extends Controller
            echo json_encode($info);
 
     }
-
+    //bbdd
     public function listArticle(){
         $type = I('post.type_id');
         $page = I('post.page');
@@ -186,33 +186,58 @@ class NewArticleController extends Controller
         $page = empty($page) ? 0 : $page;
         $size = empty($size) ? 15 : $size;
         $start = $page*$size;
-        if($type == null){
-            $info = array(
-                    'state' => 801,
-                    'status' => 801,
-                    'info'  => 'invalid parameter',
-                    'data'  => array(),
-                );
-            returnJson($info);
-        }
+//        if($type == null){
+//            $info = array(
+//                    'state' => 801,
+//                    'status' => 801,
+//                    'info'  => 'invalid parameter',
+//                    'data'  => array(),
+//                );
+//            returnJson($info);
+//        }
 //        $articleType = D('articletypes');
-        $article     = D('articles');
-        $condition = array(
-            'type_id' => $type,
-            'cyxbsmobile_articles.state'   => array('neq', 0),
-        );
+        //bbdd 文章
+//        $article     = D('articles');
+//        $condition = array(
+//            'type_id' => $type,
+//            'cyxbsmobile_articles.state'   => array('neq', 0),
+//        );
+        $content = D('hotarticles')->where(array('in' => array(5,7)))->field(array('article_id','articletype_id'))->order('updated_time DESC')->limit($start,$size)->select();
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
-        $content = $article
-                    ->where($condition)
-                    ->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')
-                    ->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src,official  ')
-                    ->limit($start,$size)
-                    ->order('updated_time DESC')
-                    ->select();
-
+//        $content = $article
+//                    ->where($condition)
+//                    ->join('cyxbsmobile_users ON cyxbsmobile_articles.user_id = cyxbsmobile_users.id')
+//                    ->field('cyxbsmobile_articles.title,cyxbsmobile_articles.id,cyxbsmobile_articles.photo_src as article_photo_src,cyxbsmobile_articles.thumbnail_src as article_thumbnail_src,cyxbsmobile_articles.type_id,cyxbsmobile_articles.content,cyxbsmobile_articles.updated_time,cyxbsmobile_articles.created_time,like_num,remark_num,cyxbsmobile_users.stunum,cyxbsmobile_users.nickname,cyxbsmobile_users.photo_src,cyxbsmobile_users.photo_thumbnail_src,official  ')
+//                    ->limit($start,$size)
+//                    ->order('updated_time DESC')
+//                    ->select();
         $result = array();
+        $stuNum = I('post.stuNum');
         foreach($content as $key => $value){
-            $stuNum = I('post.stuNum');
+            $article = Article::setArticle($value, $stuNum);
+            $field = array(
+                'title',
+                'id',
+                'photo_src' => 'article_photo_src',
+                'thumbnail_src'=>'article_thumbnail_src',
+                'type_id',
+                'updated_time',
+                'created_time',
+                'content',
+                'like_num',
+                'remark_num',
+                'author.nickname' => 'nickname',
+                'author.photo_src' => 'photo_src',
+                'author.stunum' => 'stunum',
+                'author.photo_thumbnail_src'=> 'photo_thumbnail_src',
+                'official'
+            );
+            $value = $article->get($field);
+            if ($value['type_id'] == 7) {
+                $topic = D('topics')->find($article->get('topic_id'));
+                $value['keyword'] = $topic['keyword'];
+                $value['topic_id'] = $topic['id'];
+            }
             if($value['official'] == 1) {
                 $value['nickname'] = '红岩网校工作站';
                 $value['stunum'] = "0000000000";
@@ -233,6 +258,7 @@ class NewArticleController extends Controller
 
         $info = array(
                 'status' => '200',
+                'size'  => count($result),
                 "page"   => $page,
                 'data'   => $result
         );
