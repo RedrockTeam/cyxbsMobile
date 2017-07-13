@@ -202,7 +202,7 @@ class NewArticleController extends Controller
 //            'type_id' => $type,
 //            'cyxbsmobile_articles.state'   => array('neq', 0),
 //        );
-        $content = D('hotarticles')->where(array('in' => array(5,7), 'state' => 1))->field(array('article_id','articletype_id'))->order('updated_time DESC')->limit($start,$size)->select();
+        $content = D('hotarticles')->where(array('in' => array(5,7)))->field(array('article_id','articletype_id'))->order('updated_time DESC')->limit($start,$size)->select();
         // ->order('updated_time DESC')->limit($start,$start+15)->field('user_id,title,id,photo_src,thumbnail_src,type_id,content,updated_time,created_time,like_num,remark_num')
 //        $content = $article
 //                    ->where($condition)
@@ -232,6 +232,8 @@ class NewArticleController extends Controller
                 'author.photo_thumbnail_src'=> 'photo_thumbnail_src',
                 'official'
             );
+            if ($article->get('state') != 1)
+                continue;
             $value = $article->get($field);
             if ($value['type_id'] == 7) {
                 $topic = D('topics')->find($article->get('topic_id'));
