@@ -31,6 +31,9 @@ function returnJson($status, $info = "", $data = array())
         case 200:
             $report = array('status' => 200, 'info' => 'success');
             break;
+        case 415:
+            $repost = array("status" => 415, "info" => "invalid request way");
+            break;
         case 'datatable':
             $report = array('draw' => intval($data['draw']), 'recordsFiltered' => intval($data['recordsFiltered']), 'recordsTotal' => intval($data['recordsTotal']), 'data' => $data['data']);
             unset($data);
@@ -57,7 +60,7 @@ function checkParameter($parameters = array())
 {
     $test = I("post.");
     foreach ($parameters as $value) {
-        if (empty($test[$value])&&!is_numeric($test[$value])) {
+        if (empty($test[$value]) && !is_numeric($test[$value])) {
             return false;
         }
     }
@@ -65,20 +68,18 @@ function checkParameter($parameters = array())
 }
 
 
-
 function getUserIdInTable($stunum)
 {
-    $queryField=array(
-        'stunum'=>$stunum,
+    $queryField = array(
+        'stunum' => $stunum,
     );
-    $UsersModel=M('users');
-    $result=$UsersModel->where($queryField)->field('id')->find();
-    if(!empty($result))
-        return $result;
+    $UsersModel = M('users');
+    $result = $UsersModel->where($queryField)->field('id')->find();
+    if (!empty($result))
+        return $result['id'];
     else
         return false;
 }
-
 
 
 /**
@@ -98,14 +99,14 @@ function authUser($stuNum, $idNum)
 
     $condition = array(
         "stuNum" => $stuNum,
-        "idNum"  => $idNum
+        "idNum" => $idNum
     );
     $url = "http://hongyan.cqupt.edu.cn/api/verify";
-    $needInfo = curlPost($url,$condition);
-    $needInfo = json_decode($needInfo,true);
-    if($needInfo['status'] != 200){
+    $needInfo = curlPost($url, $condition);
+    $needInfo = json_decode($needInfo, true);
+    if ($needInfo['status'] != 200) {
         return json_encode($needInfo);
-    }else{
+    } else {
         S($stuNum, $idNum);
     }
     return true;
