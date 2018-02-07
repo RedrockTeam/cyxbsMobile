@@ -1,0 +1,114 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: uncomplex func
+ * Date: 2018/2/3
+ * Time: 15:36
+ */
+
+/**
+ * 根据status返回对应的json语句
+ * @param  int $status http请求码
+ * @param  string $info 重写info信息
+ * @param  array $data json里需要返回的数据
+ */
+function returnJson($status, $info = "", $data = array())
+{
+    // print_r(debug_backtrace());exit;
+    switch ($status) {
+        case 500:
+            $report = array('status' => 500, 'info' => '服务器错误');
+            break;
+        case 404:
+            $report = array('status' => 404, 'info' => 'error parameter');
+            break;
+        case 403:
+            $report = array('status' => 403, 'info' => 'Don\'t permit');
+            break;
+        case 801:
+            $report = array('status' => 801, 'info' => 'invalid parameter');
+            break;
+        case 200:
+            $report = array('status' => 200, 'info' => 'success');
+            break;
+        case 'datatable':
+            $report = array('draw' => intval($data['draw']), 'recordsFiltered' => intval($data['recordsFiltered']), 'recordsTotal' => intval($data['recordsTotal']), 'data' => $data['data']);
+            unset($data);
+            break;
+        default:
+            $report = array('status' => $status);
+    }
+
+    if (!empty($info)) {
+        $report['info'] = $info;
+    }
+    if (!empty($data)) {
+        $report['data'] = $data;
+    }
+    //加密序列化处理
+    //$json = message_encrypt($report);
+    header("Content-Type:application/json");
+    echo json_encode($report);
+    exit;
+}
+
+
+function checkParameter($parameters = array())
+{
+    $test = I("post.");
+    foreach ($parameters as $value) {
+        if (empty($test[$value])&&!is_numeric($test[$value])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
+function getUserIdInTable($stunum)
+{
+    $queryField=array(
+        'stunum'=>$stunum,
+    );
+    $UsersModel=M('users');
+    $result=$UsersModel->where($queryField)->field('id')->find();
+    if(!empty($result))
+        return $result;
+    else
+        return false;
+}
+
+
+
+/**
+ * 验证身份信息
+ * @param $stuNum   string 学号
+ * @param $idNum    string 身份证号
+ * @return bool|mixed
+ */
+function authUser($stuNum, $idNum)
+{
+    if (empty($stuNum) || empty($idNum)) return false;
+
+    $idnum = S($stuNum);
+
+    if (!empty($idnum))
+        return $idNum == $idnum;
+
+    $condition = array(
+        "stuNum" => $stuNum,
+        "idNum"  => $idNum
+    );
+    $url = "http://hongyan.cqupt.edu.cn/api/verify";
+    $needInfo = curlPost($url,$condition);
+    $needInfo = json_decode($needInfo,true);
+    if($needInfo['status'] != 200){
+        return json_encode($needInfo);
+    }else{
+        S($stuNum, $idNum);
+    }
+    return true;
+}
+
+
