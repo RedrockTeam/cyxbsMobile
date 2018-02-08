@@ -81,6 +81,20 @@ function getUserIdInTable($stunum)
         return false;
 }
 
+function getUserBasicInfoInTable($user_id){
+    $userModel=M('users');
+    $result=$userModel
+        ->field("nickname,photo_thumbnail_src")
+        ->where(array(
+            "id"=>$user_id,
+        ))
+        ->find();
+    if (!empty($result))
+        return $result;
+    else
+        return false;
+}
+
 
 /**
  * 验证身份信息
@@ -105,7 +119,7 @@ function authUser($stuNum, $idNum)
     $needInfo = curlPost($url, $condition);
     $needInfo = json_decode($needInfo, true);
     if ($needInfo['status'] != 200) {
-        return json_encode($needInfo);
+        return false;
     } else {
         S($stuNum, $idNum);
     }

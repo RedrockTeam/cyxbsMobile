@@ -26,6 +26,7 @@ class QuestionController extends Controller
     }
 
 
+    //提问
     public function add()
     {
         $checkField = array(
@@ -117,6 +118,7 @@ class QuestionController extends Controller
         }
     }
 
+    //修改悬赏分
     public function updateReward()
     {
         $checkField = array(
@@ -125,7 +127,8 @@ class QuestionController extends Controller
             "reward",
             "question_id",
         );
-        checkParameter($checkField);
+        if (!checkParameter($checkField))
+            returnJson(801);
 
         $request = I("post.");
         if (!authUser($request['stuNum'], $request['idNum']))
@@ -133,11 +136,41 @@ class QuestionController extends Controller
         //积分确认模块!!!
         $questionModel = M("questionlist");
         $questionModel->reward = $request['reward'];
-        $questionModel->where("id=" . $request['question_id'])->save();
+        $questionModel->where("id=" . $request['question_id'])->setField(
+            array(
+                "reward" => (int)$request['reward'],
+            )
+        );
         returnJson(200);
     }
 
+    //取消提问
+    public function cancelQuestion()
+    {
+        if (!IS_POST)
+            returnJson(415);
+        $stunum = I("post.stuNum");
+        $idnum = I("post.idNum");
+        if (!authUser($stunum, $idnum))
+            returnJson(403, "invalid user or password");
+        $question_id = I("post.question_id");
+        $questionModel = M("questionlist");
+        $result = $questionModel->where("id=" . $question_id)
+            ->field(array(
+                "user_id"
+            ))
+            ->find();
+        if ($result['user_id'] == getUserIdInTable(I("post.stuNum"))) {
+            $questionModel->where("id=" . $question_id)->setField(array(
+                "state" => 0,
+            ));
+            returnJson(200);
+        } else
+            returnJson(500);
+    }
 
+
+    //首页问题列表
     public function getQuestionList()
     {
         $page = I("post.page") ?: 0;
@@ -158,6 +191,7 @@ class QuestionController extends Controller
             "disappear_at",
             "created_at",
             "is_anonymous",
+            "id",
         );
 
         $questionModel = M("questionlist");
@@ -167,7 +201,8 @@ class QuestionController extends Controller
             ->page($page, $size)
             ->field($queryField)
             ->where(array(
-                "kind" => $kind
+                "kind" => $kind,
+                "state" => 1
             ))
             ->select();
 
@@ -175,7 +210,9 @@ class QuestionController extends Controller
         foreach ($result as $question) {
 
             $userId = $question['user_id'];
-            $info = $userModel->field("nickname,photo_thumbnail_src")->where("id=" . $userId)->find();
+            $info = $userModel->field("nickname,photo_thumbnail_src")
+                ->where("id=" . $userId)
+                ->find();
             unset($question['user_id']);
 
 
@@ -187,6 +224,10 @@ class QuestionController extends Controller
                 $question['nickname'] = "匿名用户";
             }
 
+            $question['reward'] = (int)$question['reward'];
+            $question['answer_num'] = (int)$question['answer_num'];
+            $question['id'] = (int)$question['id'];
+            $question['is_anonymous'] = (int)$question['is_anonymous'];
             $question['title'] = json_decode($question['title']);
             $question['description'] = json_decode($question['description']);
             $question['tags'] = json_decode($question['tags']);
@@ -194,5 +235,95 @@ class QuestionController extends Controller
             array_push($data, $question);
         }
         returnJson(200, '', $data);
+    }
+
+
+    //问题详细信息
+    public function getDetailedInfo()
+    {
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
+            returnJson(403);
+
+        $question_id = I("post.question_id");
+        if (empty($question_id))
+            returnJson(801);
+
+        $questionModel = M("questionlist");
+        $answerModel = M("answerlist");
+
+        $queryField = array(
+            "title",
+            "description",
+            "user_id",
+            "tags",
+            "reward",
+            "answer_num",
+            "disappear_at",
+            "created_at",
+            "is_anonymous",
+        );
+
+        $question = $questionModel
+            ->field($queryField)
+            ->where(array(
+                "id" => $question_id,
+                "state" => 1,
+            ))
+            ->find();
+        if (empty($question))
+            returnJson(801,'invalid question');
+        $userinfo = getUserBasicInfoInTable($question['user_id']);
+        $answerSet = $answerModel
+            ->field(array(
+                "user_id",
+                "content",
+                "created_at",
+                "praise_num",
+                "comment_num",
+            ))
+            ->page(0,6)
+            ->where(array(
+                "question_id" => $question_id,
+                "state" => 1,
+            ))
+            ->select();
+
+        $data = new \stdClass();
+
+        $data->is_self=0;
+        if (getUserIdInTable(I("post.stuNum"))==$question['user_id'])
+            $data->is_self=1;
+
+        $data->title = json_decode($question['title']);
+        $data->description = json_decode($question['description']);
+        $data->reward = $question['reward'];
+        $data->dispaaear_at = $question['disappear_at'];
+        $data->tags = json_decode($question['tags']);
+
+        if ($question['is_anonymous'] == 0) {
+            $data->questioner_nickname = $userinfo['nickname'];
+            $data->questioner_photo_thumbnail_src = $userinfo['photo_thumbnail_src'];
+        } else {
+            $data->questioner_nickname = "匿名用户";
+            $data->questioner_photo_thumbnail_src = '';
+        }
+
+
+
+        $data->answers = array();
+        foreach ($answerSet as $value) {
+            $answer = new \stdClass();
+            $answerer = getUserBasicInfoInTable($value['user_id']);
+            $answer->nickname = $answerer['nickname'];
+            $answer->photo_thumbnail_src = $answerer['photo_thumbnail_src'];
+            $answer->content = json_decode($value['content']);
+            $answer->created_at = $value['created_at'];
+            $answer->praise_num = $value['praise_num'];
+            $answer->comment_num = $value['comment_num'];
+            array_push($data->answers, $answer);
+        }
+
+        returnJson(200, 'success', $data);
+
     }
 }
