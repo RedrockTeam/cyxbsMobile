@@ -136,11 +136,11 @@ class QuestionController extends Controller
         //积分确认模块!!!
         $questionModel = M("questionlist");
         $questionModel->reward = $request['reward'];
-        $questionModel->where("id=" . $request['question_id'])->setField(
-            array(
+        $questionModel
+            ->where("id=" . $request['question_id'])
+            ->setField(array(
                 "reward" => (int)$request['reward'],
-            )
-        );
+            ));
         returnJson(200);
     }
 
@@ -231,6 +231,10 @@ class QuestionController extends Controller
             $question['title'] = json_decode($question['title']);
             $question['description'] = json_decode($question['description']);
             $question['tags'] = json_decode($question['tags']);
+            $question['photo_url'] = array(
+                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+            );
 
             array_push($data, $question);
         }
@@ -271,34 +275,47 @@ class QuestionController extends Controller
             ))
             ->find();
         if (empty($question))
-            returnJson(801,'invalid question');
+            returnJson(801, 'invalid question');
         $userinfo = getUserBasicInfoInTable($question['user_id']);
         $answerSet = $answerModel
             ->field(array(
+                "id",
                 "user_id",
                 "content",
                 "created_at",
                 "praise_num",
                 "comment_num",
+                "is_adopted"
             ))
-            ->page(0,6)
+            ->page(0, 6)
             ->where(array(
                 "question_id" => $question_id,
                 "state" => 1,
+            ))
+            ->order(array(
+                "is_adopted" => 'desc',
+                "created_at" => "desc",
             ))
             ->select();
 
         $data = new \stdClass();
 
-        $data->is_self=0;
-        if (getUserIdInTable(I("post.stuNum"))==$question['user_id'])
-            $data->is_self=1;
+        $data->is_self = 0;
+        if (getUserIdInTable(I("post.stuNum")) == $question['user_id'])
+            $data->is_self = 1;
 
         $data->title = json_decode($question['title']);
         $data->description = json_decode($question['description']);
         $data->reward = $question['reward'];
         $data->dispaaear_at = $question['disappear_at'];
         $data->tags = json_decode($question['tags']);
+
+        //图片链接
+        //记得补充
+        $data->photo_urls = array(
+            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+        );
 
         if ($question['is_anonymous'] == 0) {
             $data->questioner_nickname = $userinfo['nickname'];
@@ -309,10 +326,10 @@ class QuestionController extends Controller
         }
 
 
-
         $data->answers = array();
         foreach ($answerSet as $value) {
             $answer = new \stdClass();
+            $answer->id = $value['id'];
             $answerer = getUserBasicInfoInTable($value['user_id']);
             $answer->nickname = $answerer['nickname'];
             $answer->photo_thumbnail_src = $answerer['photo_thumbnail_src'];
@@ -320,6 +337,15 @@ class QuestionController extends Controller
             $answer->created_at = $value['created_at'];
             $answer->praise_num = $value['praise_num'];
             $answer->comment_num = $value['comment_num'];
+            $answer->is_adopted = $value['is_adopted'];
+
+            //图片链接
+            //记得补充
+            $answer->photo_url = array(
+                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+            );
+
             array_push($data->answers, $answer);
         }
 

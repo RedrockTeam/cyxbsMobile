@@ -51,7 +51,7 @@ class AnswerController extends Controller
         if ($user_id == getUserIdInTable(I("post.stuNum")))
             returnJson(403, "yourself or invalid question");
 
-        $user_id=getUserIdInTable(I("post.stuNum"));
+        $user_id = getUserIdInTable(I("post.stuNum"));
 
         $existence = $answerModel
             ->where(
@@ -72,6 +72,7 @@ class AnswerController extends Controller
         $answerModel->content = json_encode(I("post.content"));
         $answerModel->praise_num = 0;
         $answerModel->comment_num = 0;
+        $answerModel->is_adopted = 0;
         $answerModel->created_at = $date->format("Y-m-d H:i:s");
         $answerModel->updated_at = $answerModel->created_at;
         $answerModel->state = 1;
@@ -82,19 +83,244 @@ class AnswerController extends Controller
                     "id" => $question_id,
                     "state" => 1,
                 ))
-                ->setField("answer_num", 1);
+                ->setInc("answer_num", 1);
 
             returnJson(200);
         } else
             returnJson(500);
     }
 
-    public function getAnswerlist(){
-        if (!IS_POST){
+    public function getAnswerlist()
+    {
+        if (!IS_POST) {
             returnJson(415);
         }
 
-        if(!authUser(I("post.stuNum"),I("idNum")))
+        if (!authUser(I("post.stuNum"), I("idNum")))
             returnJson(403);
+
+        $page = I("post.page") ?: 1;
+        $size = I("post.size") ?: 6;
+        $question_id = I("post.question_id");
+        if (empty($question_id))
+            returnJson(801);
+
+        $answerModel = M("answerlist");
+        $data = $answerModel
+            ->field(array(
+                "id",
+                "user_id",
+                "content",
+                "created_at",
+                "praise_num",
+                "comment_num",
+                "is_adopted",
+            ))
+            ->page($page, $size)
+            ->where(array(
+                "question_id" => $question_id,
+                "state" => 1,
+            ))
+            ->order(array())
+            ->select();
+
+
+        for ($i = 0; $i < count($data); $i++) {
+            $userinfo = getUserBasicInfoInTable($data[$i]['user_id']);
+            $data[$i]['photo_url'] = array(
+                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+            );
+            $data[$i]['content'] = json_decode($data[$i]['content']);
+            $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
+            $data[$i]['nickname'] = $userinfo['nickname'];
+        }
+        returnJson(200, "success", $data);
+    }
+
+    public function adopt()
+    {
+        if (!IS_POST)
+            returnJson(415);
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
+            returnJson(403);
+
+        $question_id = I("post.question_id");
+        $answer_id = I("post.answer_id");
+
+        if (empty($question_id) || empty($answer_id))
+            returnJson(801);
+
+        $user_id = getUserIdInTable(I("post.stuNum"));
+
+        $questionModel = M("questionlist");
+        $answerModel = M("answerlist");
+
+        $check_user = $questionModel
+            ->where(array(
+                "id" => $question_id,
+                "user_id" => $user_id,
+                "state" => 1,
+            ))
+            ->getField("user_id")
+            ->find();
+        if (empty($check_user))
+            returnJson(403, "invalid question or user power is not enough");
+
+
+        $checkAdopted = $answerModel->getField("id")->where(array(
+            "id" => $answer_id,
+            "state" => 1,
+            "is_adopted" => 1,
+        ));
+        if (!empty($checkAdopted))
+            returnJson(801, "invalid question to answer");
+
+        $answerModel
+            ->where(array(
+                "id" => $answer_id,
+                "state" => 1,
+            ))
+            ->setField("is_adopted", 1);
+
+        //积分处理
+        //在积分模块之后需要补充
+
+        returnJson(200);
+    }
+
+    public function praise()
+    {
+        if (!IS_POST) {
+            returnJson(415);
+        }
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
+            returnJson(403);
+
+        $answer_id = I("post.answer_id");
+        if (empty($answer_id))
+            returnJson(801);
+        $user_id = getUserIdInTable(I("post.stuNum"));
+
+        $prModel = M("praise_remark");
+        $answerModel = M("answerlist");
+        $datetime = new \DateTime();
+
+        $checkUnique = $prModel
+            ->where(array(
+                "user_id" => $user_id,
+                "target_id" => $answer_id,
+                "state" => 1,
+                "type" => 1,
+            ))
+            ->find();
+        if (!empty($checkUnique))
+            returnJson(403, "you have praise the answer once");
+
+        $checkSelf = $answerModel
+            ->where(array(
+                "state" => 1,
+                "id" => $answer_id,
+            ))
+            ->getField("user_id");
+        if (empty($checkSelf) || $checkSelf == $user_id)
+            returnJson(403, "can`t praise yourself");
+
+
+        $prModel->create();
+        $prModel->type = 1;
+        $prModel->target_id = $answer_id;
+        $prModel->user_id = $user_id;
+        $prModel->created_at = $datetime->format("Y-m-d H:i:s");
+        $prModel->state = 1;
+        if ($prModel->add())
+            $answerModel->where(array(
+                "id" => $answer_id,
+                "state" => 1,
+            ))->setInc("praise_num", 1);
+        else
+            returnJson(500);
+        returnJson(200);
+    }
+
+    public function cancelPraise()
+    {
+        if (!IS_POST) {
+            returnJson(415);
+        }
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
+            returnJson(403);
+
+        $answer_id = I("post.answer_id");
+        if (empty($answer_id))
+            returnJson(801);
+        $user_id = getUserIdInTable(I("post.stuNum"));
+
+        $prModel = M("praise_remark");
+        $answerModel = M("answerlist");
+
+        $checkExistence = $prModel
+            ->where(array(
+                "state" => 1,
+                "type" => 1,
+                "user_id" => $user_id,
+                "target_id" => $answer_id,
+            ))
+            ->setField("state", 0);
+        if ($checkExistence == 0)
+            returnJson(403, "the praise isn`t exist in the table");
+        else {
+            $answerModel->where(array(
+                "id" => $answer_id,
+                "state" => 1,
+            ))->setDec("praise_num", 1);
+            returnJson(200);
+        }
+
+    }
+
+    public function remark()
+    {
+        if (!IS_POST) {
+            returnJson(415);
+        }
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
+            returnJson(403);
+
+        $answer_id = I("post.answer_id");
+        $content = I("post.content");
+
+        if (empty($answer_id) || empty($content))
+            returnJson(801);
+        $user_id = getUserIdInTable(I("post.stuNum"));
+
+        $prModel = M("praise_remark");
+        $answerModel = M("answerlist");
+        $datetime = new \DateTime();
+
+        $prModel->create();
+        $prModel->type = 2;
+        $prModel->content=json_encode($content);
+        $prModel->target_id = $answer_id;
+        $prModel->user_id = $user_id;
+        $prModel->created_at = $datetime->format("Y-m-d H:i:s");
+        $prModel->state = 1;
+        if ($prModel->add())
+            $answerModel->where(array(
+                "id" => $answer_id,
+                "state" => 1,
+            ))->setInc("comment_num", 1);
+        else
+            returnJson(500);
+        returnJson(200);
+    }
+
+    public function getRemarkList(){
+        if (!IS_POST){
+            returnJson(415);
+        }
+        elseif(!authUser(I("post.stuNum"),I("post.idNum")))
+            returnJson(403);
+
     }
 }
