@@ -13,6 +13,7 @@ use Think\Controller;
 
 class AnswerController extends Controller
 {
+    //回答
     public function add()
     {
         if (!IS_POST)
@@ -90,6 +91,7 @@ class AnswerController extends Controller
             returnJson(500);
     }
 
+    //回答列表
     public function getAnswerlist()
     {
         if (!IS_POST) {
@@ -138,6 +140,7 @@ class AnswerController extends Controller
         returnJson(200, "success", $data);
     }
 
+    //采纳
     public function adopt()
     {
         if (!IS_POST)
@@ -189,6 +192,7 @@ class AnswerController extends Controller
         returnJson(200);
     }
 
+    //点赞
     public function praise()
     {
         if (!IS_POST) {
@@ -243,6 +247,7 @@ class AnswerController extends Controller
         returnJson(200);
     }
 
+    //取消赞
     public function cancelPraise()
     {
         if (!IS_POST) {
@@ -279,6 +284,7 @@ class AnswerController extends Controller
 
     }
 
+    //评论
     public function remark()
     {
         if (!IS_POST) {
@@ -315,6 +321,7 @@ class AnswerController extends Controller
         returnJson(200);
     }
 
+    //获取评论列表
     public function getRemarkList(){
         if (!IS_POST){
             returnJson(415);

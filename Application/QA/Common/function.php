@@ -84,7 +84,7 @@ function getUserIdInTable($stunum)
 function getUserBasicInfoInTable($user_id){
     $userModel=M('users');
     $result=$userModel
-        ->field("nickname,photo_thumbnail_src")
+        ->field("nickname,photo_thumbnail_src,gender")
         ->where(array(
             "id"=>$user_id,
         ))

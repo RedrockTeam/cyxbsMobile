@@ -84,8 +84,10 @@ class QuestionController extends Controller
         $question->updated_at = $question->created_at;
         $question->answer_num = 0;
 
-        $question->add();
-        returnJson(200);
+        $insertID = (int)$question->add();
+        returnJson(200, "success", array(
+            "id" => $insertID
+        ));
     }
 
     public function uploadPicture()
@@ -93,20 +95,27 @@ class QuestionController extends Controller
         //文件上传测试
         $fileConfig = array(
             "maxSize" => 3145728,
-            'rootPath' => './QA/',
-            'savePath' => 'Question',
+            'rootPath' => './Public/QA/',
+            'savePath' => '/Question',
             "saveName" => "uniqid",
             "exts" => array('jpg', 'gif', 'png', 'jpeg'),
-            "autoSub" => true,
+            "autoSub" => false,
             "subName" => array('date', "Ymd"),
         );
         $upload = new \Think\Upload($fileConfig);
         $info = $upload->upload();
+        $photoModel = M("question_photos");
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
         } else {// 上传成功 获取上传文件信息
             foreach ($info as $file) {
-                echo $file['savepath'] . $file['savename'] . "_" . $file['key'];
+                $datetime = new \DateTime();
+                $photoModel->create();
+                $photoModel->filename = "test.jpg";
+                $photoModel->question_id = 123;
+                $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
+                $photoModel->updated_at = $photoModel->created_at;
+                var_dump($photoModel->add());
             }
         }
     }
@@ -252,8 +261,13 @@ class QuestionController extends Controller
         if (empty($question_id))
             returnJson(801);
 
+        //请求者用户id
+        $requester=getUserIdInTable(I("post.stuNum"));
+
+
         $questionModel = M("questionlist");
         $answerModel = M("answerlist");
+        $prModel = M("praise_remark");
 
         $queryField = array(
             "title",
@@ -265,6 +279,7 @@ class QuestionController extends Controller
             "disappear_at",
             "created_at",
             "is_anonymous",
+            "kind",
         );
 
         $question = $questionModel
@@ -276,7 +291,42 @@ class QuestionController extends Controller
             ->find();
         if (empty($question))
             returnJson(801, 'invalid question');
+
+        //提问者用户信息
         $userinfo = getUserBasicInfoInTable($question['user_id']);
+
+        //问题信息压制
+        $data = new \stdClass();
+        $data->is_self = 0;
+        if (getUserIdInTable(I("post.stuNum")) == $question['user_id'])
+            $data->is_self = 1;
+
+        $data->title = json_decode($question['title']);
+        $data->description = json_decode($question['description']);
+        $data->reward = $question['reward'];
+        $data->disappear_at = $question['disappear_at'];
+        $data->tags = json_decode($question['tags']);
+        $data->kind = $question['kind'];
+
+        //图片链接
+        //记得补充
+        $data->photo_urls = array(
+            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
+        );
+
+        //判断提问者是否匿名
+        if ($question['is_anonymous'] == 0) {
+            $data->questioner_nickname = $userinfo['nickname'];
+            $data->questioner_photo_thumbnail_src = $userinfo['photo_thumbnail_src'];
+            $data->questioner_gender=$userinfo['gender'];
+        } else {
+            $data->questioner_nickname = "匿名用户";
+            $data->questioner_photo_thumbnail_src = '';
+            $data->questioner_gender="";
+        }
+
+
         $answerSet = $answerModel
             ->field(array(
                 "id",
@@ -297,35 +347,7 @@ class QuestionController extends Controller
                 "created_at" => "desc",
             ))
             ->select();
-
-        $data = new \stdClass();
-
-        $data->is_self = 0;
-        if (getUserIdInTable(I("post.stuNum")) == $question['user_id'])
-            $data->is_self = 1;
-
-        $data->title = json_decode($question['title']);
-        $data->description = json_decode($question['description']);
-        $data->reward = $question['reward'];
-        $data->dispaaear_at = $question['disappear_at'];
-        $data->tags = json_decode($question['tags']);
-
-        //图片链接
-        //记得补充
-        $data->photo_urls = array(
-            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-        );
-
-        if ($question['is_anonymous'] == 0) {
-            $data->questioner_nickname = $userinfo['nickname'];
-            $data->questioner_photo_thumbnail_src = $userinfo['photo_thumbnail_src'];
-        } else {
-            $data->questioner_nickname = "匿名用户";
-            $data->questioner_photo_thumbnail_src = '';
-        }
-
-
+        //答案列表信息压制
         $data->answers = array();
         foreach ($answerSet as $value) {
             $answer = new \stdClass();
@@ -333,11 +355,25 @@ class QuestionController extends Controller
             $answerer = getUserBasicInfoInTable($value['user_id']);
             $answer->nickname = $answerer['nickname'];
             $answer->photo_thumbnail_src = $answerer['photo_thumbnail_src'];
+            $answer->gender=$answerer['gender'];
             $answer->content = json_decode($value['content']);
             $answer->created_at = $value['created_at'];
             $answer->praise_num = $value['praise_num'];
             $answer->comment_num = $value['comment_num'];
             $answer->is_adopted = $value['is_adopted'];
+
+            $is_praised = $prModel
+                ->where(array(
+                    "type" => 1,
+                    "target_id" => $answer->id,
+                    "user_id" => $requester,
+                    "state" => 1,
+                ))
+                ->count();
+            if ($is_praised == 0)
+                $answer->is_praised = 0;
+            else
+                $answer->is_praised = 1;
 
             //图片链接
             //记得补充
@@ -345,7 +381,6 @@ class QuestionController extends Controller
                 "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
                 "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
             );
-
             array_push($data->answers, $answer);
         }
 
