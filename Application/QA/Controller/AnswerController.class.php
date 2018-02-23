@@ -136,6 +136,7 @@ class AnswerController extends Controller
             $data[$i]['content'] = json_decode($data[$i]['content']);
             $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
             $data[$i]['nickname'] = $userinfo['nickname'];
+            $data[$i]['gender'] = $userinfo['gender'];
         }
         returnJson(200, "success", $data);
     }
@@ -165,19 +166,28 @@ class AnswerController extends Controller
                 "user_id" => $user_id,
                 "state" => 1,
             ))
-            ->getField("user_id")
-            ->find();
+            ->getField("user_id");
         if (empty($check_user))
             returnJson(403, "invalid question or user power is not enough");
 
 
-        $checkAdopted = $answerModel->getField("id")->where(array(
-            "id" => $answer_id,
-            "state" => 1,
-            "is_adopted" => 1,
-        ));
-        if (!empty($checkAdopted))
+        $checkAdopted = $answerModel
+            ->where(array(
+                "id" => $answer_id,
+                "state" => 1,
+                "is_adopted" => 1,
+            ))
+            ->getField("id");
+        $checkOnly = $answerModel
+            ->where(array(
+                "question_id" => $question_id,
+                "state" => 1,
+                "is_adopted" => 1,
+            ))
+            ->getField("id");
+        if (!empty($checkAdopted) || !empty($checkOnly))
             returnJson(801, "invalid question to answer");
+
 
         $answerModel
             ->where(array(
@@ -306,7 +316,7 @@ class AnswerController extends Controller
 
         $prModel->create();
         $prModel->type = 2;
-        $prModel->content=json_encode($content);
+        $prModel->content = json_encode($content);
         $prModel->target_id = $answer_id;
         $prModel->user_id = $user_id;
         $prModel->created_at = $datetime->format("Y-m-d H:i:s");
@@ -322,12 +332,47 @@ class AnswerController extends Controller
     }
 
     //获取评论列表
-    public function getRemarkList(){
-        if (!IS_POST){
+    public function getRemarkList()
+    {
+        if (!IS_POST) {
             returnJson(415);
-        }
-        elseif(!authUser(I("post.stuNum"),I("post.idNum")))
+        } elseif (!authUser(I("post.stuNum"), I("post.idNum")))
             returnJson(403);
 
+        $targetID = I("post.answer_id") ?: 0;
+        if ($targetID == 0)
+            returnJson(801);
+
+        $page = I("post.page") ?: 0;
+        $size = I("post.size") ?: 15;
+
+        $prModel = M("praise_remark");
+
+        $queryResult = $prModel
+            ->field(array(
+                'content',
+                "user_id",
+                "created_at",
+            ))
+            ->page($page)
+            ->limit($size)
+            ->where(array(
+                "target_id" => $targetID,
+                "state" => 1,
+                "type" => 2,
+            ))->select();
+
+        $data = array();
+        foreach ($queryResult as $value) {
+            $userInfo = getUserBasicInfoInTable($value['user_id']);
+            $value['nickname'] = $userInfo['nickname'];
+            $value['photo_thumbnail_src'] = $userInfo['photo_thumbnail_src'];
+            $value['gender'] = $userInfo['gender'];
+            $value['content'] = json_decode($value['content']);
+            unset($value['user_id']);
+            array_push($data, $value);
+        }
+
+        returnJson(200, "success", $data);
     }
 }

@@ -90,13 +90,16 @@ class QuestionController extends Controller
         ));
     }
 
+
+    //图片上传
     public function uploadPicture()
     {
+
         //文件上传测试
         $fileConfig = array(
-            "maxSize" => 3145728,
-            'rootPath' => './Public/QA/',
-            'savePath' => '/Question',
+            "maxSize" => 4194304,
+            'rootPath' => './Public/question/',
+            'savePath' => 'Question',
             "saveName" => "uniqid",
             "exts" => array('jpg', 'gif', 'png', 'jpeg'),
             "autoSub" => false,
@@ -108,15 +111,7 @@ class QuestionController extends Controller
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
         } else {// 上传成功 获取上传文件信息
-            foreach ($info as $file) {
-                $datetime = new \DateTime();
-                $photoModel->create();
-                $photoModel->filename = "test.jpg";
-                $photoModel->question_id = 123;
-                $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
-                $photoModel->updated_at = $photoModel->created_at;
-                var_dump($photoModel->add());
-            }
+
         }
     }
 
@@ -262,7 +257,7 @@ class QuestionController extends Controller
             returnJson(801);
 
         //请求者用户id
-        $requester=getUserIdInTable(I("post.stuNum"));
+        $requester = getUserIdInTable(I("post.stuNum"));
 
 
         $questionModel = M("questionlist");
@@ -319,11 +314,11 @@ class QuestionController extends Controller
         if ($question['is_anonymous'] == 0) {
             $data->questioner_nickname = $userinfo['nickname'];
             $data->questioner_photo_thumbnail_src = $userinfo['photo_thumbnail_src'];
-            $data->questioner_gender=$userinfo['gender'];
+            $data->questioner_gender = $userinfo['gender'];
         } else {
             $data->questioner_nickname = "匿名用户";
             $data->questioner_photo_thumbnail_src = '';
-            $data->questioner_gender="";
+            $data->questioner_gender = "";
         }
 
 
@@ -355,7 +350,7 @@ class QuestionController extends Controller
             $answerer = getUserBasicInfoInTable($value['user_id']);
             $answer->nickname = $answerer['nickname'];
             $answer->photo_thumbnail_src = $answerer['photo_thumbnail_src'];
-            $answer->gender=$answerer['gender'];
+            $answer->gender = $answerer['gender'];
             $answer->content = json_decode($value['content']);
             $answer->created_at = $value['created_at'];
             $answer->praise_num = $value['praise_num'];
