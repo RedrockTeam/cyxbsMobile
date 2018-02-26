@@ -214,18 +214,18 @@ class QuestionController extends Controller
         foreach ($result as $question) {
 
             $userId = $question['user_id'];
-            $info = $userModel->field("nickname,photo_thumbnail_src")
-                ->where("id=" . $userId)
-                ->find();
+            $info = getUserBasicInfoInTable($userId);
             unset($question['user_id']);
 
 
             if ($question['is_anonymous'] == 0) {
                 $question['photo_thumbnail_src'] = $info['photo_thumbnail_src'];
                 $question['nickname'] = $info['nickname'];
+                $question['gender']=$info['gender'];
             } else {
                 $question['photo_thumbnail_src'] = null;
                 $question['nickname'] = "匿名用户";
+                $question['gender']='';
             }
 
             $question['reward'] = (int)$question['reward'];
