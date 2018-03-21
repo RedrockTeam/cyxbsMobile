@@ -10,7 +10,7 @@
  * 根据status返回对应的json语句
  * @param  int $status http请求码
  * @param  string $info 重写info信息
- * @param  array $data json里需要返回的数据
+ * @return  array $data json里需要返回的数据
  */
 function returnJson($status, $info = "", $data = array())
 {
@@ -56,6 +56,11 @@ function returnJson($status, $info = "", $data = array())
 }
 
 
+/**
+ * 检查一组参数中是否有空参数
+ * @param  array $parameters 参数数组
+ * @return  boolean $result 检查结果
+ */
 function checkParameter($parameters = array())
 {
     $test = I("post.");
@@ -68,6 +73,11 @@ function checkParameter($parameters = array())
 }
 
 
+/**
+ * 从用户表中获取userid
+ * @param  int $stunum 学号
+ * @return  mixed int|boolean 用户在user表的主键id
+ */
 function getUserIdInTable($stunum)
 {
     $queryField = array(
@@ -81,6 +91,11 @@ function getUserIdInTable($stunum)
         return false;
 }
 
+/**
+ * 通过用户id获取基本信息
+ * @param  int $user_id 用户id
+ * @return  mixed $result 包含头像 昵称 性别
+ */
 function getUserBasicInfoInTable($user_id){
     $userModel=M('users');
     $result=$userModel

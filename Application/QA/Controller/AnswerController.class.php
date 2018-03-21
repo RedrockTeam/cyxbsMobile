@@ -78,14 +78,14 @@ class AnswerController extends Controller
         $answerModel->updated_at = $answerModel->created_at;
         $answerModel->state = 1;
 
-        if ($answerModel->add()) {
+        $answer_id=$answerModel->add();
+        if (isset($answer_id)) {
             $questionModel
                 ->where(array(
                     "id" => $question_id,
                     "state" => 1,
                 ))
                 ->setInc("answer_num", 1);
-
             returnJson(200);
         } else
             returnJson(500);

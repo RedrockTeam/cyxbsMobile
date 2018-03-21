@@ -14,6 +14,15 @@ use Think\Think;
 
 class QuestionController extends Controller
 {
+    protected $fileConfig = array(
+        "maxSize" => 4194304,
+        'rootPath' => './Public/QA/Question/',
+        "saveName" => "uniqid",
+        "exts" => array('jpg', 'gif', 'png', 'jpeg'),
+        "autoSub" => false,
+        "subName" => array('date', "Ymd"),
+    );
+
     public function index()
     {
         echo "hello world!";
@@ -94,24 +103,53 @@ class QuestionController extends Controller
     //图片上传
     public function uploadPicture()
     {
-
+        $filePath = "/Public/QA/Question";
         //文件上传测试
-        $fileConfig = array(
-            "maxSize" => 4194304,
-            'rootPath' => './Public/question/',
-            'savePath' => 'Question',
-            "saveName" => "uniqid",
-            "exts" => array('jpg', 'gif', 'png', 'jpeg'),
-            "autoSub" => false,
-            "subName" => array('date', "Ymd"),
-        );
-        $upload = new \Think\Upload($fileConfig);
+        if (!IS_POST) {
+            returnJson(415);
+        }
+        $stuNum = I("post.stuNum");
+        $idNum = I("post.idNum");
+        $question_id = I("post.question_id");
+        $user_id = getUserIdInTable($stuNum);
+        if (!authUser($stuNum, $idNum))
+            returnJson(403);
+        $questionModel = M("questionlist");
+        $datetime = new \DateTime();
+
+        $checkExist = $questionModel
+            ->where(array(
+                "user_id" => $user_id,
+                'id' => $question_id,
+                "state" => 1,
+            ))
+            ->find();
+        if (empty($checkExist))
+            returnJson(403, "it is not your question or invalid question");
+
+
+        $upload = new \Think\Upload($this->fileConfig);
         $info = $upload->upload();
         $photoModel = M("question_photos");
+
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
         } else {// 上传成功 获取上传文件信息
-
+            if (!is_null(array_keys($info))){
+                foreach ($info as $key){
+                    if (!is_numeric($key[4])||strpos($key,'photo')==false)
+                        returnJson(801,"invalid parameter");
+                }
+            }
+            foreach ($info as $key=> $value) {
+                $photoModel->create();
+                $photoModel->filepath = $filePath . $value['savename'];
+                $photoModel->question_id = $question_id;
+                $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
+                $photoModel->updated_at = $photoModel->created_at;
+                $photoModel->add();
+            }
+            returnJson(200);
         }
     }
 
@@ -221,11 +259,11 @@ class QuestionController extends Controller
             if ($question['is_anonymous'] == 0) {
                 $question['photo_thumbnail_src'] = $info['photo_thumbnail_src'];
                 $question['nickname'] = $info['nickname'];
-                $question['gender']=$info['gender'];
+                $question['gender'] = $info['gender'];
             } else {
                 $question['photo_thumbnail_src'] = null;
                 $question['nickname'] = "匿名用户";
-                $question['gender']='';
+                $question['gender'] = '';
             }
 
             $question['reward'] = (int)$question['reward'];
