@@ -9,6 +9,7 @@
 namespace QA\Controller;
 
 use Think\Controller;
+use Think\Upload;
 
 class AnswerController extends Controller
 {
@@ -22,6 +23,7 @@ class AnswerController extends Controller
     );
     private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
     private $filePath = "/Public/QA/Answer/";
+
 
     //回答
     public function add()
@@ -389,7 +391,55 @@ class AnswerController extends Controller
     //答案图片上传
     public function uploadPicture()
     {
+        if (!IS_POST)
+            returnJson(415);
+        $stuNum = I("post.stuNum") ?: 0;
+        $idNum = I("post.idNum") ?: 0;
+        if ($stuNum === 0 || $idNum === 0) {
+            returnJson(403, "idNum or stuNum is null");
+        }
+        if (!authUser($stuNum, $idNum))
+            returnJson(403, "idNum or stuNum is wrong");
 
+        $user_id = getUserIdInTable($stuNum);
+        $answer_id = I("post.answer_id");
+        $answerModel = M("answerlist");
+        $checkExist = $answerModel
+            ->where(array(
+                "user_id" => $user_id,
+                "id" => $answer_id,
+                "state" => 1,
+            ))->find();
+        if (empty($checkExist))
+            returnJson(801,"invalid question or it is not your question");
 
+        $upload=new Upload($this->fileConfig);
+        $info=$upload->upload();
+        if (!$info){
+            $this->error($upload->getError());
+        }else{
+            $result=array();
+            foreach ($info as $key => $value) {
+                if (preg_match('/photo[0-9]/', $key) != 1)
+                    returnJson(801, "the file key is wrong");
+                $photoModel = M("answer_photos");
+                $checkExist = $photoModel
+                    ->where(array(
+                        "answer_id" => $answer_id,
+                        "state" => 1,
+                    ))
+                    ->find();
+                if (!empty($checkExist))
+                    returnJson(403, "the answer has already haven the photos");
+                $datetime = new \DateTime();
+                $photoModel->create();
+                $photoModel->file_path = $this->filePath.$value['savename'];
+                $photoModel->answer_id=$answer_id;
+                $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
+                $photoModel->add();
+                array_push($result,$this->domain.$this->filePath.$value['savename']);
+            }
+            returnJson(200,"success",$result);
+        }
     }
 }
