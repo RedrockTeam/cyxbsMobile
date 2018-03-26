@@ -8,11 +8,21 @@
 
 namespace QA\Controller;
 
-
 use Think\Controller;
 
 class AnswerController extends Controller
 {
+    protected $fileConfig = array(
+        "maxSize" => 4194304,
+        'rootPath' => './Public/QA/Answer/',
+        "saveName" => "uniqid",
+        "exts" => array('jpg', 'gif', 'png', 'jpeg'),
+        "autoSub" => false,
+        "subName" => array('date', "Ymd"),
+    );
+    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
+    private $filePath = "/Public/QA/Answer/";
+
     //回答
     public function add()
     {
@@ -78,7 +88,7 @@ class AnswerController extends Controller
         $answerModel->updated_at = $answerModel->created_at;
         $answerModel->state = 1;
 
-        $answer_id=$answerModel->add();
+        $answer_id = $answerModel->add();
         if (isset($answer_id)) {
             $questionModel
                 ->where(array(
@@ -374,5 +384,12 @@ class AnswerController extends Controller
         }
 
         returnJson(200, "success", $data);
+    }
+
+    //答案图片上传
+    public function uploadPicture()
+    {
+
+
     }
 }

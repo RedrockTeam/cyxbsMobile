@@ -22,6 +22,8 @@ class QuestionController extends Controller
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
+    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
+    private $filePath = "/Public/QA/Question/";
 
     public function index()
     {
@@ -103,14 +105,13 @@ class QuestionController extends Controller
     //图片上传
     public function uploadPicture()
     {
-        $filePath = "/Public/QA/Question";
-        //文件上传测试
         if (!IS_POST) {
             returnJson(415);
         }
         $stuNum = I("post.stuNum");
         $idNum = I("post.idNum");
         $question_id = I("post.question_id");
+
         $user_id = getUserIdInTable($stuNum);
         if (!authUser($stuNum, $idNum))
             returnJson(403);
@@ -131,25 +132,30 @@ class QuestionController extends Controller
         $upload = new \Think\Upload($this->fileConfig);
         $info = $upload->upload();
         $photoModel = M("question_photos");
+        $checkExist = $photoModel
+            ->where(array(
+                "question_id" => $question_id,
+                "state" => 1,
+            ))->find();
+        if (!empty($checkExist))
+            returnJson(403, "the question has already haven the photos");
 
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
         } else {// 上传成功 获取上传文件信息
-            if (!is_null(array_keys($info))){
-                foreach ($info as $key){
-                    if (!is_numeric($key[4])||strpos($key,'photo')==false)
-                        returnJson(801,"invalid parameter");
-                }
-            }
-            foreach ($info as $key=> $value) {
+            $result = array();
+            foreach ($info as $key => $value) {
+                if (preg_match('/photo[0-9]/', $key) != 1)
+                    returnJson(801, "the file key is wrong");
                 $photoModel->create();
-                $photoModel->filepath = $filePath . $value['savename'];
+                $photoModel->filepath = ($this->filePath) . $value['savename'];
                 $photoModel->question_id = $question_id;
                 $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
                 $photoModel->updated_at = $photoModel->created_at;
                 $photoModel->add();
+                array_push($result, $this->domain . $this->filePath . $value['savename']);
             }
-            returnJson(200);
+            returnJson(200, "success", $result);
         }
     }
 
@@ -237,7 +243,6 @@ class QuestionController extends Controller
         );
 
         $questionModel = M("questionlist");
-        $userModel = M("users");
 
         $result = $questionModel
             ->page($page, $size)
@@ -273,10 +278,6 @@ class QuestionController extends Controller
             $question['title'] = json_decode($question['title']);
             $question['description'] = json_decode($question['description']);
             $question['tags'] = json_decode($question['tags']);
-            $question['photo_url'] = array(
-                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-            );
 
             array_push($data, $question);
         }
@@ -343,10 +344,17 @@ class QuestionController extends Controller
 
         //图片链接
         //记得补充
-        $data->photo_urls = array(
-            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-            "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-        );
+        $photoModel = M("question_photos");
+        $pictureSet = $photoModel->where(array(
+            "question_id" => $question_id,
+            "state" => 1,
+        ))->getField("filepath", true);
+
+        $data->photo_urls = array();
+
+        foreach ($pictureSet as $value) {
+            array_push($data->photo_urls, $this->domain . $value);
+        }
 
         //判断提问者是否匿名
         if ($question['is_anonymous'] == 0) {

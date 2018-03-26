@@ -10,8 +10,12 @@ namespace QA\Controller;
 
 
 use Think\Controller;
+use QA\Common\JWT;
 
 class IntegralController extends Controller
 {
-
+    public function index()
+    {
+        var_dump(JWT::$leeway);
+    }
 }
