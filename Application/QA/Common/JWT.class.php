@@ -6,7 +6,7 @@
  * Time: 16:27
  */
 
-namespace QA\common;
+namespace QA\Common;
 use \DomainException;
 use \InvalidArgumentException;
 use \UnexpectedValueException;
