@@ -24,6 +24,19 @@ class AnswerController extends Controller
     private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
     private $filePath = "/Public/QA/Answer/";
 
+    private function urlTranslate($url)
+    {
+        $result = array();
+        if (is_array($url)) {
+            foreach ($url as $value) {
+                $value = $this->domain . $value;
+                array_push($result, $value);
+            }
+            return $result;
+        } else
+            return $this->domain . $url;
+    }
+
 
     //回答
     public function add()
@@ -138,13 +151,14 @@ class AnswerController extends Controller
             ->order(array())
             ->select();
 
-
+        $photoModel = M("answer_photos");
         for ($i = 0; $i < count($data); $i++) {
             $userinfo = getUserBasicInfoInTable($data[$i]['user_id']);
-            $data[$i]['photo_url'] = array(
-                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-            );
+            $data[$i]['photo_url'] = $photoModel->where(array(
+                "answer_id" => $data[$i]['id'],
+                "state" => 1,
+            ))->getField("file_path", true);//回答问题
+            $data[$i]['photo_url'] = $this->urlTranslate($data[$i]['photo_url']);
             $data[$i]['content'] = json_decode($data[$i]['content']);
             $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
             $data[$i]['nickname'] = $userinfo['nickname'];
@@ -178,7 +192,7 @@ class AnswerController extends Controller
                 "user_id" => $user_id,
                 "state" => 1,
             ))
-            ->getField("user_id");
+            ->getField("user_id");  //检查用户权限是否足够
         if (empty($check_user))
             returnJson(403, "invalid question or user power is not enough");
 
@@ -189,14 +203,14 @@ class AnswerController extends Controller
                 "state" => 1,
                 "is_adopted" => 1,
             ))
-            ->getField("id");
+            ->getField("id");   //检查该答案是否已经被采纳
         $checkOnly = $answerModel
             ->where(array(
                 "question_id" => $question_id,
                 "state" => 1,
                 "is_adopted" => 1,
             ))
-            ->getField("id");
+            ->getField("id");   //检查该问题是否已经有被采纳的答案
         if (!empty($checkAdopted) || !empty($checkOnly))
             returnJson(801, "invalid question to answer");
 
@@ -210,6 +224,8 @@ class AnswerController extends Controller
 
         //积分处理
         //在积分模块之后需要补充
+        $user_id=0;
+        $adoptUser=
 
         returnJson(200);
     }
@@ -411,14 +427,14 @@ class AnswerController extends Controller
                 "state" => 1,
             ))->find();
         if (empty($checkExist))
-            returnJson(801,"invalid question or it is not your question");
+            returnJson(801, "invalid question or it is not your question");
 
-        $upload=new Upload($this->fileConfig);
-        $info=$upload->upload();
-        if (!$info){
+        $upload = new Upload($this->fileConfig);
+        $info = $upload->upload();
+        if (!$info) {
             $this->error($upload->getError());
-        }else{
-            $result=array();
+        } else {
+            $result = array();
             foreach ($info as $key => $value) {
                 if (preg_match('/photo[0-9]/', $key) != 1)
                     returnJson(801, "the file key is wrong");
@@ -433,13 +449,13 @@ class AnswerController extends Controller
                     returnJson(403, "the answer has already haven the photos");
                 $datetime = new \DateTime();
                 $photoModel->create();
-                $photoModel->file_path = $this->filePath.$value['savename'];
-                $photoModel->answer_id=$answer_id;
+                $photoModel->file_path = $this->filePath . $value['savename'];
+                $photoModel->answer_id = $answer_id;
                 $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
                 $photoModel->add();
-                array_push($result,$this->domain.$this->filePath.$value['savename']);
+                array_push($result, $this->domain . $this->filePath . $value['savename']);
             }
-            returnJson(200,"success",$result);
+            returnJson(200, "success", $result);
         }
     }
 }

@@ -342,8 +342,7 @@ class QuestionController extends Controller
         $data->tags = json_decode($question['tags']);
         $data->kind = $question['kind'];
 
-        //图片链接
-        //记得补充
+        //图片链接压制
         $photoModel = M("question_photos");
         $pictureSet = $photoModel->where(array(
             "question_id" => $question_id,
