@@ -22,7 +22,6 @@ class QuestionController extends Controller
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
-    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
     private $filePath = "/Public/QA/Question/";
 
     public function index()
@@ -153,7 +152,7 @@ class QuestionController extends Controller
                 $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
                 $photoModel->updated_at = $photoModel->created_at;
                 $photoModel->add();
-                array_push($result, $this->domain . $this->filePath . $value['savename']);
+                array_push($result, DOMAIN . $this->filePath . $value['savename']);
             }
             returnJson(200, "success", $result);
         }
@@ -240,18 +239,32 @@ class QuestionController extends Controller
             "created_at",
             "is_anonymous",
             "id",
-        );
+        );  //所需查询的列
 
         $questionModel = M("questionlist");
-
-        $result = $questionModel
-            ->page($page, $size)
-            ->field($queryField)
-            ->where(array(
-                "kind" => $kind,
-                "state" => 1
-            ))
-            ->select();
+        $timeRequire = array("disappear_at" => array(
+            "EGT", date("Y-m-d H:i:s")
+        ));
+        if ($kind == "全部") {
+            $result = $questionModel
+                ->page($page, $size)
+                ->field($queryField)
+                ->where(array(
+                    "state" => 1,
+                ))
+                ->where($timeRequire)
+                ->select();
+        } else {
+            $result = $questionModel
+                ->page($page, $size)
+                ->field($queryField)
+                ->where(array(
+                    "kind" => $kind,
+                    "state" => 1,
+                ))
+                ->where($timeRequire)
+                ->select();
+        }
 
         $data = array();
         foreach ($result as $question) {
@@ -281,7 +294,7 @@ class QuestionController extends Controller
 
             array_push($data, $question);
         }
-        returnJson(200, '', $data);
+        returnJson(200, 'success', $data);
     }
 
 
@@ -298,10 +311,12 @@ class QuestionController extends Controller
         //请求者用户id
         $requester = getUserIdInTable(I("post.stuNum"));
 
-
+        //所需要使用的模型初始化
         $questionModel = M("questionlist");
         $answerModel = M("answerlist");
         $prModel = M("praise_remark");
+        $photoModel = M("question_photos");
+        $answerPhotoModel = M("answer_photos");
 
         $queryField = array(
             "title",
@@ -343,7 +358,6 @@ class QuestionController extends Controller
         $data->kind = $question['kind'];
 
         //图片链接压制
-        $photoModel = M("question_photos");
         $pictureSet = $photoModel->where(array(
             "question_id" => $question_id,
             "state" => 1,
@@ -352,7 +366,7 @@ class QuestionController extends Controller
         $data->photo_urls = array();
 
         foreach ($pictureSet as $value) {
-            array_push($data->photo_urls, $this->domain . $value);
+            array_push($data->photo_urls, DOMAIN . $value);
         }
 
         //判断提问者是否匿名
@@ -387,6 +401,7 @@ class QuestionController extends Controller
                 "created_at" => "desc",
             ))
             ->select();
+
         //答案列表信息压制
         $data->answers = array();
         foreach ($answerSet as $value) {
@@ -415,12 +430,17 @@ class QuestionController extends Controller
             else
                 $answer->is_praised = 1;
 
-            //图片链接
-            //记得补充
-            $answer->photo_url = array(
-                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-                "https://farm4.staticflickr.com/3703/33922601146_fb9867b205_k.jpg",
-            );
+            //答案图片链接
+            $answer->photo_url = array();
+            $photoSet = $answerPhotoModel
+                ->where(array(
+                    "id" => $answer->id,
+                    "state" => 1,
+                ))
+                ->getField("file_path", true);
+            foreach ($photoSet as $item) {
+                array_push($photoSet, DOMAIN . $item);
+            }
             array_push($data->answers, $answer);
         }
 

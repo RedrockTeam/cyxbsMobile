@@ -111,7 +111,7 @@ class AnswerController extends Controller
                     "state" => 1,
                 ))
                 ->setInc("answer_num", 1);
-            returnJson(200);
+            returnJson(200,"success",$answer_id);
         } else
             returnJson(500);
     }

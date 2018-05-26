@@ -6,6 +6,8 @@
  * Time: 15:36
  */
 
+const DOMAIN="https://wx.idsbllp.cn/springtest/cyxbsMobile";
+
 /**
  * 根据status返回对应的json语句
  * @param  int $status http请求码
@@ -29,10 +31,10 @@ function returnJson($status, $info = "", $data = array())
             $report = array('status' => 801, 'info' => 'invalid parameter');
             break;
         case 200:
-            $report = array('status' => 200, 'info' => 'success');
+            $report = array('status' => 200, 'info' => 'success',"data"=>array());
             break;
         case 415:
-            $repost = array("status" => 415, "info" => "invalid request way");
+            $report = array("status" => 415, "info" => "invalid request way","data"=>array());
             break;
         case 'datatable':
             $report = array('draw' => intval($data['draw']), 'recordsFiltered' => intval($data['recordsFiltered']), 'recordsTotal' => intval($data['recordsTotal']), 'data' => $data['data']);
