@@ -15,7 +15,7 @@ use Think\Think;
 class QuestionController extends Controller
 {
     protected $fileConfig = array(
-        "maxSize" => 4194304,
+        "maxSize" => 6400000,
         'rootPath' => './Public/QA/Question/',
         "saveName" => "uniqid",
         "exts" => array('jpg', 'gif', 'png', 'jpeg'),

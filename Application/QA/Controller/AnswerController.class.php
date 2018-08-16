@@ -14,7 +14,7 @@ use Think\Upload;
 class AnswerController extends Controller
 {
     protected $fileConfig = array(
-        "maxSize" => 4194304,
+        "maxSize" => 6400000,
         'rootPath' => './Public/QA/Answer/',
         "saveName" => "uniqid",
         "exts" => array('jpg', 'gif', 'png', 'jpeg'),
@@ -224,8 +224,6 @@ class AnswerController extends Controller
 
         //积分处理
         //在积分模块之后需要补充
-        $user_id=0;
-        $adoptUser=
 
         returnJson(200);
     }

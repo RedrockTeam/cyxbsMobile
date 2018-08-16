@@ -34,7 +34,7 @@ function returnJson($status, $info = "", $data = array())
             $report = array('status' => 200, 'info' => 'success',"data"=>array());
             break;
         case 415:
-            $report = array("status" => 415, "info" => "invalid request way","data"=>array());
+            $report = array("status" => 415, "info" => "invalid request way");
             break;
         case 'datatable':
             $report = array('draw' => intval($data['draw']), 'recordsFiltered' => intval($data['recordsFiltered']), 'recordsTotal' => intval($data['recordsTotal']), 'data' => $data['data']);

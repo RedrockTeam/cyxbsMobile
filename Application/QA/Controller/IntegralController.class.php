@@ -47,6 +47,7 @@ class IntegralController extends Controller
         );
     }
 
+    //增加积分
     protected static function add($addedUser, $num, $event, $time)
     {
         try {
@@ -72,7 +73,6 @@ class IntegralController extends Controller
         }
         return true;
     }
-
 
     //获取用户账户余额
     public function getDiscountBalance()
@@ -144,6 +144,7 @@ class IntegralController extends Controller
         }
     }
 
+    //获取商品列表
     public function getItemList()
     {
         $request = I("post.");
@@ -167,6 +168,7 @@ class IntegralController extends Controller
         returnJson(200, "success", $result);
     }
 
+    //签到
     public function checkIn()
     {
         if (!IS_POST) {
@@ -176,6 +178,7 @@ class IntegralController extends Controller
         $idnum = I("post.idnum");
         if (!authUser($stunum, $idnum))
             returnJson(403, "the user is not himself");
+
         $user_id = getUserIdInTable($stunum);
 
         $checkInLogModel = M("checkin_log");
@@ -184,10 +187,12 @@ class IntegralController extends Controller
             "userid" => $user_id,
             "create_at" => array("exp", "BETWEEN '" . date("Y-m-d 00:00:00") . "' AND '" . date("Y-m-d 23:59:59") . "' "),
         ))->count();
+
         if ($isCheckToday >= 1)
             returnJson(403, "today had checked in");
         $checkInLogModel->data(array("userid" => $user_id, "create_at" => date("Y-m-d H:i:s")))->add();
 
+        $i=0;
         for ($i = 0; $i < 7; $i++) {
             $num = $checkInLogModel->where(array(
                 "userid" => $user_id,
@@ -199,10 +204,11 @@ class IntegralController extends Controller
         $integral = array(10, 10, 20, 10, 30, 10, 40);
         $integralModel = M("integral_log");
         $integralModel
-            ->data(array("userid" => $user_id,
+            ->data(array(
+                "user_id" => $user_id,
                 "event_type" => "check in",
                 "num" => $integral[$i - 1],
-                "create_at" => date("Y-m-d H:i:s")
+                "created_at" => date("Y-m-d H:i:s"),
             ))
             ->add();
         $userModel = M("users");
@@ -210,6 +216,7 @@ class IntegralController extends Controller
         returnJson(200);
     }
 
+    //获取签到状态
     public function getCheckInStatus()
     {
         if (!IS_POST) {
