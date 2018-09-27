@@ -21,7 +21,8 @@ class AnswerController extends Controller
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
-    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
+//    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
+    private $domain = DOMAIN;
     private $filePath = "/Public/QA/Answer/";
 
     private function urlTranslate($url)
@@ -111,7 +112,7 @@ class AnswerController extends Controller
                     "state" => 1,
                 ))
                 ->setInc("answer_num", 1);
-            returnJson(200,"success",$answer_id);
+            returnJson(200, "success", $answer_id);
         } else
             returnJson(500);
     }

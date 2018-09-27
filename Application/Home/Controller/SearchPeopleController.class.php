@@ -3,8 +3,9 @@ namespace Home\Controller;
 use Think\Controller;
 class SearchPeopleController extends Controller {
     //api网址
-    protected $url = 'http://jwzx.cqupt.edu.cn/jwzxtmp/data/json_studentList.php';
-    
+//    protected $url = 'http://jwzx.cqupt.edu.cn/jwzxtmp/data/json_studentList.php';
+        protected $url = 'http://jwzx.cqupt.edu.cn/data/json_studentList.php';
+
 
     public function index(){
         $studentNum = I('stunum');

@@ -371,7 +371,6 @@ class UserController extends Controller
             returnJson(200, "success");
     }
 
-
     public function integralRecords()
     {
         if (!IS_POST) {
@@ -390,6 +389,7 @@ class UserController extends Controller
 
     }
 
+    //关于我的
     public function aboutMe()
     {
         if (!IS_POST)
@@ -404,13 +404,12 @@ class UserController extends Controller
         $size = I("post.size") ?: 6;
         $userId = getUserIdInTable($stunum);
 
-        $type = (int)I("post.type") ?: 0; //点赞1 评论2
+        $type = (int)I("post.type") ?: 0; //点赞1 评论2 全部3
         if ($type == 0)
             returnJson(801);
 
         $answerModel = M("answerlist");
         $remarkModel = M("praise_remark");
-        $remarkModel->where(array())->select();
 
         $answerSet = $answerModel
             ->field(array("id", "question_id", "content"))
@@ -433,10 +432,14 @@ class UserController extends Controller
                 $answerSet[$i]["photo_src"] = "";
             else
                 $answerSet[$i]["photo_src"] = DOMAIN . $photo['file_path'];
-            array_push($idSet, $answerSet[$i]['id']);
+            array_push($idSet, (int)$answerSet[$i]['id']);
         }
 
-        if ($type == 2) {
+        //修复点赞评论的bug
+        if (count($idSet)==0)
+            returnJson(200,"no data","");
+
+        if ($type == 2 || $type == 1) {
             $remarkPraiseSet = $remarkModel
                 ->field(array("target_id", "content", "user_id", "created_at", "type"))
                 ->where(array(
@@ -453,17 +456,6 @@ class UserController extends Controller
                 ->where(array(
                     "target_id" => array("in", $idSet),
                     "state" => 1,
-                ))
-                ->order("created_at desc")
-                ->page($page, $size)
-                ->select();
-        } else {
-            $remarkPraiseSet = $remarkModel
-                ->field(array("target_id", "content", "user_id", "created_at", "type"))
-                ->where(array(
-                    "target_id" => array("in", $idSet),
-                    "state" => 1,
-                    "type" => $type,
                 ))
                 ->order("created_at desc")
                 ->page($page, $size)
