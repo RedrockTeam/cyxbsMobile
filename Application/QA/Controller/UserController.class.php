@@ -97,11 +97,15 @@ class UserController extends Controller
     }
 
     //问一问
+    /**
+     * @todo 修复问一问接口
+     *
+     */
     public function ask()
     {
+        set_time_limit(10);
         if (!IS_POST)
             returnJson(415);
-
 
         $stunum = I("post.stunum");
         $idnum = I("post.idnum");
@@ -114,7 +118,6 @@ class UserController extends Controller
             returnJson(801);
 
         $questionModel = M("questionlist");
-        $answerModel = M("answerlist");
         $userID = getUserIdInTable($stunum);
 
         $userQuestion = $questionModel
@@ -124,41 +127,65 @@ class UserController extends Controller
                 "state" => 1,
             ))
             ->select();
-        $solvedQuestions = array();
-        $notSolvedQuestions = array();
+
 
         if ($userQuestion != null) {
-            for ($i = 0; $i <= count($userQuestion); $i++) {
-                $haveAdoptedAnswers = $answerModel
-                    ->field(array("content", "updated_at", "created_at"))
-                    ->where(array(
-                        "question_id" => $userQuestion[$i]['id'],
-                        "is_adopted" => 1,
-                        "state" => 1,
-                    ))
-                    ->find();
-                $userQuestion[$i]['title'] = json_decode($userQuestion[$i]['title']);
+            $userQuestionID = array();
+            $answerModel = M("answerlist");
+            $solvedQuestions = array();
+            $notSolvedQuestions = array();
 
-                if ($haveAdoptedAnswers == null) {
-                    array_push($notSolvedQuestions, $userQuestion[$i]);
-                } else {
-                    $userQuestion[$i]['answer_content'] = json_decode($haveAdoptedAnswers['content']);
-                    $userQuestion[$i]['updated_at'] = $haveAdoptedAnswers['updated_at'];
-                    array_push($solvedQuestions, $userQuestion[$i]);
-                    unset($userQuestion[$i]);
-                }
-            }
-        }
+            foreach ($userQuestion as $value)
+                array_push($userQuestionID, $value["id"]);
 
-        if ($type == 1) {
-            for ($i = 0; $i < count($notSolvedQuestions); $i++) {
-                $notSolvedQuestions[$i]["updated_at"] = "";
-            }
-            $data = $notSolvedQuestions;
-        } else {
-            $data = $solvedQuestions;
-        }
-        returnJson(200, 'success', $data);
+            $solvedQuestions = $answerModel
+                ->where(array(
+                    "question_id" => array("in", $userQuestionID),
+                    "is_adopted" => 1,
+                    "state" => 1,
+                ))
+                ->select();
+            var_dump($solvedQuestions);
+
+        } else
+            returnJson(200, "no data", "");
+
+        //问题代码 待重构
+//        echo "接口目前有问题 待重构";
+//        if ($userQuestion != null) {
+//            for ($i = 0; $i <= count($userQuestion); $i++) {
+//                $haveAdoptedAnswers = $answerModel
+//                    ->field(array("content", "updated_at", "created_at"))
+//                    ->where(array(
+//                        "question_id" => $userQuestion[$i]['id'],
+//                        "is_adopted" => 1,
+//                        "state" => 1,
+//                    ))
+//                    ->find();
+//                $userQuestion[$i]['title'] = json_decode($userQuestion[$i]['title']);
+//
+//                if ($haveAdoptedAnswers == null) {
+//                    array_push($notSolvedQuestions, $userQuestion[$i]);
+//                } else {
+//                    $userQuestion[$i]['answer_content'] = json_decode($haveAdoptedAnswers['content']);
+//                    $userQuestion[$i]['updated_at'] = $haveAdoptedAnswers['updated_at'];
+//                    array_push($solvedQuestions, $userQuestion[$i]);
+//                    unset($userQuestion[$i]);
+//                }
+//            }
+//        } else {
+//            returnJson(200, "no data", "");
+//        }
+//
+//        if ($type == 1) {
+//            for ($i = 0; $i < count($notSolvedQuestions); $i++) {
+//                $notSolvedQuestions[$i]["updated_at"] = "";
+//            }
+//            $data = $notSolvedQuestions;
+//        } else {
+//            $data = $solvedQuestions;
+//        }
+//        returnJson(200, 'success', $data);
     }
 
     //草稿箱列表
@@ -436,8 +463,8 @@ class UserController extends Controller
         }
 
         //修复点赞评论的bug
-        if (count($idSet)==0)
-            returnJson(200,"no data","");
+        if (count($idSet) == 0)
+            returnJson(200, "no data", "");
 
         if ($type == 2 || $type == 1) {
             $remarkPraiseSet = $remarkModel
