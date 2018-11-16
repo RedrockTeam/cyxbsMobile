@@ -97,6 +97,7 @@ class FeedbackController extends Controller
      * @description
      * @param int $page 页码
      * @param int $size 一页的数量
+     * @todo 增加管理员功能
      */
     public function reportList()
     {
@@ -116,5 +117,19 @@ class FeedbackController extends Controller
             returnJson(200, "success", $result);
         else
             returnJson(404, "no data");
+    }
+
+    /**
+     * @author yangruixin
+     * @description 该方法为举报处理，处理完之后将举报记录删除
+     * @method POST
+     * @param int $stunum
+     * @param int $idnum
+     * @param int $id 举报id
+     * @todo 管理员认证方法 并且需要确定处理方式
+     */
+    public function process()
+    {
+
     }
 }
