@@ -36,11 +36,12 @@ class FeedbackController extends Controller
     /**
      * @description 增加举报记录
      * @author yangruixin
-     * @param String stunum
-     * @param String idnum 上面两项参数放在了initialize方法里面
-     * @param String type 举报类型
-     * @param String content 举报内容
-     * @param int question_id 举报对象
+     * @param String $stunum
+     * @param String $idnum 上面两项参数放在了initialize方法里面
+     * @param String $type 举报类型
+     * @param String $content 举报内容
+     * @param int $question_id 举报对象
+     * @return String json
      */
     public function addReport()
     {
@@ -93,9 +94,27 @@ class FeedbackController extends Controller
 
     /**
      * @author yangruixin
+     * @description
+     * @param int $page 页码
+     * @param int $size 一页的数量
      */
     public function reportList()
     {
+        $page = I("post.page") ?: 1;
+        $size = I("post.size") ?: 6;
 
+        $reportModel = M(REPORT_TABLE);
+        $field = array("user_id", "type", "content", "question_id");
+        $result = $reportModel
+            ->field($field)
+            ->where(array(
+                "state" => 1
+            ))
+            ->page($page, $size)
+            ->select();
+        if ($result != null)
+            returnJson(200, "success", $result);
+        else
+            returnJson(404, "no data");
     }
 }
