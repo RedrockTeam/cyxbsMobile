@@ -220,6 +220,12 @@ class QuestionController extends Controller
     //首页问题列表
     public function getQuestionList()
     {
+        //认证部分 确定用户身份
+        $stunum = I("post.stunum");
+        $idnum = I("post.idnum");
+        if (!authUser($stunum, $idnum))
+            returnJson(403);
+
         $page = I("post.page") ?: 0;
         $size = I("post.size") ?: 6;
         $kind = I("post.kind") ?: 0;
@@ -271,6 +277,10 @@ class QuestionController extends Controller
 
             $userId = $question['user_id'];
             $info = getUserBasicInfoInTable($userId);
+            $question["is_self"] = 0;
+            if ($userId == getUserIdInTable($stunum))
+                $question["is_self"] = 1;
+
             unset($question['user_id']);
 
 
@@ -299,6 +309,9 @@ class QuestionController extends Controller
 
 
     //问题详细信息
+    /*
+     * @todo 该接口即将废弃
+     */
     public function getDetailedInfo()
     {
         if (!authUser(I("post.stuNum"), I("post.idNum")))
