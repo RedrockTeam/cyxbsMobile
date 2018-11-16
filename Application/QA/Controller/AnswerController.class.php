@@ -124,8 +124,10 @@ class AnswerController extends Controller
             returnJson(415);
         }
 
-        if (!authUser(I("post.stuNum"), I("idNum")))
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
             returnJson(403);
+
+        $stunum = I("post.stuNum");
 
         $page = I("post.page") ?: 1;
         $size = I("post.size") ?: 6;
@@ -153,6 +155,8 @@ class AnswerController extends Controller
             ->select();
 
         $photoModel = M("answer_photos");
+        $prModel = M("praise_remark");
+
         for ($i = 0; $i < count($data); $i++) {
             $userinfo = getUserBasicInfoInTable($data[$i]['user_id']);
             $data[$i]['photo_url'] = $photoModel->where(array(
@@ -164,11 +168,27 @@ class AnswerController extends Controller
             $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
             $data[$i]['nickname'] = $userinfo['nickname'];
             $data[$i]['gender'] = $userinfo['gender'];
+            $is_praised = $prModel
+                ->where(array(
+                    "type" => 1,
+                    "target_id" => $data[$i]['id'],
+                    "user_id" => getUserIdInTable($stunum),
+                    "state" => 1,
+                ))
+                ->count();
+            $data[$i]['is_praised'] = 0;
+            if ($is_praised > 0)
+                $data[$i]['is_praised'] = 1;
         }
         returnJson(200, "success", $data);
     }
 
     //采纳
+
+    /**@author yangruixin
+     * @todo 积分处理 在积分模块之后需要补充
+     *
+     */
     public function adopt()
     {
         if (!IS_POST)
@@ -222,9 +242,13 @@ class AnswerController extends Controller
                 "state" => 1,
             ))
             ->setField("is_adopted", 1);
+        $questionModel
+            ->where(array(
+                "id" => $question_id,
+                "state" => 1
+            ))
+            ->setField("is_adopted", 1);
 
-        //积分处理
-        //在积分模块之后需要补充
 
         returnJson(200);
     }
