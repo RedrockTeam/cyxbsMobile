@@ -175,6 +175,7 @@ class UserController extends Controller
                     ))
                     ->where(array(
                         "question_id" => $questionQueryResult[$i]["question_id"],
+                        "is_adopted" => $queryType,
                         "state" => 1
                     ))
                     ->select();
