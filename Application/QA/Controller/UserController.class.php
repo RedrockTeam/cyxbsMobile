@@ -97,13 +97,16 @@ class UserController extends Controller
     }
 
     //问一问
+
     /**
      * @todo 修复问一问接口
-     *
+     * @param int type 1已解决 2未解决
+     * @param int page default 1
+     * @param int size default 2
+     * @throws \Think\Exception
      */
     public function ask()
     {
-        set_time_limit(10);
         if (!IS_POST)
             returnJson(415);
 
@@ -113,42 +116,54 @@ class UserController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
 
+        //type 为1 查询已经解决问题 type为2 查询未解决问题
         $type = (int)I("post.type") ?: 0;
-        if ($type == 0)
-            returnJson(801);
+        $queryType = 0;
+        switch ($type) {
+            case 1:
+                $queryType = 1;
+                break;
+            case  2:
+                $queryType = 0;
+                break;
+            default:
+                returnJson(801, "invalid query type");
+                break;
+        }
+
 
         $questionModel = M("questionlist");
         $userID = getUserIdInTable($stunum);
 
-        $userQuestion = $questionModel
-            ->field(array("id", "title", "disappear_at", "created_at"))
-            ->where(array(
+        $questionQueryResult = $questionModel->field(
+            array(
+                "id" => "question_id",
+                "title",
+                "description",
+                "is_anonymous",
+                "disappear_at",
+                "created_at",
+                "updated_at",
+                "state"
+            )
+        )->where(
+            array(
                 "user_id" => $userID,
-                "state" => 1,
-            ))
-            ->select();
+                "is_adopted" => $queryType,
+                "state" => 1
+            )
+        )->select();
 
-
-        if ($userQuestion != null) {
-            $userQuestionID = array();
-            $answerModel = M("answerlist");
-            $solvedQuestions = array();
-            $notSolvedQuestions = array();
-
-            foreach ($userQuestion as $value)
-                array_push($userQuestionID, $value["id"]);
-
-            $solvedQuestions = $answerModel
-                ->where(array(
-                    "question_id" => array("in", $userQuestionID),
-                    "is_adopted" => 1,
-                    "state" => 1,
-                ))
-                ->select();
-            var_dump($solvedQuestions);
-
-        } else
+        if (empty($questionQueryResult))
             returnJson(200, "no data", "");
+
+        for ($i = 0; $i < count($questionQueryResult); $i++) {
+            $questionQueryResult[$i]["title"] = json_decode($questionQueryResult[$i]["title"]);
+            $questionQueryResult[$i]["description"] = json_decode($questionQueryResult[$i]["description"]);
+        }
+
+
+        returnJson(200, "success", $questionQueryResult);
 
         //问题代码 待重构
 //        echo "接口目前有问题 待重构";
