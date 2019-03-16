@@ -116,6 +116,8 @@ class UserController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
 
+        $page = I("post.page") ?: 1;
+        $size = I("post.size") ?: 6;
         //type 为1 查询已经解决问题 type为2 查询未解决问题
         $type = (int)I("post.type") ?: 0;
         $queryType = 0;
@@ -135,72 +137,53 @@ class UserController extends Controller
         $questionModel = M("questionlist");
         $userID = getUserIdInTable($stunum);
 
-        $questionQueryResult = $questionModel->field(
-            array(
-                "id" => "question_id",
-                "title",
-                "description",
-                "is_anonymous",
-                "disappear_at",
-                "created_at",
-                "updated_at",
-                "state"
-            )
-        )->where(
-            array(
-                "user_id" => $userID,
-                "is_adopted" => $queryType,
-                "state" => 1
-            )
-        )->select();
+        $questionQueryResult = $questionModel
+            ->field(
+                array(
+                    "id" => "question_id",
+                    "title",
+                    "description",
+                    "disappear_at",
+                    "created_at",
+                    "updated_at",
+                ))
+            ->where(
+                array(
+                    "user_id" => $userID,
+                    "is_adopted" => $queryType,
+                    "state" => 1
+                ))
+            ->page($page, $size)
+            ->select();
 
+        //802状态
         if (empty($questionQueryResult))
             returnJson(200, "no data", "");
 
-        for ($i = 0; $i < count($questionQueryResult); $i++) {
-            $questionQueryResult[$i]["title"] = json_decode($questionQueryResult[$i]["title"]);
-            $questionQueryResult[$i]["description"] = json_decode($questionQueryResult[$i]["description"]);
-        }
+        if ($queryType == 0)
+            returnJson(200, "success", $questionQueryResult);
+        else if ($queryType == 1) {
+            $answerModel = M("answerlist");
+            for ($i = 0; $i < count($questionQueryResult); $i++) {
+                $adoptedAnswer = $answerModel
+                    ->field(array(
+                        "id" => " answer_id",
+                        "content",
+                        "created_at",
+                        "updated_at",
+                        "state"
+                    ))
+                    ->where(array(
+                        "question_id" => $questionQueryResult[$i]["question_id"],
+                        "state" => 1
+                    ))
+                    ->select();
+                $questionQueryResult[$i]["answer"] = $adoptedAnswer;
+            }
 
-
-        returnJson(200, "success", $questionQueryResult);
-
-        //问题代码 待重构
-//        echo "接口目前有问题 待重构";
-//        if ($userQuestion != null) {
-//            for ($i = 0; $i <= count($userQuestion); $i++) {
-//                $haveAdoptedAnswers = $answerModel
-//                    ->field(array("content", "updated_at", "created_at"))
-//                    ->where(array(
-//                        "question_id" => $userQuestion[$i]['id'],
-//                        "is_adopted" => 1,
-//                        "state" => 1,
-//                    ))
-//                    ->find();
-//                $userQuestion[$i]['title'] = json_decode($userQuestion[$i]['title']);
-//
-//                if ($haveAdoptedAnswers == null) {
-//                    array_push($notSolvedQuestions, $userQuestion[$i]);
-//                } else {
-//                    $userQuestion[$i]['answer_content'] = json_decode($haveAdoptedAnswers['content']);
-//                    $userQuestion[$i]['updated_at'] = $haveAdoptedAnswers['updated_at'];
-//                    array_push($solvedQuestions, $userQuestion[$i]);
-//                    unset($userQuestion[$i]);
-//                }
-//            }
-//        } else {
-//            returnJson(200, "no data", "");
-//        }
-//
-//        if ($type == 1) {
-//            for ($i = 0; $i < count($notSolvedQuestions); $i++) {
-//                $notSolvedQuestions[$i]["updated_at"] = "";
-//            }
-//            $data = $notSolvedQuestions;
-//        } else {
-//            $data = $solvedQuestions;
-//        }
-//        returnJson(200, 'success', $data);
+            returnJson(200, "success", $questionQueryResult);
+        } else
+            returnJson(500, "server error");
     }
 
     //草稿箱列表
