@@ -485,8 +485,8 @@ class AnswerController extends Controller
     public function remarkJsonProcess()
     {
         $model = M("praise_remark");
-        var_dump("123");
         $data = $model->field(array("id", "content"))->where(array("type" => 2))->select();
+        var_dump($data);
         for ($i = 0; $i < count($data); $i++) {
             $data["content"] = json_decode($data["content"]);
             $model->where(array("id" => $data["id"]))->setField(array("content" => $data["content"]));
