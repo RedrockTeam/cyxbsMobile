@@ -10,7 +10,6 @@ namespace QA\Controller;
 
 
 use Think\Controller;
-use Think\Think;
 
 class QuestionController extends Controller
 {
@@ -289,7 +288,7 @@ class QuestionController extends Controller
                 $question['nickname'] = $info['nickname'];
                 $question['gender'] = $info['gender'];
             } else {
-                $question['photo_thumbnail_src'] = null;
+                $question['photo_thumbnail_src'] = "";
                 $question['nickname'] = "匿名用户";
                 $question['gender'] = '';
             }
@@ -301,6 +300,7 @@ class QuestionController extends Controller
 
             array_push($data, $question);
         }
+        var_dump($data);
         returnJson(200, 'success', $data);
     }
 
@@ -364,7 +364,7 @@ class QuestionController extends Controller
         $data->description = $question['description'];
         $data->reward = $question['reward'];
         $data->disappear_at = $question['disappear_at'];
-        $data->tags =$question['tags'];
+        $data->tags = $question['tags'];
         $data->kind = $question['kind'];
 
         //图片链接压制
