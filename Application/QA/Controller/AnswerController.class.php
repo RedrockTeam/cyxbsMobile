@@ -481,16 +481,4 @@ class AnswerController extends Controller
             returnJson(200, "success", $result);
         }
     }
-
-    public function remarkJsonProcess()
-    {
-        $model = M("praise_remark");
-        $data = $model->field(array("id", "content"))->where(array("type" => 2))->select();
-        var_dump($data);
-        for ($i = 0; $i < count($data); $i++) {
-            $content = json_decode($data[$i]["content"]);
-            $model->where(array("id" => $data[$i]["id"]))->setField(array("content" => $content));
-        }
-        return "123";
-    }
 }
