@@ -17,11 +17,11 @@ class QuestionController extends Controller
         "maxSize" => 6400000,
         'rootPath' => './Public/QA/Question/',
         "saveName" => "uniqid",
-        "exts" => array('jpg', 'gif', 'png', 'jpeg'),
+        "exts" => array('png', 'jpeg', "jpg", 'PNG', 'JPEG', 'JPG'),
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
-    private $filePath = "/Public/QA/Question/";
+    private $filePath = "./Public/QA/Question/";
 
     public function index()
     {

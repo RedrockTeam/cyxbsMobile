@@ -17,13 +17,13 @@ class AnswerController extends Controller
         "maxSize" => 6400000,
         'rootPath' => './Public/QA/Answer/',
         "saveName" => "uniqid",
-        "exts" => array('jpg', 'gif', 'png', 'jpeg'),
+        "exts" => array('png', 'jpeg', "jpg", 'PNG', 'JPEG', 'JPG'),
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
 //    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
     private $domain = DOMAIN;
-    private $filePath = "/Public/QA/Answer/";
+    private $filePath = "./Public/QA/Answer/";
 
     private function urlTranslate($url)
     {
