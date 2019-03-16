@@ -69,11 +69,11 @@ class QuestionController extends Controller
         $question->user_id = getUserIdInTable($stunum) ?: 0;
         if ($question->user_id == 0)
             returnJson(403, "invalid stunum");
-        $question->title = json_encode(I("post.title"));
-        $question->description = json_encode(I("post.description"));
+        $question->title = I("post.title");
+        $question->description = I("post.description");
         $question->is_anonymous = I("post.is_anonymous");
         $question->kind = I("post.kind");
-        $question->tags = json_encode(I("post.tags"));
+        $question->tags = I("post.tags");
 
         //积分认证模块
         //记得写好这里
@@ -298,9 +298,6 @@ class QuestionController extends Controller
             $question['answer_num'] = (int)$question['answer_num'];
             $question['id'] = (int)$question['id'];
             $question['is_anonymous'] = (int)$question['is_anonymous'];
-            $question['title'] = json_decode($question['title']);
-            $question['description'] = json_decode($question['description']);
-            $question['tags'] = json_decode($question['tags']);
 
             array_push($data, $question);
         }
@@ -363,11 +360,11 @@ class QuestionController extends Controller
         if (getUserIdInTable(I("post.stuNum")) == $question['user_id'])
             $data->is_self = 1;
 
-        $data->title = json_decode($question['title']);
-        $data->description = json_decode($question['description']);
+        $data->title = $question['title'];
+        $data->description = $question['description'];
         $data->reward = $question['reward'];
         $data->disappear_at = $question['disappear_at'];
-        $data->tags = json_decode($question['tags']);
+        $data->tags =$question['tags'];
         $data->kind = $question['kind'];
 
         //图片链接压制
@@ -424,7 +421,7 @@ class QuestionController extends Controller
             $answer->nickname = $answerer['nickname'];
             $answer->photo_thumbnail_src = $answerer['photo_thumbnail_src'];
             $answer->gender = $answerer['gender'];
-            $answer->content = json_decode($value['content']);
+            $answer->content = $value['content'];
             $answer->created_at = $value['created_at'];
             $answer->praise_num = $value['praise_num'];
             $answer->comment_num = $value['comment_num'];

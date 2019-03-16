@@ -63,7 +63,7 @@ class UserController extends Controller
                         "state" => 1,
                     ))
                     ->find();
-                $adoptedAnswers[$i]['question_title'] = json_decode($questionInfo['title']);
+                $adoptedAnswers[$i]['question_title'] = $questionInfo['title'];
                 $adoptedAnswers[$i]['disappear_at'] = $questionInfo['disappear_at'];
                 $adoptedAnswers[$i]['created_at'] = "";
 
@@ -82,7 +82,7 @@ class UserController extends Controller
                         "state" => 1,
                     ))
                     ->find();
-                $notAdoptedAnswers[$i]['question_title'] = json_decode($questionInfo['title']);
+                $notAdoptedAnswers[$i]['question_title'] = $questionInfo['title'];
                 $notAdoptedAnswers[$i]['disappear_at'] = $questionInfo['disappear_at'];
                 $notAdoptedAnswers[$i]["updated_at"] = "";
             }
