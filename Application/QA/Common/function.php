@@ -6,14 +6,15 @@
  * Time: 15:36
  */
 
-const DOMAIN="https://wx.idsbllp.cn/springtest/cyxbsMobile";
+const DOMAIN = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
 
 const REPORT_TABLE = "reports";
 /**
  * 根据status返回对应的json语句
  * @param  int $status http请求码
  * @param  string $info 重写info信息
- * @return  array $data json里需要返回的数据
+ * @param  array $data
+ * @return void $data json里需要返回的数据
  */
 function returnJson($status, $info = "", $data = array())
 {
@@ -32,7 +33,7 @@ function returnJson($status, $info = "", $data = array())
             $report = array('status' => 801, 'info' => 'invalid parameter');
             break;
         case 200:
-            $report = array('status' => 200, 'info' => 'success',"data"=>array());
+            $report = array('status' => 200, 'info' => 'success', "data" => array());
             break;
         case 415:
             $report = array("status" => 415, "info" => "invalid request way");
@@ -48,6 +49,7 @@ function returnJson($status, $info = "", $data = array())
             $report = array('status' => $status);
     }
 
+
     if (!empty($info)) {
         $report['info'] = $info;
     }
@@ -57,6 +59,7 @@ function returnJson($status, $info = "", $data = array())
     //加密序列化处理
     //$json = message_encrypt($report);
     header("Content-Type:application/json");
+    http_response_code($status);
     echo json_encode($report);
     exit;
 }
@@ -102,12 +105,13 @@ function getUserIdInTable($stunum)
  * @param  int $user_id 用户id
  * @return  mixed $result 包含头像 昵称 性别
  */
-function getUserBasicInfoInTable($user_id){
-    $userModel=M('users');
-    $result=$userModel
+function getUserBasicInfoInTable($user_id)
+{
+    $userModel = M('users');
+    $result = $userModel
         ->field("nickname,photo_thumbnail_src,gender")
         ->where(array(
-            "id"=>$user_id,
+            "id" => $user_id,
         ))
         ->find();
     if (!empty($result))
