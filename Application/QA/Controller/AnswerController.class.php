@@ -96,7 +96,7 @@ class AnswerController extends Controller
         $answerModel->create();
         $answerModel->user_id = $user_id;
         $answerModel->question_id = $question_id;
-        $answerModel->content = json_encode(I("post.content"));
+        $answerModel->content = I("post.content");
         $answerModel->praise_num = 0;
         $answerModel->comment_num = 0;
         $answerModel->is_adopted = 0;
@@ -419,7 +419,7 @@ class AnswerController extends Controller
             $value['nickname'] = $userInfo['nickname'];
             $value['photo_thumbnail_src'] = $userInfo['photo_thumbnail_src'];
             $value['gender'] = $userInfo['gender'];
-            $value['content'] = json_decode($value['content']);
+            $value['content'] = $value['content'];
             unset($value['user_id']);
             array_push($data, $value);
         }
@@ -480,5 +480,17 @@ class AnswerController extends Controller
             }
             returnJson(200, "success", $result);
         }
+    }
+
+    public function remarkJsonProcess()
+    {
+        $model = M("answerlist");
+        $data = $model->field(array("id", "content"))->select();
+        var_dump($data);
+        for ($i = 0; $i < count($data); $i++) {
+            $content = json_decode($data[$i]["content"]);
+            $model->where(array("id" => $data[$i]["id"]))->setField(array("content" => $content));
+        }
+        return "123";
     }
 }
