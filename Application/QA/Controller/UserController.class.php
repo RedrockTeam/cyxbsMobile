@@ -422,8 +422,11 @@ class UserController extends Controller
                 ->page($page, $size)
                 ->select();
 
+            if (empty($data))
+                returnJson(200, "no data");
+
             for ($i = 0; $i < count($data); $i++)
-                $data[$i]["event_type"] = $eventMap[$data[$i]["event_type"]]?:"其它";
+                $data[$i]["event_type"] = $eventMap[$data[$i]["event_type"]] ?: "其它";
 
             returnJson(200, "success", $data);
         } catch (Exception $exception) {
