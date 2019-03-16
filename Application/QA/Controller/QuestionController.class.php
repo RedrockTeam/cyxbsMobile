@@ -300,7 +300,6 @@ class QuestionController extends Controller
 
             array_push($data, $question);
         }
-        var_dump($data);
         returnJson(200, 'success', $data);
     }
 
