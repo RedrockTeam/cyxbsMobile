@@ -76,31 +76,7 @@ class IntegralController extends Controller
     }
 
     //获取用户账户余额
-    public function getDiscountBalance()
-    {
-        if (!IS_POST) {
-            returnJson(415);
-        }
-        $stuNum = I("post.stuNum");
-        $idNum = I("post.idNum");
-        //认证方式
-        //需要更换
-        //测试时认证不变
-        if (!authUser($stuNum, $idNum))
-            returnJson(403, "discount verify failed");
-        try {
-            $userModel = M('users');
-            $user_id = getUserIdInTable($stuNum);
-            $balance = $userModel
-                ->where(array(
-                    "id" => $user_id
-                ))
-                ->getField("integral");
-            returnJson(200, "success", (int)$balance);
-        } catch (\Exception $e) {
-            returnJson(500, "server error");
-        }
-    }
+    //该方法弃用
 
     //管理员 增加可兑换商品
     public function addItem()
