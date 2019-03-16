@@ -164,7 +164,7 @@ class AnswerController extends Controller
                 "state" => 1,
             ))->getField("file_path", true);//回答问题
             $data[$i]['photo_url'] = $this->urlTranslate($data[$i]['photo_url']);
-            $data[$i]['content'] = json_decode($data[$i]['content']);
+            $data[$i]['content'] = $data[$i]['content'];
             $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
             $data[$i]['nickname'] = $userinfo['nickname'];
             $data[$i]['gender'] = $userinfo['gender'];
@@ -367,7 +367,7 @@ class AnswerController extends Controller
 
         $prModel->create();
         $prModel->type = 2;
-        $prModel->content = json_encode($content);
+        $prModel->content = $content;
         $prModel->target_id = $answer_id;
         $prModel->user_id = $user_id;
         $prModel->created_at = $datetime->format("Y-m-d H:i:s");
@@ -480,5 +480,16 @@ class AnswerController extends Controller
             }
             returnJson(200, "success", $result);
         }
+    }
+
+    public function remarkJsonProcess()
+    {
+        $model = M("praise_remark");
+        $data = $model->field(array("id", "content"))->where(array("type" => 2))->select();
+        for ($i = 0; $i < count($data); $i++) {
+            $data["content"] = json_decode($data["content"]);
+            $model->where(array("id" => $data["id"]))->setField(array("content" => $data["content"]));
+        }
+        return "123";
     }
 }
