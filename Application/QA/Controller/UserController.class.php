@@ -486,14 +486,10 @@ class UserController extends Controller
         }
 
         for ($i = 0; $i < count($remarkPraiseSet); $i++) {
-            if ($type == 2)
-                $remarkPraiseSet[$i]['content'] = $remarkPraiseSet[$i]['content'];
-            elseif ($type == 3) {
+            if ($type == 3) {
                 if ($remarkPraiseSet[$i]['type'] != 2)
-                    $remarkPraiseSet[$i]['content'] = $remarkPraiseSet[$i]['content'];
-                else
                     $remarkPraiseSet[$i]['content'] = "";
-            } else
+            } elseif ($type == 1)
                 $remarkPraiseSet[$i]['content'] = "";
 
             $id = $remarkPraiseSet[$i]['user_id'];
