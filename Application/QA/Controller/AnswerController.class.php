@@ -481,19 +481,4 @@ class AnswerController extends Controller
             returnJson(200, "success", $result);
         }
     }
-
-    public function remarkJsonProcess()
-    {
-        $model = M("questionlist");
-        $data = $model->field(array("id", "title", "description", "tags"))->where(array("id" => array("EGT", 221)))->select();
-        var_dump($data);
-        for ($i = 0; $i < count($data); $i++) {
-            $title = json_decode($data[$i]["title"]);
-            $desc = json_decode($data[$i]["description"]);
-            $tags = json_decode($data[$i]["tags"]);
-            $model->where(array("id" => $data[$i]["id"]))
-                ->setField(array("title" => $title, "description" => $desc, "tags" => $tags));
-        }
-        return "123";
-    }
 }
