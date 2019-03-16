@@ -6,8 +6,8 @@
  * Time: 15:36
  */
 
-const DOMAIN = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
-
+//const DOMAIN = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
+const DOMAIN = "https://hongyan.cqupt.edu.cn/app";
 const REPORT_TABLE = "reports";
 /**
  * 根据status返回对应的json语句
@@ -21,7 +21,7 @@ function returnJson($status, $info = "", $data = array())
     // print_r(debug_backtrace());exit;
     switch ($status) {
         case 500:
-            $report = array('status' => 500, 'info' => '服务器错误');
+            $report = array('status' => 500, 'info' => 'server error');
             break;
         case 404:
             $report = array('status' => 404, 'info' => 'error parameter');
@@ -36,7 +36,7 @@ function returnJson($status, $info = "", $data = array())
             $report = array('status' => 200, 'info' => 'success', "data" => array());
             break;
         case 415:
-            $report = array("status" => 415, "info" => "invalid request way");
+            $report = array("status" => 405, "info" => "invalid http method");
             break;
         case 405:
             $report = array("status" => 405, "info" => "invalid http method");
