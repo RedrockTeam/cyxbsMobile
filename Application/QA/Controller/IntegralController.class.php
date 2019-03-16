@@ -148,9 +148,6 @@ class IntegralController extends Controller
     //签到
     public function checkIn()
     {
-        if (!IS_POST) {
-            returnJson(415);
-        }
         $stunum = I("post.stunum");
         $idnum = I("post.idnum");
         if (!authUser($stunum, $idnum))

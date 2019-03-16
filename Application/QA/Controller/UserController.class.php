@@ -9,6 +9,7 @@
 namespace QA\Controller;
 
 use Think\Controller;
+use Think\Exception;
 
 class UserController extends Controller
 {
@@ -407,8 +408,27 @@ class UserController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
 
-        $page = I("post.page") ?: 0;
+        $userId = getUserIdInTable($stunum);
+        $page = I("post.page") ?: 1;
         $size = I("post.size") ?: 6;
+
+        $eventMap = array("adopt" => "采纳", "exchange" => "商品兑换", "talent" => "系统操作", "check in" => "签到");
+        try {
+            $integralLogModel = M("integral_log");
+            $data = $integralLogModel
+                ->field(array("num", "event_type", "created_at"))
+                ->where(array("user_id" => $userId))
+                ->order("created_at desc")
+                ->page($page, $size)
+                ->select();
+
+            for ($i = 0; $i < count($data); $i++)
+                $data[$i]["event_type"] = $eventMap[$data[$i]["event_type"]]?:"其它";
+
+            returnJson(200, "success", $data);
+        } catch (Exception $exception) {
+            returnJson(500);
+        }
 
 
     }
