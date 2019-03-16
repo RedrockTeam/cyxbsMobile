@@ -488,8 +488,8 @@ class AnswerController extends Controller
         $data = $model->field(array("id", "content"))->where(array("type" => 2))->select();
         var_dump($data);
         for ($i = 0; $i < count($data); $i++) {
-            $data["content"] = json_decode($data["content"]);
-            $model->where(array("id" => $data["id"]))->setField(array("content" => $data["content"]));
+            $content = json_decode($data[$i]["content"]);
+            $model->where(array("id" => $data[$i]["id"]))->setField(array("content" => $content));
         }
         return "123";
     }
