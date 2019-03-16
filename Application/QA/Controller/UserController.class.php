@@ -64,7 +64,6 @@ class UserController extends Controller
                     ))
                     ->find();
                 $adoptedAnswers[$i]['question_title'] = json_decode($questionInfo['title']);
-                $adoptedAnswers[$i]['content'] = json_decode($adoptedAnswers[$i]['content']);
                 $adoptedAnswers[$i]['disappear_at'] = $questionInfo['disappear_at'];
                 $adoptedAnswers[$i]['created_at'] = "";
 
@@ -84,7 +83,6 @@ class UserController extends Controller
                     ))
                     ->find();
                 $notAdoptedAnswers[$i]['question_title'] = json_decode($questionInfo['title']);
-                $notAdoptedAnswers[$i]['content'] = json_decode($notAdoptedAnswers[$i]['content']);
                 $notAdoptedAnswers[$i]['disappear_at'] = $questionInfo['disappear_at'];
                 $notAdoptedAnswers[$i]["updated_at"] = "";
             }
@@ -225,7 +223,7 @@ class UserController extends Controller
                         "id" => $draftList[$i]['target_id'],
                         "state" => 1,
                     ))->getField("content");
-                    $check = json_decode($check);
+                    $check = $check;
                     $draftList[$i]['title_content'] = $check;
                     break;
                 case "remark":
@@ -237,7 +235,7 @@ class UserController extends Controller
                             "state" => 1,
                         ))
                         ->getField("content");
-                    $check = json_decode($check);
+                    $check = $check;
                     $draftList[$i]['title_content'] = $check;
                     break;
             }
@@ -448,7 +446,6 @@ class UserController extends Controller
         $photoModel = M("answer_photos");
         $idSet = array();
         for ($i = 0; $i < count($answerSet); $i++) {
-            $answerSet[$i]['content'] = json_decode($answerSet[$i]['content']);
             $photo = $photoModel
                 ->where(array(
                     "answer_id" => $answerSet[$i]['id'],
@@ -490,13 +487,12 @@ class UserController extends Controller
 
         for ($i = 0; $i < count($remarkPraiseSet); $i++) {
             if ($type == 2)
-                $remarkPraiseSet[$i]['content'] = json_decode($remarkPraiseSet[$i]['content']);
+                $remarkPraiseSet[$i]['content'] = $remarkPraiseSet[$i]['content'];
             elseif ($type == 3) {
-                if ($remarkPraiseSet[$i]['type'] == 2)
-                    $remarkPraiseSet[$i]['content'] = json_decode($remarkPraiseSet[$i]['content']);
+                if ($remarkPraiseSet[$i]['type'] != 2)
+                    $remarkPraiseSet[$i]['content'] = $remarkPraiseSet[$i]['content'];
                 else
                     $remarkPraiseSet[$i]['content'] = "";
-
             } else
                 $remarkPraiseSet[$i]['content'] = "";
 
