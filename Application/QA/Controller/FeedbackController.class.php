@@ -12,16 +12,12 @@ use Think\Controller;
 
 class FeedbackController extends Controller
 {
-    public function index()
-    {
-        echo "hello";
-    }
-
     /**
      * @description use to check the users stunum&idnum
      * @param String stunum
      * @idnum String idnum
      * @return void
+     * @throws \Think\Exception
      */
     public function _initialize()
     {
@@ -42,6 +38,7 @@ class FeedbackController extends Controller
      * @param String $content 举报内容
      * @param int $question_id 举报对象
      * @return String json
+     * @throws \Think\Exception
      */
     public function addReport()
     {
@@ -95,8 +92,7 @@ class FeedbackController extends Controller
     /**
      * @author yangruixin
      * @description
-     * @param int $page 页码
-     * @param int $size 一页的数量
+     * @throws \Think\Exception
      * @todo 增加管理员功能
      */
     public function reportList()
