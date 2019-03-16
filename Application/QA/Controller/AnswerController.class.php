@@ -484,12 +484,15 @@ class AnswerController extends Controller
 
     public function remarkJsonProcess()
     {
-        $model = M("answerlist");
-        $data = $model->field(array("id", "content"))->select();
+        $model = M("questionlist");
+        $data = $model->field(array("id", "title", "description", "tags"))->select();
         var_dump($data);
         for ($i = 0; $i < count($data); $i++) {
-            $content = json_decode($data[$i]["content"]);
-            $model->where(array("id" => $data[$i]["id"]))->setField(array("content" => $content));
+            $title = json_decode($data[$i]["title"]);
+            $desc = json_decode($data[$i]["description"]);
+            $tags = json_decode($data[$i]["tags"]);
+            $model->where(array("id" => $data[$i]["id"]))
+                ->setField(array("title" => $title, "description" => $desc, "tags" => $tags));
         }
         return "123";
     }
