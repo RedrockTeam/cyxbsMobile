@@ -9,8 +9,9 @@
 namespace QA\Controller;
 
 
-use Think\Controller;
 use QA\Common\JWT;
+use Think\Controller;
+use Think\Exception;
 use Think\Upload;
 
 class IntegralController extends Controller
@@ -179,7 +180,9 @@ class IntegralController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "the user is not himself");
 
-        $user_id = getUserIdInTable($stunum);
+        $userInfo = getUserInfo($stunum);
+        $user_id = (int)$userInfo["id"];
+        $userIntegral = (int)$userInfo["integral"];
 
         $checkInLogModel = M("checkin_log");
 
@@ -190,66 +193,58 @@ class IntegralController extends Controller
 
         if ($isCheckToday >= 1)
             returnJson(403, "today had checked in");
-        $checkInLogModel->data(array("userid" => $user_id, "create_at" => date("Y-m-d H:i:s")))->add();
+        else {
+            try {
+                $checkInLogModel
+                    ->data(array("userid" => $user_id, "create_at" => date("Y-m-d H:i:s")))
+                    ->add();
+                //积分映射
+                $integralMap = array(10, 10, 20, 10, 30, 10, 40);
 
-        $i=0;
-        for ($i = 0; $i < 7; $i++) {
-            $num = $checkInLogModel->where(array(
-                "userid" => $user_id,
-                "create_at" => array("exp", "BETWEEN '" . date("Y-m-d 00:00:00", strtotime("-" . (string)$i . " day")) . "' AND '" . date("Y-m-d 23:59:59", strtotime("-" . (string)$i . " day")) . "' "),
-            ))->count();
-            if ($num <= 0)
-                break;
+                //连续签到日期
+                $continuousSignInDayNum = getUserInfo($user_id)['check_in_days'];
+                //前一天是否签到
+                $isCheckYesterday = $checkInLogModel->where(array(
+                    "userid" => $user_id,
+                    "create_at" => array("exp", "BETWEEN '" . date("Y-m-d 00:00:00", strtotime("-1 day")) . "' AND '" . date("Y-m-d 23:59:59", strtotime("-1 day")) . "' "),
+                ))->count();
+
+                //如果昨天签到了 计算连续签到天数 大于七天时 积分按七天签到算
+                $integral = 0;
+                if ($isCheckYesterday == 1 && $continuousSignInDayNum >= 1) {
+                    $continuousSignInDayNum += 1;
+                    if ($continuousSignInDayNum >= 7)
+                        $integral = $integralMap[6];
+                    else
+                        $integral = $integralMap[$continuousSignInDayNum];
+                } else if ($isCheckToday != 1) {
+                    $continuousSignInDayNum = 1;
+                    $integral = $integralMap[0];
+                }
+
+                //积分变动记录表添加记录
+                $integralModel = M("integral_log");
+                $integralModel
+                    ->data(array(
+                        "user_id" => $user_id,
+                        "event_type" => "check in",
+                        "num" => $integral,
+                        "created_at" => date("Y-m-d H:i:s"),
+                    ))
+                    ->add();
+
+                //变更用户表 积分数额
+                $userModel = M("users");
+                $userModel
+                    ->where(array("id" => $user_id))
+                    ->setField(array("integral" => $userIntegral + $integral, "check_in_days" => $continuousSignInDayNum));
+                returnJson(200);
+            } catch (Exception $exception) {
+                returnJson(500, "server error");
+            }
         }
-        $integral = array(10, 10, 20, 10, 30, 10, 40);
-        $integralModel = M("integral_log");
-        $integralModel
-            ->data(array(
-                "user_id" => $user_id,
-                "event_type" => "check in",
-                "num" => $integral[$i - 1],
-                "created_at" => date("Y-m-d H:i:s"),
-            ))
-            ->add();
-        $userModel = M("users");
-        $userModel->where(array("id" => $user_id))->setInc("integral", $integral[$i - 1]);
-        returnJson(200);
     }
 
     //获取签到状态
-    public function getCheckInStatus()
-    {
-        if (!IS_POST) {
-            returnJson(415);
-        }
-        $stunum = I("post.stunum");
-        $idnum = I("post.idnum");
-        if (!authUser($stunum, $idnum))
-            returnJson(403, "the user is not himself");
-        $user_id = getUserIdInTable($stunum);
-
-        $checkInLogModel = M("checkin_log");
-
-        $isCheckToday = $checkInLogModel->where(array(
-            "userid" => $user_id,
-            "create_at" => array("exp", "BETWEEN '" . date("Y-m-d 00:00:00") . "' AND '" . date("Y-m-d 23:59:59") . "' "),
-        ))->count();
-        if ($isCheckToday == 1)
-            $data['checked'] = 1;
-        else
-            $data['checked'] = 0;
-
-        for ($i = 0; $i < 7; $i++) {
-            $num = $checkInLogModel->where(array(
-                "userid" => $user_id,
-                "create_at" => array("exp", "BETWEEN '" . date("Y-m-d 00:00:00", strtotime("-" . (string)$i . " day")) . "' AND '" . date("Y-m-d 23:59:59", strtotime("-" . (string)$i . " day")) . "' "),
-            ))->count();
-            if ($num <= 0)
-                break;
-        }
-
-        $data['serialDays'] = $i;
-
-        returnJson(200, "success", $data);
-    }
+    //该方法弃用
 }
