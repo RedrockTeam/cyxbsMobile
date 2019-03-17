@@ -491,7 +491,7 @@ class QuestionController extends Controller
                 "question_id" => $questionId,
                 "state" => 1
             ))->find();
-        if (empty($checkExistence) || $checkExistence["user_id"] == $userId)
+        if (isset($checkExistence) || $checkExistence["user_id"] == $userId)
             returnJson(403, "already ignored the question or it's your question, please check it");
         else {
             $model->create();
