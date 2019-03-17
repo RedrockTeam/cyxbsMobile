@@ -30,8 +30,9 @@ class QuestionController extends Controller
 
     public function _before_add()
     {
+        //前置操作 不是POST直接返回405
         if (!IS_POST)
-            returnJson(801, "wrong way to request");
+            returnJson(405);
     }
 
 
