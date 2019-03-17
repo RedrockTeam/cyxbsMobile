@@ -248,13 +248,13 @@ class QuestionController extends Controller
 
         $userId = getUserIdInTable($stunum);
         //加载该用户忽略列表
-        $ignoreModel = M("ignoreList");
+        $ignoreModel = M("ignore_problems");
         $ignoreList = $ignoreModel
             ->where(array(
                 "user_id" => $userId,
                 "state" => "1"
             ))
-            ->getField('question_id',true);
+            ->getField('question_id', true);
 
         $questionModel = M("questionlist");
         $timeRequire = array(
