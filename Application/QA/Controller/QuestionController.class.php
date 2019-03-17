@@ -21,7 +21,7 @@ class QuestionController extends Controller
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
-    private $filePath = "./Public/QA/Question/";
+    private $filePath = "/Public/QA/Question/";
 
     public function index()
     {
@@ -230,7 +230,7 @@ class QuestionController extends Controller
         $kind = I("post.kind") ?: 0;
 
         if ($kind === 0)
-            returnJson(801);
+            returnJson(400, "invalid kind");
 
         $queryField = array(
             "title",
@@ -246,10 +246,21 @@ class QuestionController extends Controller
             "id",
         );  //所需查询的列
 
+        $userId = getUserIdInTable($stunum);
+        //加载该用户忽略列表
+        $ignoreModel = M("ignoreList");
+        $ignoreList = $ignoreModel
+            ->where(array(
+                "user_id" => $userId,
+                "state" => "1"
+            ))
+            ->getField('question_id',true);
+
         $questionModel = M("questionlist");
-        $timeRequire = array("disappear_at" => array(
-            "EGT", date("Y-m-d H:i:s")
-        ));
+        $timeRequire = array(
+            "disappear_at" => array("EGT", date("Y-m-d H:i:s")),
+            "id" => array("NOT IN", $ignoreList)
+        );
         if ($kind == "全部") {
             $result = $questionModel
                 ->page($page, $size)
@@ -258,6 +269,7 @@ class QuestionController extends Controller
                     "state" => 1,
                 ))
                 ->where($timeRequire)
+                ->order("disappear_at asc")
                 ->select();
         } else {
             $result = $questionModel
@@ -268,6 +280,7 @@ class QuestionController extends Controller
                     "state" => 1,
                 ))
                 ->where($timeRequire)
+                ->order("disappear_at asc")
                 ->select();
         }
 

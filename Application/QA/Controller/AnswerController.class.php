@@ -23,7 +23,7 @@ class AnswerController extends Controller
     );
 //    private $domain = "https://wx.idsbllp.cn/springtest/cyxbsMobile";
     private $domain = DOMAIN;
-    private $filePath = "./Public/QA/Answer/";
+    private $filePath = "/Public/QA/Answer/";
 
     private function urlTranslate($url)
     {
