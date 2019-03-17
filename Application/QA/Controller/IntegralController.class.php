@@ -26,7 +26,7 @@ class IntegralController extends Controller
         "autoSub" => false,
         "subName" => array('date', "Ymd"),
     );
-    private $filePath = "/Public/QA/Item/";
+    private $filePath = "./Public/QA/Item/";
 
     public function _initialize()
     {

@@ -35,7 +35,6 @@ class QuestionController extends Controller
             returnJson(405);
     }
 
-
     //提问
     public function add()
     {
@@ -455,6 +454,38 @@ class QuestionController extends Controller
         }
 
         returnJson(200, 'success', $data);
+    }
 
+    //问题忽略功能
+    public function ignore()
+    {
+        if (!authUser(I("post.stuNum"), I("post.idNum")))
+            returnJson(403);
+
+        $questionId = I("post.question_id");
+
+        if (empty($questionId))
+            returnJson(400);
+
+        $userId = getUserIdInTable(I("post.stuNum"));
+
+        $model = M("ignore_problems");
+
+        $checkExistence = $model
+            ->field(array("user_id", "question_id"))
+            ->where(array(
+                "user_id" => $userId,
+                "question_id" => $questionId,
+                "state" => 1
+            ))->find();
+        if (empty($checkExistence) || $checkExistence["user_id"] == $userId)
+            returnJson(403, "already ignored the question or it's your question, please check it");
+        else {
+            $model->create();
+            $model->user_id = $userId;
+            $model->question_id = $questionId;
+            if ($model->add())
+                returnJson(200);
+        }
     }
 }
