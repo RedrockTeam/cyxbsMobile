@@ -349,24 +349,24 @@ class UserController extends Controller
                 $target_id = I("post.target_id") ?: 0;
                 if ($target_id == 0)
                     returnJson(801);
-                $answerModel = M("answerlist");
-                $check = $answerModel->where(array(
-                    "id" => $target_id,
-                    "state" => 1,
-                ))->find();
+                $questionModel = M("questionlist");
+                $check = $questionModel
+                    ->where(array(
+                        "id" => $target_id,
+                        "state" => 1,
+                    ))->find();
                 if ($check == null)
-                    returnJson(403, "invalid answer");
+                    returnJson(403, "invalid question");
                 break;
             case "remark":
                 $target_id = I("post.target_id") ?: 0;
                 if ($target_id == 0)
                     returnJson(801);
 
-                $remarkModel = M("praise_remark");
-                $check = $remarkModel
+                $answerModel = M("answerlist");
+                $check = $answerModel
                     ->where(array(
                         "id" => $target_id,
-                        "type" => 2,
                         "state" => 1,
                     ))
                     ->find();
@@ -378,7 +378,7 @@ class UserController extends Controller
                 $content = ($content);
                 break;
             default:
-                returnJson(403, "invalid parameter 'type' ");
+                returnJson(403, "invalid parameter \'type\' ");
                 break;
         }
 
@@ -394,6 +394,8 @@ class UserController extends Controller
 
         if ($draftModel->add())
             returnJson(200, "success");
+        else
+            returnJson(500);
     }
 
     public function integralRecords()
