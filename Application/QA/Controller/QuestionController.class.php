@@ -257,10 +257,17 @@ class QuestionController extends Controller
             ->getField('question_id', true);
 
         $questionModel = M("questionlist");
-        $timeRequire = array(
-            "disappear_at" => array("EGT", date("Y-m-d H:i:s")),
-            "id" => array("NOT IN", $ignoreList)
-        );
+        $timeRequire = array();
+        if (empty($ignoreList)) {
+            $timeRequire = array(
+                "disappear_at" => array("EGT", date("Y-m-d H:i:s")),
+            );
+        } else {
+            $timeRequire = array(
+                "disappear_at" => array("EGT", date("Y-m-d H:i:s")),
+                "id" => array("NOT IN", $ignoreList)
+            );
+        }
         if ($kind == "全部") {
             $result = $questionModel
                 ->page($page, $size)
