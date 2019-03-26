@@ -98,7 +98,6 @@ class UserController extends Controller
     //问一问
 
     /**
-     * @todo 修复问一问接口
      * @param int type 1已解决 2未解决
      * @param int page default 1
      * @param int size default 2
@@ -534,4 +533,8 @@ class UserController extends Controller
 
         returnJson(200, "success", $remarkPraiseSet);
     }
+
+    /*
+     * @todo 草稿箱图片功能
+     */
 }

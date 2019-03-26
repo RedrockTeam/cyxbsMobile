@@ -508,7 +508,5 @@ class QuestionController extends Controller
         }
     }
 
-    /*
-     * @todo 草稿箱图片功能
-     */
+
 }
