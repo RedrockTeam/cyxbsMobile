@@ -213,40 +213,36 @@ class UserController extends Controller
             ->page($page, $size)
             ->select();
 
+        if (empty($draftList))
+            returnJson(200, "no data!");
+
         for ($i = 0; $i < count($draftList); $i++) {
             switch ($draftList[$i]["type"]) {
                 case "question":
                     $draftList[$i]['title_content'] = "";
                     break;
                 case "answer":
-                    $answerModel = M("answerlist");
-                    $check = $answerModel->where(array(
+                    $questionModel = M("questionlist");
+                    $check = $questionModel->where(array(
                         "id" => $draftList[$i]['target_id'],
                         "state" => 1,
-                    ))->getField("content");
-                    $check = $check;
+                    ))->getField("title");
                     $draftList[$i]['title_content'] = $check;
                     break;
                 case "remark":
-                    $remarkModel = M("praise_remark");
-                    $check = $remarkModel
+                    $answerModel = M("answerlist");
+                    $check = $answerModel
                         ->where(array(
                             "id" => $draftList[$i]['target_id'],
-                            "type" => 2,
                             "state" => 1,
                         ))
                         ->getField("content");
-                    $check = $check;
                     $draftList[$i]['title_content'] = $check;
                     break;
             }
         }
 
-
-        if ($draftList == null)
-            returnJson(200, "success", array());
-        else
-            returnJson(200, "success", $draftList);
+        returnJson(200, "success", $draftList);
     }
 
     //更新草稿箱
@@ -398,6 +394,7 @@ class UserController extends Controller
             returnJson(500);
     }
 
+    //积分记录
     public function integralRecords()
     {
         if (!IS_POST) {
