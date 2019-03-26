@@ -99,7 +99,6 @@ class QuestionController extends Controller
         ));
     }
 
-
     //图片上传
     public function uploadPicture()
     {
@@ -508,4 +507,8 @@ class QuestionController extends Controller
                 returnJson(200);
         }
     }
+
+    /*
+     * @todo 草稿箱图片功能
+     */
 }
