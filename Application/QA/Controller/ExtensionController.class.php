@@ -61,11 +61,13 @@ class ExtensionController extends Controller
 
         $result = array_diff(Classroom::$ALL, $busyRoom);
         for ($i = 0; $i < count($result); $i++) {
+            var_dump($result[$i]);
+            var_dump($result[$i][0]);
             if ($result[$i][0] != $buildNum)
                 unset($result[$i]);
         }
-        sort($result);
-
-        returnJson(200, "success", $result);
+//        sort($result);
+//
+//        returnJson(200, "success", $result);
     }
 }
