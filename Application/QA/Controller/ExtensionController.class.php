@@ -9,10 +9,10 @@
 namespace QA\Controller;
 
 
-class ExtensionController
+use Think\Controller;
+
+class ExtensionController extends Controller
 {
-
-
     public function emptyRoom()
     {
         $buildNum = I("get.buildNum");
