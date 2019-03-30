@@ -12,4 +12,18 @@ namespace QA\Controller;
 class ExtensionController
 {
 
+
+    public function emptyRoom()
+    {
+        $buildNum = I("get.buildNum");
+        $week = I("get.week");
+        $sectionNum = I("get.sectionNum");
+        $weekdayNum = I("get.weekdayNum");
+
+        var_dump($weekdayNum);
+
+        $sectionMapper = array(
+            ""
+        );
+    }
 }
