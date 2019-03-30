@@ -8,22 +8,62 @@
 
 namespace QA\Controller;
 
-
 use Think\Controller;
 
 class ExtensionController extends Controller
 {
     public function emptyRoom()
     {
+        if (!extension_loaded('redis')) {
+            E(L('_NOT_SUPPORT_') . ':redis');
+        }
+
         $buildNum = I("get.buildNum");
         $week = I("get.week");
         $sectionNum = I("get.sectionNum");
         $weekdayNum = I("get.weekdayNum");
 
-        var_dump($weekdayNum);
+        if (is_null($buildNum) || is_null($week) || is_null($sectionNum) || is_null($weekdayNum))
+            returnJson(801);
 
         $sectionMapper = array(
-            ""
+            array("1", "2"),
+            array("3", "4"),
+            array("5", "6"),
+            array("7", "8"),
+            array("9", "10"),
+            array("11", "12")
         );
+
+
+        $key = array();
+        if (strpos($sectionNum, ",")) {
+            $key = array($week . "_" . $weekdayNum . "_" . $sectionNum);
+        } else {
+            $key = explode(",", $sectionNum);
+            for ($i = 0; $i < count($key); $i++)
+                $key[$i] = $week . "_" . $weekdayNum . "_" . $key[$i];
+        }
+
+        if (empty($key))
+            returnJson(403);
+
+        $busyRoom = array();
+        $redis = new \Redis();
+        $redis->connect(C('REDIS_HOST') ?: '127.0.0.1');
+        $redis->select(3);
+        for ($i = 0; $i < count($key); $i++) {
+            $busyRoom = array_merge($busyRoom, $redis->sMembers($key[$i]));
+            $busyRoom = array_unique($busyRoom);
+        }
+
+        $result = array_diff(\Classroom::$ALL, $busyRoom);
+        for ($i = 0; $i < count($result); $i++) {
+            if ($result[$i][0] != $buildNum)
+                unset($result[$i]);
+        }
+        sort($result);
+
+        returnJson(200, "success", $result);
     }
 }

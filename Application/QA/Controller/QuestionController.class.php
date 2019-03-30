@@ -164,6 +164,9 @@ class QuestionController extends Controller
     }
 
     //修改悬赏分
+    /*
+     * @todo 积分确认
+     */
     public function updateReward()
     {
         $checkField = array(
