@@ -1,5 +1,6 @@
 <?php
 
+namespace QA\Common;
 //标明所有教室 以及2/3/4/5/8教教室
 class Classroom
 {

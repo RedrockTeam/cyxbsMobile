@@ -8,6 +8,7 @@
 
 namespace QA\Controller;
 
+use QA\Common\Classroom;
 use Think\Controller;
 
 class ExtensionController extends Controller
@@ -35,14 +36,15 @@ class ExtensionController extends Controller
             array("11", "12")
         );
 
-
         $key = array();
         if (strpos($sectionNum, ",")) {
-            $key = array($week . "_" . $weekdayNum . "_" . $sectionNum);
+            $key = array($week . "_" . $weekdayNum . "_" . $sectionMapper[(int)$sectionNum][0], $week . "_" . $weekdayNum . "_" . $sectionMapper[(int)$sectionNum][1]);
         } else {
-            $key = explode(",", $sectionNum);
-            for ($i = 0; $i < count($key); $i++)
-                $key[$i] = $week . "_" . $weekdayNum . "_" . $key[$i];
+            $tmpkey = explode(",", $sectionNum);
+            for ($i = 0; $i < count($tmpkey); $i++) {
+                array_push($key, $key[$i] = $week . "_" . $weekdayNum . "_" . $sectionMapper[(int)$tmpkey][0]);
+                array_push($key, $key[$i] = $week . "_" . $weekdayNum . "_" . $sectionMapper[(int)$tmpkey][1]);
+            }
         }
 
         if (empty($key))
@@ -57,7 +59,7 @@ class ExtensionController extends Controller
             $busyRoom = array_unique($busyRoom);
         }
 
-        $result = array_diff(\Classroom::$ALL, $busyRoom);
+        $result = array_diff(Classroom::$ALL, $busyRoom);
         for ($i = 0; $i < count($result); $i++) {
             if ($result[$i][0] != $buildNum)
                 unset($result[$i]);
