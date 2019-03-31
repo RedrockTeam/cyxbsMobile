@@ -10,13 +10,18 @@ namespace QA\Controller;
 
 use QA\Common\Classroom;
 use Think\Controller;
+use Think\Exception;
 
 class ExtensionController extends Controller
 {
     public function emptyRoom()
     {
         if (!extension_loaded('redis')) {
-            E(L('_NOT_SUPPORT_') . ':redis');
+            try {
+                E(L('_NOT_SUPPORT_') . ':redis');
+            } catch (Exception $e) {
+                returnJson(500);
+            }
         }
 
         $buildNum = I("get.buildNum");
