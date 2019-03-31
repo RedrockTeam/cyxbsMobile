@@ -67,9 +67,10 @@ class ExtensionController extends Controller
             if ($result[$i][0] == $buildNum)
                 array_push($data, $result[$i]);
         }
-//        header("Content-Type:application/json");
 
-        return array(
+        header("Content-Type:application/json");
+
+        echo json_encode(array(
             "status" => 200,
             "info" => "success",
             "version" => "1.0.0",
@@ -77,6 +78,6 @@ class ExtensionController extends Controller
             "weekdayNum" => "{$weekdayNum}",
             "buildNum" => "{$buildNum}",
             "data" => $data,
-        );
+        ));
     }
 }
