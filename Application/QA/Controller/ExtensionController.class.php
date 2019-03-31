@@ -60,14 +60,23 @@ class ExtensionController extends Controller
         }
 
         $result = array_diff(Classroom::$ALL, $busyRoom);
+        sort($result);
+
+        $data = array();
         for ($i = 0; $i < count($result); $i++) {
-            var_dump($result[$i]);
-            var_dump($result[$i][0]);
-            if ($result[$i][0] != $buildNum)
-                unset($result[$i]);
+            if ($result[$i][0] == $buildNum)
+                array_push($data, $result[$i]);
         }
-//        sort($result);
-//
-//        returnJson(200, "success", $result);
+//        header("Content-Type:application/json");
+
+        return array(
+            "status" => 200,
+            "info" => "success",
+            "version" => "1.0.0",
+            "term" => "20182",
+            "weekdayNum" => "{$weekdayNum}",
+            "buildNum" => "{$buildNum}",
+            "data" => $data,
+        );
     }
 }
