@@ -546,10 +546,18 @@ class UserController extends Controller
     private $filePath = "/Public/QA/Draft/";
 
     /*
-     * @todo 草稿箱图片功能
+     * @todo Nginx问题 等待测试
      */
     public function draftImageUpload()
     {
+        if (!IS_POST)
+            returnJson(415);
+        $stunum = I("post.stunum");
+        $idnum = I("post.idnum");
+
+        if (!authUser($stunum, $idnum))
+            returnJson(403, "it is not yourself");
+
         $upload = new \Think\Upload($this->fileConfig);
         $info = $upload->upload();
 
@@ -564,7 +572,31 @@ class UserController extends Controller
                 array_push($result, $filePath);
             }
 
-            returnJson(200,"success",$result);
+            returnJson(200, "success", $result);
         }
+    }
+
+    public function getScoreStatus()
+    {
+        if (!IS_POST)
+            returnJson(415);
+        $stunum = I("post.stunum");
+        $idnum = I("post.idnum");
+
+        if (!authUser($stunum, $idnum))
+            returnJson(403, "it is not yourself");
+
+        $userInfo = getUserInfo($stunum);
+
+        $isCheckToday = M("checkin_log")->where(array(
+            "userid" => $userInfo["id"],
+            "create_at" => array("between", array(date("Y-m-d 00:00:00"), date("Y-m-d 23:59:59")))
+        ))->count();
+
+        returnJson(200, "success", array(
+            "integral" => $userInfo['integral'],
+            "check_in_days" > $userInfo["check_in_days"],
+            "is_check_today" => $isCheckToday
+        ));
     }
 }
