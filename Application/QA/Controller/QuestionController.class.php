@@ -113,8 +113,8 @@ class QuestionController extends Controller
         if (!authUser($stuNum, $idNum))
             returnJson(403);
         $questionModel = M("questionlist");
-        $datetime = new \DateTime();
 
+        //确定问题是否是该用户的
         $checkExist = $questionModel
             ->where(array(
                 "user_id" => $user_id,
@@ -125,17 +125,41 @@ class QuestionController extends Controller
         if (empty($checkExist))
             returnJson(403, "it is not your question or invalid question");
 
-
-        $upload = new \Think\Upload($this->fileConfig);
-        $info = $upload->upload();
+        //确定图片数量少于九张
         $photoModel = M("question_photos");
-        $checkExist = $photoModel
+        $checkEnable = $photoModel
             ->where(array(
                 "question_id" => $question_id,
                 "state" => 1,
             ))->find();
-        if (!empty($checkExist))
-            returnJson(403, "the question has already haven the photos");
+        if ($checkEnable>=9)
+            returnJson(403, "the question has already haven the enough photos");
+
+
+        $photoUrl = I("post.photo_url1");
+        if (isset($photoUrl)) {
+            $result = array();
+            //最多九张图 判断完第一张图是不是为空即可知道是否有url的图片
+            for ($i = 1; $i <= 9; $i++) {
+                $tempUri = I("post.photo_url" . $i);
+                //每一次循环中判断是否有新图 如果没有说明图片上传结束
+                if (empty($tempUri)) {
+                    returnJson(200, "success", $result);
+                    break;
+                }
+
+                $photoModel->create();
+                $photoModel->file_path = $tempUri;
+                $photoModel->question_id = $question_id;
+                $photoModel->created_at = date("Y-m-d H:i:s");
+                $photoModel->add();
+                array_push($result, $this->domain . $tempUri);
+            }
+            returnJson(200, "success", $result);
+        }
+
+        $upload = new \Think\Upload($this->fileConfig);
+        $info = $upload->upload();
 
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
@@ -147,7 +171,7 @@ class QuestionController extends Controller
                 $photoModel->create();
                 $photoModel->filepath = ($this->filePath) . $value['savename'];
                 $photoModel->question_id = $question_id;
-                $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
+                $photoModel->created_at = date("Y-m-d H:i:s");
                 $photoModel->updated_at = $photoModel->created_at;
                 $photoModel->add();
                 array_push($result, DOMAIN . $this->filePath . $value['savename']);
