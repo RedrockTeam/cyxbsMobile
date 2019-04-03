@@ -596,7 +596,7 @@ class UserController extends Controller
 
         $data = array(
             "integral" => (int)$userInfo['integral'],
-            "check_in_days" > (int)$userInfo["check_in_days"],
+            "check_in_days" => (int)$userInfo["check_in_days"],
             "is_check_today" => (int)$isCheckToday
         );
 
