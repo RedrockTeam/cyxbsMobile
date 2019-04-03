@@ -454,22 +454,24 @@ class AnswerController extends Controller
         if (empty($checkExist))
             returnJson(801, "invalid question or it is not your question");
 
+        //检测是否超过九张图片
+        $photoModel = M("answer_photos");
+        $photoNums = $photoModel
+            ->where(array(
+                "answer_id" => $answer_id,
+                "state" => 1,
+            ))
+            ->count();
+        if ($photoNums >= 9)
+            returnJson(403, "the answer has already haven the enough photos");
+
         $photoUrl = I("post.photo_url1");
         if (isset($photoUrl)) {
-            //检测是否超过九张图片
-            $photoModel = M("answer_photos");
-            $photoNums = $photoModel
-                ->where(array(
-                    "answer_id" => $answer_id,
-                    "state" => 1,
-                ))
-                ->count();
-            if ($photoNums >= 9)
-                returnJson(403, "the answer has already haven the enough photos");
-
             $result = array();
-            for ($i = 0; $i <= 9; $i++) {
+            //最多九张图 判断完第一张图是不是为空即可知道是否有url的图片
+            for ($i = 1; $i <= 9; $i++) {
                 $tempUri = I("post.photo_url" . $i);
+                //每一次循环中判断是否有新图 如果没有说明图片上传结束
                 if (empty($tempUri)) {
                     returnJson(200, "success", $result);
                     break;
@@ -494,20 +496,10 @@ class AnswerController extends Controller
             foreach ($info as $key => $value) {
                 if (preg_match('/photo[0-9]/', $key) != 1)
                     returnJson(801, "the file key is wrong");
-                $photoModel = M("answer_photos");
-                $photoNums = $photoModel
-                    ->where(array(
-                        "answer_id" => $answer_id,
-                        "state" => 1,
-                    ))
-                    ->count();
-                if ($photoNums >= 9)
-                    returnJson(403, "the answer has already haven the enough photos");
-                $datetime = new \DateTime();
                 $photoModel->create();
                 $photoModel->file_path = $this->filePath . $value['savename'];
                 $photoModel->answer_id = $answer_id;
-                $photoModel->created_at = $datetime->format("Y-m-d H:i:s");
+                $photoModel->created_at = date("Y-m-d H:i:s");
                 $photoModel->add();
                 array_push($result, $this->domain . $this->filePath . $value['savename']);
             }
