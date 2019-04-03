@@ -152,6 +152,7 @@ class QuestionController extends Controller
                 $photoModel->filepath = $tempUri;
                 $photoModel->question_id = $question_id;
                 $photoModel->created_at = date("Y-m-d H:i:s");
+                $photoModel->updated_at = $photoModel->created_at;
                 $photoModel->add();
                 array_push($result, $this->domain . $tempUri);
             }
