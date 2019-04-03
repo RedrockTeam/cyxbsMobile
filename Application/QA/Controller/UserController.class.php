@@ -594,6 +594,19 @@ class UserController extends Controller
             "create_at" => array("between", array(date("Y-m-d 00:00:00"), date("Y-m-d 23:59:59")))
         ))->count();
 
+        //通过检测昨天的签到情况 重置连续签到天数
+        $isCheckYesterday = M("checkin_log")->where(array(
+            "userid" => $userInfo["id"],
+            "create_at" => array("between", array(date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))))
+        ))->count();
+
+        if ((int)$userInfo["check_in_days"] == 1) {
+            if ($isCheckYesterday < 1) {
+                M("users")->where(array("stunum" => $stunum))->setField("check_in_days", 0);
+                $userInfo["check_in_days"] = 0;
+            }
+        }
+
         $data = array(
             "integral" => (int)$userInfo['integral'],
             "check_in_days" => (int)$userInfo["check_in_days"],

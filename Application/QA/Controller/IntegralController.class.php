@@ -190,7 +190,7 @@ class IntegralController extends Controller
                         $integral = $integralMap[6];
                     else
                         $integral = $integralMap[$continuousSignInDayNum];
-                } else if ($isCheckToday != 1) {
+                }  else if ($isCheckToday != 1) {
                     $continuousSignInDayNum = 1;
                     $integral = $integralMap[0];
                 }
