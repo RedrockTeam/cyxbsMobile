@@ -586,7 +586,7 @@ class UserController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
 
-        $userInfo = M("users")->where(array("stunum"=>$stunum))->find();
+        $userInfo = M("users")->where(array("stunum" => $stunum))->find();
 
 
         $isCheckToday = M("checkin_log")->where(array(
@@ -594,10 +594,12 @@ class UserController extends Controller
             "create_at" => array("between", array(date("Y-m-d 00:00:00"), date("Y-m-d 23:59:59")))
         ))->count();
 
-        returnJson(200, "success", array(
-            "integral" => $userInfo['integral'],
-            "check_in_days" > $userInfo["check_in_days"],
-            "is_check_today" => $isCheckToday
-        ));
+        $data = array(
+            "integral" => (int)$userInfo['integral'],
+            "check_in_days" > (int)$userInfo["check_in_days"],
+            "is_check_today" => (int)$isCheckToday
+        );
+
+        returnJson(200, "success", $data);
     }
 }
