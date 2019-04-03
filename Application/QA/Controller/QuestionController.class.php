@@ -132,7 +132,7 @@ class QuestionController extends Controller
                 "question_id" => $question_id,
                 "state" => 1,
             ))->count();
-        if ($checkEnable>=9)
+        if ($checkEnable >= 9)
             returnJson(403, "the question has already haven the enough photos");
 
 
@@ -154,7 +154,7 @@ class QuestionController extends Controller
                 $photoModel->created_at = date("Y-m-d H:i:s");
                 $photoModel->updated_at = $photoModel->created_at;
                 $photoModel->add();
-                array_push($result, $this->domain . $tempUri);
+                array_push($result, DOMAIN . $tempUri);
             }
             returnJson(200, "success", $result);
         }
