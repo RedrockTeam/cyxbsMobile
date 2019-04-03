@@ -586,7 +586,8 @@ class UserController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
 
-        $userInfo = getUserInfo($stunum);
+        $userInfo = M("users")->where(array("stunum"=>$stunum))->find();
+
 
         $isCheckToday = M("checkin_log")->where(array(
             "userid" => $userInfo["id"],
