@@ -14,6 +14,27 @@ use Think\Exception;
 
 class ExtensionController extends Controller
 {
+    /*
+     * @desc 图片轮播接口 用于获取掌邮轮播图
+     * @param
+     */
+    public function imageCarousel()
+    {
+        $model = M("firstscreen_picture");
+        $result = $model->query("SELECT DISTINCT
+                ( picture_url ) as `picture_url`,
+                keyword,
+                picture_goto_url 
+            FROM
+                cyxbsmobile_firstscreen_picture");
+        for ($i = 0; $i < count($result); $i++)
+            $result[$i]["picture_goto_url"] = $result[$i]["picture_goto_url"] ?: "";
+
+
+        returnJson(200, "success", $result);
+
+    }
+
     public function emptyRoom()
     {
         if (!extension_loaded('redis')) {
