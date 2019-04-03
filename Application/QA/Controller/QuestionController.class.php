@@ -131,7 +131,7 @@ class QuestionController extends Controller
             ->where(array(
                 "question_id" => $question_id,
                 "state" => 1,
-            ))->find();
+            ))->count();
         if ($checkEnable>=9)
             returnJson(403, "the question has already haven the enough photos");
 
