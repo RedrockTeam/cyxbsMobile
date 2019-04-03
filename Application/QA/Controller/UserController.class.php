@@ -601,7 +601,7 @@ class UserController extends Controller
         ))->count();
 
         if ((int)$userInfo["check_in_days"] == 1) {
-            if ($isCheckYesterday < 1) {
+            if ($isCheckYesterday != 1 && $isCheckToday != 1) {
                 M("users")->where(array("stunum" => $stunum))->setField("check_in_days", 0);
                 $userInfo["check_in_days"] = 0;
             }
