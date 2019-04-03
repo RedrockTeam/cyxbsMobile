@@ -534,7 +534,37 @@ class UserController extends Controller
         returnJson(200, "success", $remarkPraiseSet);
     }
 
+
+    protected $fileConfig = array(
+        "maxSize" => 6400000,
+        'rootPath' => './Public/QA/Draft/',
+        "saveName" => "uniqid",
+        "exts" => array('png', 'jpeg', "jpg", 'PNG', 'JPEG', 'JPG'),
+        "autoSub" => false,
+        "subName" => array('date', "Ymd"),
+    );
+    private $filePath = "/Public/QA/Draft/";
+
     /*
      * @todo 草稿箱图片功能
      */
+    public function draftImageUpload()
+    {
+        $upload = new \Think\Upload($this->fileConfig);
+        $info = $upload->upload();
+
+        if (!$info)
+            $this->error($upload->getError());
+        else {
+            $result = array();
+            foreach ($info as $key => $value) {
+                if (preg_match('/photo[0-9]/', $key) != 1)
+                    returnJson(801, "the file key is wrong");
+                $filePath = ($this->filePath) . $value['savename'];
+                array_push($result, $filePath);
+            }
+
+            returnJson(200,"success",$result);
+        }
+    }
 }

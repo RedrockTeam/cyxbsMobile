@@ -16,7 +16,6 @@ class ExtensionController extends Controller
 {
     /*
      * @desc 图片轮播接口 用于获取掌邮轮播图
-     * @param
      */
     public function imageCarousel()
     {
@@ -27,6 +26,8 @@ class ExtensionController extends Controller
                 picture_goto_url 
             FROM
                 cyxbsmobile_firstscreen_picture");
+
+
         for ($i = 0; $i < count($result); $i++)
             $result[$i]["picture_goto_url"] = $result[$i]["picture_goto_url"] ?: "";
 
