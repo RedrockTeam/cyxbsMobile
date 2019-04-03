@@ -9,6 +9,7 @@
 namespace QA\Controller;
 
 use Think\Controller;
+use Think\Exception;
 use Think\Upload;
 
 class AnswerController extends Controller
@@ -81,40 +82,42 @@ class AnswerController extends Controller
         $user_id = getUserIdInTable(I("post.stuNum"));
 
         $existence = $answerModel
-            ->where(
-                array(
-                    "user_id" => $user_id,
-                    "question_id" => $question_id,
-                    "state" => 1,
-                )
-            )
+            ->where(array(
+                "user_id" => $user_id,
+                "question_id" => $question_id,
+                "state" => 1,
+            ))
             ->find();
 
         if (!empty($existence))
             returnJson(403, "the answer is already existing in the list");
 
-        $answerModel->create();
-        $answerModel->user_id = $user_id;
-        $answerModel->question_id = $question_id;
-        $answerModel->content = I("post.content");
-        $answerModel->praise_num = 0;
-        $answerModel->comment_num = 0;
-        $answerModel->is_adopted = 0;
-        $answerModel->created_at = $date->format("Y-m-d H:i:s");
-        $answerModel->updated_at = $answerModel->created_at;
-        $answerModel->state = 1;
+        try {
+            $answerModel->create();
+            $answerModel->user_id = $user_id;
+            $answerModel->question_id = $question_id;
+            $answerModel->content = I("post.content");
+            $answerModel->praise_num = 0;
+            $answerModel->comment_num = 0;
+            $answerModel->is_adopted = 0;
+            $answerModel->created_at = $date->format("Y-m-d H:i:s");
+            $answerModel->updated_at = $answerModel->created_at;
+            $answerModel->state = 1;
 
-        $answer_id = $answerModel->add();
-        if (isset($answer_id)) {
-            $questionModel
-                ->where(array(
-                    "id" => $question_id,
-                    "state" => 1,
-                ))
-                ->setInc("answer_num", 1);
-            returnJson(200, "success", $answer_id);
-        } else
+            $answer_id = $answerModel->add();
+            if (isset($answer_id)) {
+                $questionModel
+                    ->where(array(
+                        "id" => $question_id,
+                        "state" => 1,
+                    ))
+                    ->setInc("answer_num", 1);
+                returnJson(200, "success", $answer_id);
+            } else
+                returnJson(500);
+        } catch (Exception $exception) {
             returnJson(500);
+        }
     }
 
     //回答列表
@@ -164,7 +167,6 @@ class AnswerController extends Controller
                 "state" => 1,
             ))->getField("file_path", true);//回答问题
             $data[$i]['photo_url'] = $this->urlTranslate($data[$i]['photo_url']);
-            $data[$i]['content'] = $data[$i]['content'];
             $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
             $data[$i]['nickname'] = $userinfo['nickname'];
             $data[$i]['gender'] = $userinfo['gender'];
@@ -452,6 +454,37 @@ class AnswerController extends Controller
         if (empty($checkExist))
             returnJson(801, "invalid question or it is not your question");
 
+        $photoUrl = I("post.photo_url1");
+        if (isset($photoUrl)) {
+            //检测是否超过九张图片
+            $photoModel = M("answer_photos");
+            $photoNums = $photoModel
+                ->where(array(
+                    "answer_id" => $answer_id,
+                    "state" => 1,
+                ))
+                ->count();
+            if ($photoNums >= 9)
+                returnJson(403, "the answer has already haven the enough photos");
+
+            $result = array();
+            for ($i = 0; $i <= 9; $i++) {
+                $tempUri = I("post.photo_url" . $i);
+                if (empty($tempUri)) {
+                    returnJson(200, "success", $result);
+                    break;
+                }
+
+                $photoModel->create();
+                $photoModel->file_path = $tempUri;
+                $photoModel->answer_id = $answer_id;
+                $photoModel->created_at = date("Y-m-d H:i:s");
+                $photoModel->add();
+                array_push($result, $this->domain . $tempUri);
+            }
+            returnJson(200, "success", $result);
+        }
+
         $upload = new Upload($this->fileConfig);
         $info = $upload->upload();
         if (!$info) {
@@ -462,14 +495,14 @@ class AnswerController extends Controller
                 if (preg_match('/photo[0-9]/', $key) != 1)
                     returnJson(801, "the file key is wrong");
                 $photoModel = M("answer_photos");
-                $checkExist = $photoModel
+                $photoNums = $photoModel
                     ->where(array(
                         "answer_id" => $answer_id,
                         "state" => 1,
                     ))
-                    ->find();
-                if (!empty($checkExist))
-                    returnJson(403, "the answer has already haven the photos");
+                    ->count();
+                if ($photoNums >= 9)
+                    returnJson(403, "the answer has already haven the enough photos");
                 $datetime = new \DateTime();
                 $photoModel->create();
                 $photoModel->file_path = $this->filePath . $value['savename'];
