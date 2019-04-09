@@ -7,11 +7,6 @@ use Think\Controller;
 
 class CIController extends Controller
 {
-    public function index()
-    {
-        echo "hello";
-    }
-
     public function gitPull()
     {
         if (!IS_POST)
