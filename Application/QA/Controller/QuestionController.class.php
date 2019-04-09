@@ -319,6 +319,7 @@ class QuestionController extends Controller
         }
 
         $data = array();
+        $photoModel = M("question_photos");
         foreach ($result as $question) {
 
             $userId = $question['user_id'];
@@ -328,7 +329,6 @@ class QuestionController extends Controller
                 $question["is_self"] = 1;
 
             unset($question['user_id']);
-
 
             if ($question['is_anonymous'] == 0) {
                 $question['photo_thumbnail_src'] = $info['photo_thumbnail_src'];
@@ -344,6 +344,17 @@ class QuestionController extends Controller
             $question['answer_num'] = (int)$question['answer_num'];
             $question['id'] = (int)$question['id'];
             $question['is_anonymous'] = (int)$question['is_anonymous'];
+
+            $pictureSet = $photoModel->where(array(
+                "question_id" => $question["id"],
+                "state" => 1,
+            ))->getField("filepath", true);
+
+            $question["photo_url"] = array();
+
+            foreach ($pictureSet as $value) {
+                array_push($question["photo_url"], DOMAIN . $value);
+            }
 
             array_push($data, $question);
         }
@@ -432,7 +443,7 @@ class QuestionController extends Controller
             $data->questioner_gender = $userinfo['gender'];
         } else {
             $data->questioner_nickname = "匿名用户";
-            $data->questioner_photo_thumbnail_src = '';
+            $data->questioner_photo_thumbnail_src = "";
             $data->questioner_gender = "";
         }
 

@@ -166,6 +166,9 @@ class AnswerController extends Controller
                 "answer_id" => $data[$i]['id'],
                 "state" => 1,
             ))->getField("file_path", true);//回答问题
+            //确认所有返回的uri都是数组类型
+            if (!is_array($data[$i]['photo_url']))
+                $data[$i]['photo_url'] = array($data[$i]['photo_url']);
             $data[$i]['photo_url'] = $this->urlTranslate($data[$i]['photo_url']);
             $data[$i]['photo_thumbnail_src'] = $userinfo['photo_thumbnail_src'];
             $data[$i]['nickname'] = $userinfo['nickname'];
