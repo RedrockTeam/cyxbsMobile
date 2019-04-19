@@ -138,9 +138,7 @@ class QuestionController extends Controller
 
 
         $photoUrl = I("post.photo_url1");
-        var_dump($photoUrl);
-        exit;
-        if (!is_null($photoUrl)) {
+        if (!empty($photoUrl)) {
             $result = array();
 
             //最多九张图 判断完第一张图是不是为空即可知道是否有url的图片
