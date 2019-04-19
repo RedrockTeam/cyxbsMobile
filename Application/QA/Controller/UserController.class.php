@@ -553,8 +553,12 @@ class UserController extends Controller
     {
         if (!IS_POST)
             returnJson(415);
+
         $stunum = I("post.stunum");
         $idnum = I("post.idnum");
+
+        var_dump($stunum);
+        var_dump($idnum);
 
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
