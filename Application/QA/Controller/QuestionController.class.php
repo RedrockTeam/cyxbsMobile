@@ -140,11 +140,14 @@ class QuestionController extends Controller
         $photoUrl = I("post.photo_url1");
         if (!is_null($photoUrl)) {
             $result = array();
+
             //最多九张图 判断完第一张图是不是为空即可知道是否有url的图片
             for ($i = 1; $i <= 9; $i++) {
                 $tempUri = I("post.photo_url" . $i);
                 //每一次循环中判断是否有新图 如果没有说明图片上传结束
                 if (empty($tempUri)) {
+                    var_dump("123");
+                    exit;
                     returnJson(200, "success", $result);
                     break;
                 }
