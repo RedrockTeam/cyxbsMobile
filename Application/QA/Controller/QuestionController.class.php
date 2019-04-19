@@ -10,6 +10,7 @@ namespace QA\Controller;
 
 
 use Think\Controller;
+use Think\Upload;
 
 class QuestionController extends Controller
 {
@@ -159,9 +160,11 @@ class QuestionController extends Controller
             returnJson(200, "success", $result);
         }
 
-        $upload = new \Think\Upload($this->fileConfig);
+        $upload = new Upload($this->fileConfig);
         $info = $upload->upload();
 
+        var_dump($info);
+        exit;
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
         } else {// 上传成功 获取上传文件信息
