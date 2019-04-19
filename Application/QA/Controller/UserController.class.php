@@ -559,6 +559,7 @@ class UserController extends Controller
 
         var_dump($stunum);
         var_dump($idnum);
+        exit;
 
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
