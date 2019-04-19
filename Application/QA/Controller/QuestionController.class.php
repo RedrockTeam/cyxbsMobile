@@ -138,7 +138,7 @@ class QuestionController extends Controller
 
 
         $photoUrl = I("post.photo_url1");
-        if (isset($photoUrl)) {
+        if (!is_null($photoUrl)) {
             $result = array();
             //最多九张图 判断完第一张图是不是为空即可知道是否有url的图片
             for ($i = 1; $i <= 9; $i++) {
@@ -157,8 +157,6 @@ class QuestionController extends Controller
                 $photoModel->add();
                 array_push($result, DOMAIN . $tempUri);
             }
-            var_dump("test url");
-            exit;
             returnJson(200, "success", $result);
         }
 
@@ -167,6 +165,7 @@ class QuestionController extends Controller
 
         var_dump($info);
         exit;
+
         if (!$info) {// 上传错误提示错误信息
             $this->error($upload->getError());
         } else {// 上传成功 获取上传文件信息
