@@ -10,6 +10,7 @@ namespace QA\Controller;
 
 use Think\Controller;
 use Think\Exception;
+use Think\Upload;
 
 class UserController extends Controller
 {
@@ -558,7 +559,7 @@ class UserController extends Controller
         if (!authUser($stunum, $idnum))
             returnJson(403, "it is not yourself");
 
-        $upload = new \Think\Upload($this->fileConfig);
+        $upload = new Upload($this->fileConfig);
         $info = $upload->upload();
 
         if (!$info)
