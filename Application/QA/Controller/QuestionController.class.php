@@ -157,6 +157,8 @@ class QuestionController extends Controller
                 $photoModel->add();
                 array_push($result, DOMAIN . $tempUri);
             }
+            var_dump("test url");
+            exit;
             returnJson(200, "success", $result);
         }
 
