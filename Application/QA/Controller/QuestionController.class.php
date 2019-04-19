@@ -138,6 +138,8 @@ class QuestionController extends Controller
 
 
         $photoUrl = I("post.photo_url1");
+        var_dump($photoUrl);
+        exit;
         if (!is_null($photoUrl)) {
             $result = array();
 
@@ -146,8 +148,6 @@ class QuestionController extends Controller
                 $tempUri = I("post.photo_url" . $i);
                 //每一次循环中判断是否有新图 如果没有说明图片上传结束
                 if (empty($tempUri)) {
-                    var_dump("123");
-                    exit;
                     returnJson(200, "success", $result);
                     break;
                 }
