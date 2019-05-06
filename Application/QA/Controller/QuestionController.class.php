@@ -6,6 +6,13 @@
  * Time: 15:58
  */
 
+/**
+ * Created by PhpStorm.
+ * User: MashiroC
+ * Date: 2019/5/6
+ * Time: 17:08
+ */
+
 namespace QA\Controller;
 
 
@@ -242,6 +249,131 @@ class QuestionController extends Controller
             returnJson(200);
         } else
             returnJson(500);
+    }
+
+
+    //问题详情
+    public function getQuestionInfo()
+    {
+        //认证部分 确定用户身份
+        $stunum = I("post.stunum");
+        $idnum = I("post.idnum");
+        if (!authUser($stunum, $idnum))
+            returnJson(403);
+
+        $problemId = I("post.question_id") ?: 0;
+
+        if ($problemId === 0)
+            returnJson(400, "invalid id");
+
+        $queryField = array(
+            "title",
+            "description",
+            "user_id",
+            "kind",
+            "tags",
+            "reward",
+            "answer_num",
+            "disappear_at",
+            "created_at",
+            "is_anonymous",
+            "id",
+        );  //所需查询的列
+
+        $userId = getUserIdInTable($stunum);
+        //加载该用户忽略列表
+        $ignoreModel = M("ignore_problems");
+        $ignoreList = $ignoreModel
+            ->where(array(
+                "user_id" => $userId,
+                "state" => "1"
+            ))
+            ->getField('question_id', true);
+
+        $questionModel = M("questionlist");
+        $timeRequire = array();
+        if (empty($ignoreList)) {
+            $timeRequire = array(
+                "disappear_at" => array("EGT", date("Y-m-d H:i:s")),
+            );
+        } else {
+            $timeRequire = array(
+                "disappear_at" => array("EGT", date("Y-m-d H:i:s")),
+                "id" => array("NOT IN", $ignoreList)
+            );
+        }
+        $result = $questionModel
+            ->field($queryField)
+            ->where(array(
+                "id" => $problemId,
+            ))
+            ->where($timeRequire)
+            ->select();
+
+        $disappear_at = $result[0]["disappear_at"];
+        if (count($result) === 0 || strtotime($disappear_at) < strtotime(date("Y-m-d H:i:s"))) {
+            returnJson(200, "question overtime");
+        }
+
+        $data = array();
+        $photoModel = M("question_photos");
+        foreach ($result as $question) {
+
+            $userId = $question['user_id'];
+            $info = getUserBasicInfoInTable($userId);
+            $question["is_self"] = 0;
+            if ($userId == getUserIdInTable($stunum))
+                $question["is_self"] = 1;
+
+            unset($question['user_id']);
+
+            if ($question['is_anonymous'] == 0) {
+                $question['photo_thumbnail_src'] = $info['photo_thumbnail_src'];
+                $question['nickname'] = $info['nickname'];
+                $question['gender'] = $info['gender'];
+            } else {
+                $question['photo_thumbnail_src'] = "";
+                $question['nickname'] = "匿名用户";
+                $question['gender'] = '';
+            }
+
+            $question['reward'] = (int)$question['reward'];
+            $question['answer_num'] = (int)$question['answer_num'];
+            $question['id'] = (int)$question['id'];
+            $question['is_anonymous'] = (int)$question['is_anonymous'];
+
+            $pictureSet = $photoModel->where(array(
+                "question_id" => $question["id"],
+                "state" => 1,
+            ))->getField("filepath", true);
+
+            $question["photo_url"] = array();
+
+            foreach ($pictureSet as $value) {
+                array_push($question["photo_url"], DOMAIN . $value);
+            }
+
+            array_push($data, $question);
+        }
+        returnJson(200, 'success', $data);
+    }
+
+    public function share()
+    {
+        $question_id = I("get.id");
+        echo "
+        <html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <title>Title</title>
+</head>
+<body>
+<a href=\"cyxbsmobile://qa/question/" . $question_id . "\">分享</a>
+</body>
+</html>
+        ";
+        exit();
+
     }
 
 

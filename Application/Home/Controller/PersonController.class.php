@@ -177,10 +177,11 @@ class PersonController extends BaseController
     public function addTransaction()
     {
         $information = I('post.');
-
+//        exit;
         if (!$this->produceTransaction($information)) {
             returnJson(404, $this->error);
         }
+
 
         $user = M('users')->where("stunum='%s'", $information['stuNum'])->find();
         if (!$user) {
@@ -584,7 +585,9 @@ class PersonController extends BaseController
                             if ($date['day'] > 6 || $date['day'] < 0) {
                                 return false;
                             }
-                        } else    return false;
+                        } else {
+                            return false;
+                        }
 
                         //判断课程        
                         if (is_numeric($date['class'])) {
@@ -603,6 +606,7 @@ class PersonController extends BaseController
                         $date['week'] = array_flip($date['week']);
                         $date['week'] = array_flip($date['week']);
 
+                        //周数>21 周数<0
                         foreach ($date['week'] as $week) {
                             if (!is_numeric($week) || $week <= 0 || $week > 21)
                                 return false;
