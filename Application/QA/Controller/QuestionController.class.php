@@ -368,7 +368,7 @@ class QuestionController extends Controller
     <title>Title</title>
 </head>
 <body>
-<a href=\"cyxbsmobile://qa/question/" . $question_id . "\">分享</a>
+<a href=\"cyxbsmobile://qa/question?qid=" . $question_id . "\">分享</a>
 </body>
 </html>
         ";
