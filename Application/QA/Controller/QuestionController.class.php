@@ -314,10 +314,8 @@ class QuestionController extends Controller
         if (count($result) === 0 || strtotime($disappear_at) < strtotime(date("Y-m-d H:i:s"))) {
             returnJson(200, "question overtime");
         }
-
-        $data = array();
+        $question = $result[0];
         $photoModel = M("question_photos");
-        foreach ($result as $question) {
 
             $userId = $question['user_id'];
             $info = getUserBasicInfoInTable($userId);
@@ -353,9 +351,7 @@ class QuestionController extends Controller
                 array_push($question["photo_url"], DOMAIN . $value);
             }
 
-            array_push($data, $question);
-        }
-        returnJson(200, 'success', $data);
+        returnJson(200, 'success', $question);
     }
 
     public function share()

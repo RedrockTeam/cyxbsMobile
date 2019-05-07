@@ -152,7 +152,6 @@ class IntegralController extends Controller
         $idnum = I("post.idnum");
         if (!authUser($stunum, $idnum))
             returnJson(403, "the user is not himself");
-
         $userInfo = getUserInfo($stunum);
         $user_id = (int)$userInfo["id"];
         $userIntegral = (int)$userInfo["integral"];
@@ -186,11 +185,12 @@ class IntegralController extends Controller
                 $integral = 0;
                 if ($isCheckYesterday == 1 && $continuousSignInDayNum >= 1) {
                     $continuousSignInDayNum += 1;
-                    if ($continuousSignInDayNum >= 7)
+                    if ($continuousSignInDayNum >= 7) {
                         $integral = $integralMap[6];
-                    else
-                        $integral = $integralMap[$continuousSignInDayNum];
-                }  else if ($isCheckToday != 1) {
+                    } else {
+                        $integral = $integralMap[$continuousSignInDayNum-1];
+                    }
+                } else if ($isCheckToday != 1) {
                     $continuousSignInDayNum = 1;
                     $integral = $integralMap[0];
                 }
