@@ -677,5 +677,131 @@ class QuestionController extends Controller
         }
     }
 
+    public function detailForSharePage()
+    {
+        $question_id = I("get.question_id");
+        if (empty($question_id))
+            returnJson(801);
 
+        //所需要使用的模型初始化
+        $questionModel = M("questionlist");
+        $answerModel = M("answerlist");
+        $prModel = M("praise_remark");
+        $photoModel = M("question_photos");
+        $answerPhotoModel = M("answer_photos");
+
+        $queryField = array(
+            "title",
+            "description",
+            "user_id",
+            "tags",
+            "reward",
+            "answer_num",
+            "disappear_at",
+            "created_at",
+            "is_anonymous",
+            "kind",
+        );
+
+        $question = $questionModel
+            ->field($queryField)
+            ->where(array(
+                "id" => $question_id,
+                "state" => 1,
+            ))
+            ->find();
+        if (empty($question))
+            returnJson(801, 'invalid question');
+
+        //提问者用户信息
+        $userinfo = getUserBasicInfoInTable($question['user_id']);
+
+        //问题信息压制
+        $data = new \stdClass();
+        $data->is_self = 0;
+        if (getUserIdInTable(I("post.stuNum")) == $question['user_id'])
+            $data->is_self = 1;
+
+        $data->title = $question['title'];
+        $data->description = $question['description'];
+        $data->reward = $question['reward'];
+        $data->disappear_at = $question['disappear_at'];
+        $data->tags = $question['tags'];
+        $data->kind = $question['kind'];
+
+        //图片链接压制
+        $pictureSet = $photoModel->where(array(
+            "question_id" => $question_id,
+            "state" => 1,
+        ))->getField("filepath", true);
+
+        $data->photo_urls = array();
+
+        foreach ($pictureSet as $value) {
+            array_push($data->photo_urls, DOMAIN . $value);
+        }
+
+        //判断提问者是否匿名
+        if ($question['is_anonymous'] == 0) {
+            $data->questioner_nickname = $userinfo['nickname'];
+            $data->questioner_photo_thumbnail_src = $userinfo['photo_thumbnail_src'];
+            $data->questioner_gender = $userinfo['gender'];
+        } else {
+            $data->questioner_nickname = "匿名用户";
+            $data->questioner_photo_thumbnail_src = "";
+            $data->questioner_gender = "";
+        }
+
+        $answerSet = $answerModel
+            ->field(array(
+                "id",
+                "user_id",
+                "content",
+                "created_at",
+                "praise_num",
+                "comment_num",
+                "is_adopted"
+            ))
+            ->page(0, 6)
+            ->where(array(
+                "question_id" => $question_id,
+                "state" => 1,
+            ))
+            ->order(array(
+                "is_adopted" => 'desc',
+                "created_at" => "desc",
+            ))
+            ->select();
+
+        //答案列表信息压制
+        $data->answers = array();
+        foreach ($answerSet as $value) {
+            $answer = new \stdClass();
+            $answer->id = $value['id'];
+            $answerer = getUserBasicInfoInTable($value['user_id']);
+            $answer->nickname = $answerer['nickname'];
+            $answer->photo_thumbnail_src = $answerer['photo_thumbnail_src'];
+            $answer->gender = $answerer['gender'];
+            $answer->content = $value['content'];
+            $answer->created_at = $value['created_at'];
+            $answer->praise_num = $value['praise_num'];
+            $answer->comment_num = $value['comment_num'];
+            $answer->is_adopted = $value['is_adopted'];
+
+            //答案图片链接
+            $answer->photo_url = array();
+            $photoSet = $answerPhotoModel
+                ->where(array(
+                    "id" => $answer->id,
+                    "state" => 1,
+                ))
+                ->getField("file_path", true);
+            foreach ($photoSet as $item) {
+                array_push($photoSet, DOMAIN . $item);
+            }
+            array_push($data->answers, $answer);
+        }
+
+        returnJson(200, 'success', $data);
+    }
 }
