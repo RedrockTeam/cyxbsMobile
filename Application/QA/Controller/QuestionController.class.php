@@ -679,7 +679,7 @@ class QuestionController extends Controller
 
     public function detailForSharePage()
     {
-        $question_id = I("get.question_id");
+        $question_id = I("get.question");
         if (empty($question_id))
             returnJson(801);
 
