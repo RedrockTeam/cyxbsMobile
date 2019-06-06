@@ -88,6 +88,24 @@ class QuestionController extends Controller
         //in 2018/2/8 1:10
         $question->reward = I("post.reward");
 
+        //积分变动记录表添加记录
+        $integralModel = M("integral_log");
+        $integralModel
+            ->data(array(
+                "user_id" => $question->user_id,
+                "event_type" => "check in",
+                "num" => -($question->reward),
+                "created_at" => date("Y-m-d H:i:s"),
+            ))
+            ->add();
+        //变更用户表 积分数额
+        $userInfo = getUserInfo($stunum);
+        $userIntegral = (int)$userInfo["integral"];
+        $userModel = M("users");
+        $userModel
+            ->where(array("id" => $question->user_id))
+            ->setField(array("integral" => $userIntegral - $question->reward));
+
         //时间字段格式校验
         $disappearTime = I("post.disappear_time");
         if (date("Y-m-d H:i:s", strtotime($disappearTime)) == $disappearTime)
@@ -317,39 +335,39 @@ class QuestionController extends Controller
         $question = $result[0];
         $photoModel = M("question_photos");
 
-            $userId = $question['user_id'];
-            $info = getUserBasicInfoInTable($userId);
-            $question["is_self"] = 0;
-            if ($userId == getUserIdInTable($stunum))
-                $question["is_self"] = 1;
+        $userId = $question['user_id'];
+        $info = getUserBasicInfoInTable($userId);
+        $question["is_self"] = 0;
+        if ($userId == getUserIdInTable($stunum))
+            $question["is_self"] = 1;
 
-            unset($question['user_id']);
+        unset($question['user_id']);
 
-            if ($question['is_anonymous'] == 0) {
-                $question['photo_thumbnail_src'] = $info['photo_thumbnail_src'];
-                $question['nickname'] = $info['nickname'];
-                $question['gender'] = $info['gender'];
-            } else {
-                $question['photo_thumbnail_src'] = "";
-                $question['nickname'] = "匿名用户";
-                $question['gender'] = '';
-            }
+        if ($question['is_anonymous'] == 0) {
+            $question['photo_thumbnail_src'] = $info['photo_thumbnail_src'];
+            $question['nickname'] = $info['nickname'];
+            $question['gender'] = $info['gender'];
+        } else {
+            $question['photo_thumbnail_src'] = "";
+            $question['nickname'] = "匿名用户";
+            $question['gender'] = '';
+        }
 
-            $question['reward'] = (int)$question['reward'];
-            $question['answer_num'] = (int)$question['answer_num'];
-            $question['id'] = (int)$question['id'];
-            $question['is_anonymous'] = (int)$question['is_anonymous'];
+        $question['reward'] = (int)$question['reward'];
+        $question['answer_num'] = (int)$question['answer_num'];
+        $question['id'] = (int)$question['id'];
+        $question['is_anonymous'] = (int)$question['is_anonymous'];
 
-            $pictureSet = $photoModel->where(array(
-                "question_id" => $question["id"],
-                "state" => 1,
-            ))->getField("filepath", true);
+        $pictureSet = $photoModel->where(array(
+            "question_id" => $question["id"],
+            "state" => 1,
+        ))->getField("filepath", true);
 
-            $question["photo_url"] = array();
+        $question["photo_url"] = array();
 
-            foreach ($pictureSet as $value) {
-                array_push($question["photo_url"], DOMAIN . $value);
-            }
+        foreach ($pictureSet as $value) {
+            array_push($question["photo_url"], DOMAIN . $value);
+        }
 
         returnJson(200, 'success', $question);
     }
